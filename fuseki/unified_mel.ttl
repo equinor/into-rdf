@@ -1,0 +1,21 @@
+@base <http://rdf.equinor.com/ontology/mel> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix tp: <http://rdf.equinor.com/raw/melexcel#> .
+
+tp:Tag_Number rdfs:subPropertyOf <#tag> .
+tp:Tag_No%23  rdfs:subPropertyOf <#tag> .
+
+tp:Net_Dry_Weight__%28kg%29 rdfs:subPropertyOf <#NetDryWeight> .
+<#NetDryWeight> a owl:DataProperty;
+    rdfs:range xsd:integer .
+
+tp:Gross_Dry_Weight__%28kg%29 rdfs:subPropertyOf <#GrossDryWeight> .
+<#GrossDryWeight> a owl:DataProperty;
+    rdfs:range xsd:integer .
+
+tp:Content_Weight__%28kg%29 rdfs:subPropertyOf <#ContentWeight> .
+<#ContentWeight> a owl:DataProperty;
+    rdfs:range xsd:integer .

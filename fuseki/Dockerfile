@@ -99,7 +99,20 @@ RUN \
     mkdir -p $LOGS && \
     mkdir -p $DATA && \
     chown -R fuseki ${FUSEKI_DIR} && \
-    chmod a+x entrypoint.sh 
+    chmod a+x entrypoint.sh
+
+## Changes from dugtrio team
+ARG CONFIGS=${FUSEKI_DIR}/config
+ARG ONTOLOGIES=${FUSEKI_DIR}/ontologies
+RUN \
+    mkdir -p $CONFIGS && \
+    mkdir -p $ONTOLOGIES && \
+    chown -R fuseki ${FUSEKI_DIR}
+
+COPY dugtrio_config.ttl ${CONFIGS}
+COPY unified_mel.ttl ${ONTOLOGIES}
+
+## End changes from dugtrio team
 
 ## Default environment variables.
 ENV \
