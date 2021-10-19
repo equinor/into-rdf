@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31402.337
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "melexcel2ttl", "melexcel2ttl\melexcel2ttl.csproj", "{85C2DCD1-C6C1-4B10-B9F3-EF13ACEFE7F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "melexcel2ttl.Tests", "melexcel2ttl.Tests\melexcel2ttl.Tests.csproj", "{ABF4CAEC-F77E-4FD2-86AC-1BA524CADF87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "melexcel2ttl.Tests", "melexcel2ttl.Tests\melexcel2ttl.Tests.csproj", "{ABF4CAEC-F77E-4FD2-86AC-1BA524CADF87}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "melexcel2ttlcli", "melexcel2ttlcli\melexcel2ttlcli.csproj", "{623BF8FE-D4DD-43D1-9B12-8DFF00C3BF2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "melexcel2ttlcli", "melexcel2ttlcli\melexcel2ttlcli.csproj", "{623BF8FE-D4DD-43D1-9B12-8DFF00C3BF2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MelXlsxToRdf", "MelXlsxToRdf\MelXlsxToRdf.csproj", "{D7FB198D-8E93-4A8E-9423-F8E442839EFF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Melexcel2ttl.Lib", "Melexcel2ttl.Lib\Melexcel2ttl.Lib.csproj", "{82064AED-B7CF-466E-BB07-315CF5663059}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,14 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8A43D613-3AB7-4092-BAFD-E840619B7CFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8A43D613-3AB7-4092-BAFD-E840619B7CFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8A43D613-3AB7-4092-BAFD-E840619B7CFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8A43D613-3AB7-4092-BAFD-E840619B7CFA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{85C2DCD1-C6C1-4B10-B9F3-EF13ACEFE7F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{85C2DCD1-C6C1-4B10-B9F3-EF13ACEFE7F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{85C2DCD1-C6C1-4B10-B9F3-EF13ACEFE7F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{85C2DCD1-C6C1-4B10-B9F3-EF13ACEFE7F5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ABF4CAEC-F77E-4FD2-86AC-1BA524CADF87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ABF4CAEC-F77E-4FD2-86AC-1BA524CADF87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABF4CAEC-F77E-4FD2-86AC-1BA524CADF87}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -31,6 +25,14 @@ Global
 		{623BF8FE-D4DD-43D1-9B12-8DFF00C3BF2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{623BF8FE-D4DD-43D1-9B12-8DFF00C3BF2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{623BF8FE-D4DD-43D1-9B12-8DFF00C3BF2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7FB198D-8E93-4A8E-9423-F8E442839EFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7FB198D-8E93-4A8E-9423-F8E442839EFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7FB198D-8E93-4A8E-9423-F8E442839EFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7FB198D-8E93-4A8E-9423-F8E442839EFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82064AED-B7CF-466E-BB07-315CF5663059}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82064AED-B7CF-466E-BB07-315CF5663059}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82064AED-B7CF-466E-BB07-315CF5663059}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82064AED-B7CF-466E-BB07-315CF5663059}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

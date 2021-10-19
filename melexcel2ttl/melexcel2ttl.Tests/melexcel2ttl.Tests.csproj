@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\melexcel2ttl\melexcel2ttl.csproj" />
+    <ProjectReference Include="..\Melexcel2ttl.Lib\Melexcel2ttl.Lib.csproj" />
   </ItemGroup>
 
   <ItemGroup>

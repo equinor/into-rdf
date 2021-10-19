@@ -5,7 +5,7 @@ using Microsoft.Azure.Functions.Worker;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 
-namespace Equinor.MelXlsxToRdf
+namespace Melexcel2ttl
 {
     public static class MelXslxToRDF
     {

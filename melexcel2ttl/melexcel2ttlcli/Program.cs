@@ -1,9 +1,7 @@
-﻿using System;
+﻿using Melexcel2ttl;
+using System;
 using System.IO;
-using System.Threading.Tasks;
 using System.Text;
-using melexcel2ttl;
-
 
 namespace melexcel2ttlcli
 {
@@ -28,12 +26,8 @@ namespace melexcel2ttlcli
         {
             using (var fileStream = File.Open(fileName, FileMode.Open))
             {
-                using (var memoryStream = new MemoryStream())
-                {
-                    var mapper = new Xslx2TttlMapper();
-                    mapper.Map(fileName, fileStream, memoryStream);
-                    return Encoding.UTF8.GetString(memoryStream.ToArray());
-                }
+                var mapper = new Xslx2TtlMapper();
+                return mapper.Map(fileName, fileStream);
             }
         }
     }
