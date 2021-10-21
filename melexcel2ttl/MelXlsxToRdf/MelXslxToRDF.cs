@@ -19,20 +19,30 @@ namespace Melexcel2ttl
             {
                 var logger = context.GetLogger("MelXslxToRDF");
                 logger.LogInformation($"C# Blob trigger function Processed blob\n Name: {name} \n Data: {myBlob}");
-                var inStream = new MemoryStream(inputMel.ToArray());
-                var mapper = new Xslx2TtlMapper();
-                String resString = mapper.Map(name, inStream);
-                var storageConnection = Environment.GetEnvironmentVariable("dugtrioexperimental_STORAGE");
-                BlobServiceClient blobServiceClient = new BlobServiceClient(storageConnection);
-                BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient("melexcel");
-                var strippedName = name.Replace("xslx", "");
-                BlobClient blobClient = blobContainerClient.GetBlobClient($"{strippedName}.ttl");
-                var stream = new MemoryStream();
-                var writer = new StreamWriter(stream);
-                writer.Write(resString);
-                writer.Flush();
-                stream.Position = 0;
-                blobClient.Upload(stream);
+
+                string resString = string.Empty;
+
+                using (var inStream = new MemoryStream(inputMel.ToArray()))
+                {
+                    resString = new Xslx2TtlMapper().Map(name, inStream);
+                }
+                if(resString != string.Empty) {
+                    var storageConnection = Environment.GetEnvironmentVariable("dugtrioexperimental_STORAGE");
+                    BlobServiceClient blobServiceClient = new BlobServiceClient(storageConnection);
+                    BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient("melttl");
+                    var strippedName = name.Replace("xslx", "ttl");
+                    BlobClient blobClient = blobContainerClient.GetBlobClient(strippedName);
+                    
+                    using (var stream = new MemoryStream())
+                    {
+                        var writer = new StreamWriter(stream);
+                        writer.Write(resString);
+                        writer.Flush();
+                        stream.Position = 0;
+                        blobClient.Upload(stream);
+                    }
+                }
+
             }
         }
     }
