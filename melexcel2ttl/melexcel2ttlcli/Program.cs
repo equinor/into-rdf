@@ -10,19 +10,34 @@ namespace melexcel2ttlcli
         static void Main(string[] args)
         {
             Console.WriteLine(args[0]);
-            string path = args[0];
-            string ttl = null;
-            int index = 0;
-            foreach (var fileName in Directory.EnumerateFiles(path))
+            string fileOrDir = args[0];
+
+            if (Path.HasExtension(fileOrDir))
             {
-                index += 1;
-                var outputFile = $"output_{index}.ttl";
-                ttl = Transformation(fileName);
-                File.WriteAllText(outputFile, ttl);
+                var fileName = fileOrDir;
+                TransformFile(fileName);
+            }
+            else
+            {
+                foreach (var fileName in Directory.EnumerateFiles(fileOrDir))
+                {
+                    TransformFile(fileName);
+                }
             }
         }
 
-        private static string Transformation(string fileName)
+        private static void TransformFile(string fileName)
+        {
+            if (!Directory.Exists("output"))
+            {
+                Directory.CreateDirectory("output");
+            }
+            var outputFile = $"output/{Path.GetFileNameWithoutExtension(fileName)}.ttl";
+            var ttl = TransformXlsx2Ttl(fileName);
+            File.WriteAllText(outputFile, ttl);
+        }
+
+        private static string TransformXlsx2Ttl(string fileName)
         {
             using (var fileStream = File.Open(fileName, FileMode.Open))
             {
