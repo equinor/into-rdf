@@ -1,4 +1,4 @@
-﻿using Melexcel2ttl;
+﻿using Excel2ttl.Mel;
 using System;
 using System.IO;
 using System.Text;
@@ -41,7 +41,7 @@ namespace melexcel2ttlcli
         {
             using (var fileStream = File.Open(fileName, FileMode.Open))
             {
-                var mapper = new Xslx2TtlMapper();
+                var mapper = new Mel2TtlMapper();
                 return mapper.Map(fileName, fileStream);
             }
         }

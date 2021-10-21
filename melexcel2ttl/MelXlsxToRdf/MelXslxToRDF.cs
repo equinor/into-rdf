@@ -1,11 +1,12 @@
 using System;
 using System.IO;
+using Excel2ttl.Mel;
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.Functions.Worker;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 
-namespace Melexcel2ttl
+namespace Mel2ttl
 {
     public static class MelXslxToRDF
     {
@@ -24,7 +25,7 @@ namespace Melexcel2ttl
 
                 using (var inStream = new MemoryStream(inputMel.ToArray()))
                 {
-                    resString = new Xslx2TtlMapper().Map(name, inStream);
+                    resString = new Mel2TtlMapper().Map(name, inStream);
                 }
                 if(resString != string.Empty) {
                     var storageConnection = Environment.GetEnvironmentVariable("dugtrioexperimental_STORAGE");
