@@ -29,7 +29,7 @@ namespace Melexcel2ttl
                 if(resString != string.Empty) {
                     var storageConnection = Environment.GetEnvironmentVariable("dugtrioexperimental_STORAGE");
                     BlobServiceClient blobServiceClient = new BlobServiceClient(storageConnection);
-                    BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient("melttl");
+                    BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient("ttl");
                     var strippedName = name.Replace("xslx", "ttl");
                     BlobClient blobClient = blobContainerClient.GetBlobClient(strippedName);
                     
