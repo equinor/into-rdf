@@ -30,8 +30,8 @@ namespace Mel2ttl
                 if(resString != string.Empty) {
                     var storageConnection = Environment.GetEnvironmentVariable("dugtrioexperimental_STORAGE");
                     BlobServiceClient blobServiceClient = new BlobServiceClient(storageConnection);
-                    BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient("ttl");
-                    var strippedName = name.Replace("xslx", "ttl");
+                    BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(Environment.GetEnvironmentVariable("sourceBlob"));
+                    var strippedName = name.Replace("xlsx", "ttl");
                     BlobClient blobClient = blobContainerClient.GetBlobClient(strippedName);
                     
                     using (var stream = new MemoryStream())
