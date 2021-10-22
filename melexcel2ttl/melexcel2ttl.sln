@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "melexcel2ttlcli", "melexcel
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MelXlsxToRdf", "MelXlsxToRdf\MelXlsxToRdf.csproj", "{D7FB198D-8E93-4A8E-9423-F8E442839EFF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Melexcel2ttl.Lib", "Melexcel2ttl.Lib\Melexcel2ttl.Lib.csproj", "{82064AED-B7CF-466E-BB07-315CF5663059}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Excel2ttl.Lib", "Excel2ttl.Lib\Excel2ttl.Lib.csproj", "{82064AED-B7CF-466E-BB07-315CF5663059}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

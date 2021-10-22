@@ -9,7 +9,6 @@ namespace melexcel2ttlcli
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(args[0]);
             string fileOrDir = args[0];
 
             if (Path.HasExtension(fileOrDir))
