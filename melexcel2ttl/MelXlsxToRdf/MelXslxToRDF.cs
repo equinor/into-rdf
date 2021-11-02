@@ -25,7 +25,7 @@ namespace Mel2ttl
 
                 using (var inStream = new MemoryStream(inputMel.ToArray()))
                 {
-                    resString = new Mel2TtlMapper().Map(name, inStream);
+                    resString = new Mel2TtlMapper(logger).Map(name, inStream);
                 }
                 if(resString != string.Empty) {
                     var storageConnection = Environment.GetEnvironmentVariable("dugtrioexperimental_STORAGE");
