@@ -11,7 +11,7 @@ namespace Mel2ttl
     public static class MelXslxToRDF
     {
         [Function("MelXslxToRDF")]
-        public static void Run([BlobTrigger("melexcel/{name}", Connection = "dugtrioexperimental_STORAGE")] System.ReadOnlyMemory<Byte> inputMel,
+        public static void Run([BlobTrigger("melexcel/{name}", Connection = "dugtrioexperimental_STORAGE")] byte[] inputMel,
          string myBlob,
          string name,
         FunctionContext context)
@@ -32,7 +32,7 @@ namespace Mel2ttl
 
                 string resString = string.Empty;
 
-                using (var inStream = new MemoryStream(inputMel.ToArray()))
+                using (var inStream = new MemoryStream(inputMel))
                 {
                     resString = new Mel2TtlMapper(logger).Map(name, inStream);
                 }
