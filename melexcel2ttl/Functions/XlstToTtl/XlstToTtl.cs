@@ -23,7 +23,7 @@ namespace XlstToTtl
 
             writeToParseLog($"Detected new file {name}", parselogBlob);
 
-            if (name.EndsWith(".xlsx"))
+            if (name.ToLower().EndsWith(".xlsx"))
             {
                 writeToParseLog($"Starting parsing of {name}", parselogBlob);
 
@@ -41,7 +41,7 @@ namespace XlstToTtl
                 {
                     writeToParseLog($"Successfully parsed {name}", parselogBlob);
                     log.LogInformation($"Successfully parsed {name}");
-                    var strippedName = name.Replace("xlsx", "ttl");
+                    var strippedName = name.Replace("xlsx", "ttl").Replace("XLSX", "ttl");
                     BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(Environment.GetEnvironmentVariable("sourceContainer"));
                     BlobClient blobClient = blobContainerClient.GetBlobClient(strippedName);
                     writeToParseLog($"Uploading {strippedName} to storage", parselogBlob);
