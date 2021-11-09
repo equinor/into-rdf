@@ -42,7 +42,7 @@ namespace XlstToTtl
                     writeToParseLog($"Successfully parsed {name}", parselogBlob);
                     log.LogInformation($"Successfully parsed {name}");
                     var strippedName = name.Replace("xlsx", "ttl").Replace("XLSX", "ttl");
-                    BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(Environment.GetEnvironmentVariable("sourceContainer"));
+                    BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(Environment.GetEnvironmentVariable("targetContainer"));
                     BlobClient blobClient = blobContainerClient.GetBlobClient(strippedName);
                     writeToParseLog($"Uploading {strippedName} to storage", parselogBlob);
                     using (var stream = new MemoryStream())
