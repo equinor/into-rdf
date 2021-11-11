@@ -32,9 +32,11 @@ namespace XlstToTtl
                 try
                 {
                     resString = new Mel2TtlMapper().Map(name, inputMel);
-                } catch(Exception ex)
+                }
+                catch (Exception ex)
                 {
                     log.LogWarning(ex.Message);
+                    log.LogInformation($"Error parsing {name} {ex.Message}");
                 }
 
                 if (resString != string.Empty)
@@ -55,6 +57,10 @@ namespace XlstToTtl
                     }
                     writeToParseLog($"Successfully Uploaded {strippedName} to storage", parselogBlob);
                     log.LogInformation($"Successfully uploaded {name}");
+                }
+                else
+                {
+                    log.LogInformation($"No data extracted from {name}");
                 }
 
             }
