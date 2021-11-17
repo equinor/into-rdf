@@ -3,13 +3,13 @@ using System.IO;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
-using Excel2ttl.Mel;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
+using Excel2ttl.Mel;
 
-namespace XlstToTtl
+namespace Excel2ttl.Functions.Xlst2Ttl
 {
-    public static class XlstToTtl
+    public static class Xlst2Ttl
     {
         [FunctionName("XlstToTtl")]
         public static void Run([BlobTrigger("melexcel/{name}", Connection = "connection")] Stream inputMel, string name, ILogger log)

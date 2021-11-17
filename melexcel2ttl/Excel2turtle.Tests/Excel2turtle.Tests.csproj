@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Excel2ttl.Lib\Excel2ttl.Lib.csproj" />
+    <ProjectReference Include="..\Excel2turtle.Lib\Excel2turtle.Lib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
