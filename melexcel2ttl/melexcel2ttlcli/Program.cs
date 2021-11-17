@@ -29,6 +29,7 @@ namespace melexcel2ttlcli
             if (Path.HasExtension(fileOrDir))
             {
                 var fileName = fileOrDir;
+                Console.WriteLine($"Transforming: {fileName}");
                 TransformFile(fileName, dataType);
             }
             else
@@ -68,8 +69,7 @@ namespace melexcel2ttlcli
                         break;
                     default:
                         break;
-                } 
-
+                }
                 return mapper.Map(fileName, fileStream);
             }
         }
