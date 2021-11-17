@@ -1,11 +1,11 @@
-﻿using Excel2ttl.Mel;
-using Excel2ttl.Interfaces;
-using Excel2ttl.Capacities;
+﻿using Excel2Turtle.Mel;
+using Excel2Turtle.Interfaces;
+using Excel2Turtle.Capacities;
 using System;
 using System.IO;
 using System.Text;
 
-namespace melexcel2ttlcli
+namespace Excel2Turtle.Cli
 {
     class Program
     {

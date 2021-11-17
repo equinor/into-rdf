@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace Excel2ttl.Interfaces
+namespace Excel2Turtle.Interfaces
 {
 
     public interface ITtlMapper

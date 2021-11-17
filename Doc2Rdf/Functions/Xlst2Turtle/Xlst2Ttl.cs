@@ -5,9 +5,9 @@ using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
-using Excel2ttl.Mel;
+using Excel2Turtle.Mel;
 
-namespace Excel2ttl.Functions.Xlst2Ttl
+namespace Excel2Turtle.Functions.Xlst2Turtle
 {
     public static class Xlst2Ttl
     {
