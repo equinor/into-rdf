@@ -13,7 +13,6 @@ namespace Excel2Turtle.Cli
         {
             string fileOrDir = args[0];
             string dataType = args[1];
-
             if (args.Length != 2)
             {
                 Console.WriteLine("Wrong number of input args. Please enter File or Directory and Type of data (mel or capacities)");
