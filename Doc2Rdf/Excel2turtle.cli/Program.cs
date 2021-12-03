@@ -2,8 +2,14 @@
 using Excel2Turtle.Interfaces;
 using Excel2Turtle.Capacities;
 using System;
+using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Text;
+using Excel2Turtle.Infrastructure.Repository;
+using Excel2Turtle.Infrastructure;
+using Excel2Turtle.Core.Entities;
+using Excel2Turtle.Lib;
 
 namespace Excel2Turtle.Cli
 {
@@ -11,65 +17,56 @@ namespace Excel2Turtle.Cli
     {
         static int Main(string[] args)
         {
-            string fileOrDir = args[0];
-            string dataType = args[1];
-            if (args.Length != 2)
+            try
             {
-                Console.WriteLine("Wrong number of input args. Please enter File or Directory and Type of data (mel or capacities)");
-                return 0;
-            }
-
-            if (!args[1].Equals("mel") && !args[1].Equals("capacities"))
-            {
-                Console.WriteLine("Wrong kind of data. Valid values: mel or capacities");
-                return 0;
-            }
-
-            if (Path.HasExtension(fileOrDir))
-            {
-                var fileName = fileOrDir;
-                Console.WriteLine($"Transforming: {fileName}");
-                TransformFile(fileName, dataType);
-            }
-            else
-            {
-                foreach (var fileName in Directory.EnumerateFiles(fileOrDir))
+                string outputDir = "output";
+                string fileOrDir = args[0];
+                if (args.Length != 1)
                 {
-                    Console.WriteLine($"Transforming: {fileName}");
-                    TransformFile(fileName, dataType);
+                    Console.WriteLine("Wrong number of input args. Please enter File or Directory");
+                    return 0;
                 }
+                
+                CreateOutputDirectory(outputDir);
+
+                if (Path.HasExtension(fileOrDir))
+                {
+                    TransformFile(fileOrDir);
+                }
+                else
+                {
+                    foreach (var fileName in Directory.EnumerateFiles(fileOrDir))
+                    {
+                        TransformFile(fileName);
+                    }
+                }                
             }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Something went south! {ex.Message}");
+            }
+
             return 0;
         }
 
-        private static void TransformFile(string fileName, string dataType)
+        private static void TransformFile(string fileName)
         {
-            if (!Directory.Exists("output"))
-            {
-                Directory.CreateDirectory("output");
-            }
+            Console.WriteLine($"Transforming: {fileName}");
+
+            Excel2TtlMapper excel2TtlMapper = new Excel2TtlMapper();
+            excel2TtlMapper.Initialize(fileName);
+            var ttl = excel2TtlMapper.Transform();
+
             var outputFile = $"output/{Path.GetFileNameWithoutExtension(fileName)}.ttl";
-            var ttl = TransformXlsx2Ttl(fileName, dataType);
             File.WriteAllText(outputFile, ttl);
         }
 
-        private static string TransformXlsx2Ttl(string fileName, string dataType)
+        private static void CreateOutputDirectory(string outputDir)
         {
-            using (var fileStream = File.Open(fileName, FileMode.Open))
+            if (!Directory.Exists(outputDir))
             {
-                ITtlMapper mapper = new Mel2TtlMapper();
-                switch (dataType)
-                {
-                    case "mel":
-                        mapper = new Mel2TtlMapper();
-                        break;
-                    case "capacities":
-                        mapper = new CapacitiesTtlMapper();
-                        break;
-                    default:
-                        break;
-                }
-                return mapper.Map(fileName, fileStream);
+                Directory.CreateDirectory(outputDir);
             }
         }
     }
