@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31402.337
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Excel2turtle.cli", "Excel2turtle.cli\Excel2turtle.cli.csproj", "{70441D5F-ED1E-4C26-8FDA-4C1C0C97F43C}"
 EndProject
@@ -10,6 +10,14 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Excel2turtle.Tests", "Excel2turtle.Tests\Excel2turtle.Tests.csproj", "{9E074BB7-065C-43CE-BF25-B9883A778D20}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xlst2Ttl", "Functions\Xlst2Turtle\Xlst2Ttl.csproj", "{74A533A5-F7C7-4226-AB51-8902FE8EDB7E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDToRdf.Lib", "SDToRdf\SDToRdf.Lib.csproj", "{8A6E774D-61F6-4A9D-A765-C332A6497135}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SD2Rdf.Cli", "SdToRdf.Cli\SD2Rdf.Cli.csproj", "{2196AF78-C068-4160-8610-734F9CB7D86B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SD2Rdf.Tests", "SDToRdf.Tests\SD2Rdf.Tests.csproj", "{6CC63513-AE82-41F2-AB4E-918AC2FDFA5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doc2RdfCommon", "Doc2RdfCommon\Doc2RdfCommon.csproj", "{0D73381A-53AD-4D97-8718-BF8718F494FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +41,22 @@ Global
 		{74A533A5-F7C7-4226-AB51-8902FE8EDB7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74A533A5-F7C7-4226-AB51-8902FE8EDB7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74A533A5-F7C7-4226-AB51-8902FE8EDB7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A6E774D-61F6-4A9D-A765-C332A6497135}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A6E774D-61F6-4A9D-A765-C332A6497135}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A6E774D-61F6-4A9D-A765-C332A6497135}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A6E774D-61F6-4A9D-A765-C332A6497135}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2196AF78-C068-4160-8610-734F9CB7D86B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2196AF78-C068-4160-8610-734F9CB7D86B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2196AF78-C068-4160-8610-734F9CB7D86B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2196AF78-C068-4160-8610-734F9CB7D86B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CC63513-AE82-41F2-AB4E-918AC2FDFA5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CC63513-AE82-41F2-AB4E-918AC2FDFA5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CC63513-AE82-41F2-AB4E-918AC2FDFA5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CC63513-AE82-41F2-AB4E-918AC2FDFA5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D73381A-53AD-4D97-8718-BF8718F494FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D73381A-53AD-4D97-8718-BF8718F494FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D73381A-53AD-4D97-8718-BF8718F494FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D73381A-53AD-4D97-8718-BF8718F494FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

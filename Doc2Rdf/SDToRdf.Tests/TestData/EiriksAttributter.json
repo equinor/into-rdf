@@ -1,0 +1,12 @@
+{
+  "@context": {
+    "@vocab": "http://example.com/ont/jsonldprimer#",
+    "primer": "http://example.com/ont/jsonldprimer#",
+    "other": "http://otherexample.com/ont/prefix/"
+  },
+  "@id" :  "https://EirikSiSjappa.no/KvenErEirik",
+  "fjas:height": 186.0,
+  "width": 53,
+  "other:BMI": 26.5,
+  "http://yetanotherexample.com/ont/absoluteIRI#hair": "short"
+}

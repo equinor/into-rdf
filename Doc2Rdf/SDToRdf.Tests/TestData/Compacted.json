@@ -1,0 +1,11 @@
+{
+  "@id": "http://dbpedia.org/resource/John_Lennon",
+  "http://schema.org/birthDate": {
+    "@type": "http://www.w3.org/2001/XMLSchema#date",
+    "@value": "1940-10-09"
+  },
+  "http://schema.org/spouse": {
+    "@id": "http://dbpedia.org/resource/Cynthia_Lennon"
+  },
+  "http://xmlns.com/foaf/0.1/name": "John Lennon"
+}
