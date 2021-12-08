@@ -103,14 +103,12 @@ RUN \
 
 ## Changes from dugtrio team
 ARG CONFIGS=${FUSEKI_DIR}/config
-ARG ONTOLOGIES=${FUSEKI_DIR}/ontologies
 RUN \
     mkdir -p $CONFIGS && \
-    mkdir -p $ONTOLOGIES && \
     chown -R fuseki ${FUSEKI_DIR}
 
-COPY dugtrio_config.ttl ${CONFIGS}
-COPY unified_mel.ttl ${ONTOLOGIES}
+COPY reasoning_config.ttl ${CONFIGS}
+COPY no_reasoning_config.ttl ${CONFIGS}
 
 ## End changes from dugtrio team
 

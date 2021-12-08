@@ -50,8 +50,6 @@ PREFIX ja:      <http://jena.hpl.hp.com/2005/11/Assembler#>
 
 :model_inf a ja:InfModel;
     ja:baseModel :dataset;
-
-    ja:content [ja:externalContent <file:/fuseki/ontologies/unified_mel.ttl>];
     ja:reasoner [ja:reasonerURL <http://jena.hpl.hp.com/2003/OWLFBRuleReasoner>]
 .
 

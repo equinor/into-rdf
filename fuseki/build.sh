@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -e
+
 SCRIPT_LOCATION=$(dirname $0)
 BASE_LOCATION=$(dirname $SCRIPT_LOCATION)
 
@@ -27,13 +30,13 @@ mkdir -p $BUILD_LOCATION
 
 #download
 curl https://repo1.maven.org/maven2/org/apache/jena/jena-fuseki-docker/4.2.0/jena-fuseki-docker-4.2.0.zip -o "$ZIP_LOCATION"
-echo $(cat $SCRIPT_LOCATION/41md5sum) "$ZIP_LOCATION" | md5sum -c
+echo $(cat $SCRIPT_LOCATION/fuseki_4_2_md5sum) "$ZIP_LOCATION" | md5sum -c
 unzip $ZIP_LOCATION -d $BUILD_LOCATION
 
 #modify
 cp entrypoint.sh $FUSEKI_LOCATION -v
-cp dugtrio_config.ttl $FUSEKI_LOCATION -v
-cp unified_mel.ttl $FUSEKI_LOCATION -v
+cp reasoning_config.ttl $FUSEKI_LOCATION -v
+cp no_reasoning_config.ttl $FUSEKI_LOCATION -v
 cp Dockerfile $FUSEKI_LOCATION -v
 
 #build
