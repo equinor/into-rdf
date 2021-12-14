@@ -54,9 +54,8 @@ namespace Excel2Turtle.Cli
         {
             Console.WriteLine($"Transforming: {fileName}");
 
-            Excel2TtlMapper excel2TtlMapper = new Excel2TtlMapper();
-            excel2TtlMapper.Initialize(fileName);
-            var ttl = excel2TtlMapper.Transform();
+            var content = Excel2TtlMapper.Initialize(fileName);
+            var ttl = Excel2TtlMapper.Transform(content);
 
             var outputFile = $"output/{Path.GetFileNameWithoutExtension(fileName)}.ttl";
             File.WriteAllText(outputFile, ttl);
