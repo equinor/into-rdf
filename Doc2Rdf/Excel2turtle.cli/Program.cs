@@ -17,6 +17,7 @@ namespace Excel2Turtle.Cli
     {
         static int Main(string[] args)
         {
+
             try
             {
                 string outputDir = "output";
@@ -28,7 +29,7 @@ namespace Excel2Turtle.Cli
                 }
                 
                 CreateOutputDirectory(outputDir);
-
+                
                 if (Path.HasExtension(fileOrDir))
                 {
                     TransformFile(fileOrDir);
@@ -40,9 +41,9 @@ namespace Excel2Turtle.Cli
                         TransformFile(fileName);
                     }
                 }                
-            }
+           }
 
-            catch (Exception ex)
+          catch (Exception ex)
             {
                 Console.WriteLine($"Something went south! {ex.Message}");
             }

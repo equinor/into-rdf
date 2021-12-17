@@ -7,10 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="dotnetrdf" Version="2.7.2" />
+    <PackageReference Include="dotnetrdf" Version="2.7.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.runner.console" Version="2.4.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -22,6 +26,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Excel2Turtle.Lib\Excel2Turtle.Lib.csproj" />
+    <ProjectReference Include="..\Excel2Turtle.Infrastructure\Excel2Turtle.Infrastructure.csproj" />
+    <ProjectReference Include="..\Excel2Turtle.Core\Excel2Turtle.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,5 +35,4 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
 </Project>
