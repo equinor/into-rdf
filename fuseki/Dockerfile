@@ -103,12 +103,14 @@ RUN \
 
 ## Changes from dugtrio team
 ARG CONFIGS=${FUSEKI_DIR}/config
+ARG TTL_DATA=${FUSEKI_DIR}/ttl_data
 RUN \
     mkdir -p $CONFIGS && \
+    mkdir -p $TTL_DATA && \
     chown -R fuseki ${FUSEKI_DIR}
 
 COPY reasoning_config.ttl ${CONFIGS}
-COPY no_reasoning_config.ttl ${CONFIGS}
+COPY stid_config.ttl ${CONFIGS}
 
 ## End changes from dugtrio team
 

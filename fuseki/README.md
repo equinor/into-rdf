@@ -22,10 +22,10 @@ All parameters to the docker run command are forwarded to fuseki. This means tha
 
 See https://jena.apache.org/documentation/fuseki2/fuseki-configuration.html
 
-If the first one is chosen it must use one of the configuration files already copied to the server. See ./build.sh, or whatever script is runnign this at the time of reading, for name of config files. at Tue Dec 7 13:14:56 2021 this was `reasoning_config.ttl` and `no_reasoning_config.ttl` meaning these parameter could be given to docker and run locally like:
+If the first one is chosen it must use one of the configuration files already copied to the server. See ./build.sh, or whatever script is runnign this at the time of reading, for name of config files. at Wed Dec 16 2021 this was `reasoning_config.ttl` and `stid_config.ttl` meaning these parameter could be given to docker and run locally like:
 
 1a. `docker run --rm -p 8080:3030 fuseki --conf /fuseki/config/reasoning_config.ttl`
-1b. `docker run --rm -p 8080:3030 -e JAVA_OPTIONS="-Xmx8g" fuseki --conf /fuseki/config/no_reasoning_config.ttl`
+1b. `docker run --rm -p 8080:3030 -e JAVA_OPTIONS="-Xmx8g" fuseki --conf /fuseki/config/stid_config.ttl`
 
 `-e JAVA_OPTIONS="-Xmx8g"` is for configuring more memory to jvm.
 
