@@ -6,7 +6,7 @@ SCRIPT_LOCATION=$(dirname $0)
 BASE_LOCATION=$(dirname $SCRIPT_LOCATION)
 
 BUILD_LOCATION="$BASE_LOCATION/build"
-FUSEKI_LOCATION="$BUILD_LOCATION/jena-fuseki-docker-4.3.1"
+FUSEKI_LOCATION="$BUILD_LOCATION/jena-fuseki-docker-4.3.2"
 ZIP_LOCATION="$FUSEKI_LOCATION.zip"
 
 #checks
@@ -29,8 +29,8 @@ rm -r $BUILD_LOCATION
 mkdir -p $BUILD_LOCATION
 
 #download
-curl https://repo1.maven.org/maven2/org/apache/jena/jena-fuseki-docker/4.3.1/jena-fuseki-docker-4.3.1.zip -o "$ZIP_LOCATION"
-echo $(cat $SCRIPT_LOCATION/fuseki_4_3_1_md5sum) "$ZIP_LOCATION" | md5sum -c
+curl https://repo1.maven.org/maven2/org/apache/jena/jena-fuseki-docker/4.3.2/jena-fuseki-docker-4.3.2.zip -o "$ZIP_LOCATION"
+echo $(cat $SCRIPT_LOCATION/fuseki_4_3_2_md5sum) "$ZIP_LOCATION" | md5sum -c
 unzip $ZIP_LOCATION -d $BUILD_LOCATION
 
 #modify
@@ -40,4 +40,4 @@ cp stid_config.ttl $FUSEKI_LOCATION -v
 cp Dockerfile $FUSEKI_LOCATION -v
 
 #build
-docker build --force-rm --build-arg JENA_VERSION=4.3.1 -t fuseki $FUSEKI_LOCATION
+docker build --force-rm --build-arg JENA_VERSION=4.3.2 -t fuseki $FUSEKI_LOCATION
