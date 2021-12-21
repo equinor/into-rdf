@@ -1,14 +1,5 @@
-﻿using Excel2Turtle.Mel;
-using Excel2Turtle.Interfaces;
-using Excel2Turtle.Capacities;
-using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System;
 using System.IO;
-using System.Text;
-using Excel2Turtle.Infrastructure.Repository;
-using Excel2Turtle.Infrastructure;
-using Excel2Turtle.Core.Entities;
 using Excel2Turtle.Lib;
 
 namespace Excel2Turtle.Cli
