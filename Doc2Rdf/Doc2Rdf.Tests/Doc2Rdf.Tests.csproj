@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Excel2Turtle.Lib\Excel2Turtle.Lib.csproj" />
+    <ProjectReference Include="..\Excel2turtle.Lib\Excel2Turtle.Lib.csproj" />
     <ProjectReference Include="..\Excel2Turtle.Infrastructure\Excel2Turtle.Infrastructure.csproj" />
     <ProjectReference Include="..\Excel2Turtle.Core\Excel2Turtle.Core.csproj" />
   </ItemGroup>
