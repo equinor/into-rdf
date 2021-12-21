@@ -11,6 +11,7 @@ variables:
   dotnetSdkVersion: '3.1.x'
   azureSubscription: 'spine az sp'
   functionName: 'XlsxToTtl'
+  workingDirectory: 'Doc2Rdf'
 
 pool:
   vmImage: ubuntu-latest
@@ -24,12 +25,15 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'Restore project dependencies'
   inputs:
+    workingDirectory: '$(workingDirectory)'
     command: 'restore'
     projects: '**/*.csproj'
+    includeNuGetOrg: true
 
 - task: DotNetCoreCLI@2
   displayName: 'Build the project - $(buildConfiguration)'
   inputs:
+    workingDirectory: '$(workingDirectory)'
     command: 'build'
     arguments: '--no-restore --configuration $(buildConfiguration)'
     projects: '**/*.csproj'
@@ -37,6 +41,7 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'Run unit tests - $(buildConfiguration)'
   inputs:
+    workingDirectory: '$(workingDirectory)'
     command: 'test'
     arguments: '--no-build --configuration $(buildConfiguration)'
     publishTestResults: true
@@ -45,11 +50,13 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'Publish the project - $(buildConfiguration)'
   inputs:
+    workingDirectory: '$(workingDirectory)'
     command: 'publish'
     projects: '**/*.csproj'
     publishWebProjects: false
     arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
     zipAfterPublish: true
+    modifyOutputPath: true
 
 - task: AzureFunctionApp@1
   inputs:
