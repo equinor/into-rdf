@@ -26,7 +26,7 @@ steps:
   displayName: 'Restore project dependencies'
   inputs:
     command: 'restore'
-    projects: '($workingDirectory)/**/*.csproj'
+    projects: 'Doc2Rdf/*/*.csproj'
     includeNuGetOrg: true
 
 - task: DotNetCoreCLI@2
