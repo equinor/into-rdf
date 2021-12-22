@@ -14,7 +14,7 @@ variables:
   workingDirectory: 'Doc2Rdf'
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: windows-latest
 
 steps:
 - task: UseDotNet@2
