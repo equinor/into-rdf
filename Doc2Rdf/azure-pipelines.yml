@@ -11,7 +11,9 @@ variables:
   dotnetSdkVersion: '3.1.x'
   azureSubscription: 'spine az sp'
   functionName: 'XlsxToTtl'
+  functionProjectName: 'Xlst2Turtle'
   workingDirectory: 'Doc2Rdf'
+
 
 pool:
   vmImage: windows-latest
@@ -59,5 +61,5 @@ steps:
     azureSubscription: $(azureSubscription)
     appType: 'functionApp'
     appName: $(functionName)
-    package: '$(Build.ArtifactStagingDirectory)/$(buildConfiguration)/$(functionName).zip'
+    package: '$(Build.ArtifactStagingDirectory)/$(buildConfiguration)/$(functionProjectName).zip'
     deploymentMethod: 'auto'
