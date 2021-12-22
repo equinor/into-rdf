@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Excel2Turtle.Lib;
+using Doc2Rdf.Library;
 
 namespace Excel2Turtle.Cli
 {
@@ -46,8 +46,8 @@ namespace Excel2Turtle.Cli
         {
             Console.WriteLine($"Transforming: {fileName}");
 
-            var content = Excel2TtlMapper.Initialize(fileName);
-            var ttl = Excel2TtlMapper.Transform(content);
+            var content = Doc2RdfTransformer.Initialize(fileName);
+            var ttl = Doc2RdfTransformer.Transform(content);
 
             var outputFile = $"output/{Path.GetFileNameWithoutExtension(fileName)}.ttl";
             File.WriteAllText(outputFile, ttl);

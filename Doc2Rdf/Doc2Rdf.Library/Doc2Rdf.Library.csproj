@@ -1,13 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Excel2Turtle.Infrastructure\Excel2Turtle.Infrastructure.csproj" />
     <ProjectReference Include="..\Excel2Turtle.Core\Excel2Turtle.Core.csproj" />
-    <ProjectReference Include="..\Doc2Rdf.Library\Doc2Rdf.Library.csproj" />
+    <ProjectReference Include="..\Excel2Turtle.Infrastructure\Excel2Turtle.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="dotnetRDF" Version="2.7.0" />
   </ItemGroup>
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
