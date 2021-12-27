@@ -5,7 +5,7 @@ using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
-using Excel2Turtle.Mel;
+using Doc2Rdf.Library;
 
 namespace Excel2Turtle.Functions.Xlst2Turtle
 {
@@ -31,7 +31,8 @@ namespace Excel2Turtle.Functions.Xlst2Turtle
 
                 try
                 {
-                    resString = new Mel2TtlMapper().Map(name, inputMel);
+                    var content = Doc2RdfTransformer.Initialize(name);
+                    resString = Doc2RdfTransformer.Transform(content);
                 }
                 catch (Exception ex)
                 {
