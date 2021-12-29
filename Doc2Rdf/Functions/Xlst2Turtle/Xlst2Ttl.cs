@@ -5,9 +5,10 @@ using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
+using Excel2Turtle.Core.Entities;
 using Doc2Rdf.Library;
 
-namespace Excel2Turtle.Functions.Xlst2Turtle
+namespace Doc2Rdf.Functions.Xlst2Turtle
 {
     public static class Xlst2Ttl
     {
@@ -17,6 +18,7 @@ namespace Excel2Turtle.Functions.Xlst2Turtle
             log.LogInformation($"C# Blob trigger function Processed blob\n Name:{name} \n Size: {inputMel.Length} Bytes");
             var storageConnection = Environment.GetEnvironmentVariable("connection");
             BlobServiceClient blobServiceClient = new BlobServiceClient(storageConnection);
+
             BlobContainerClient logContainerClient = blobServiceClient.GetBlobContainerClient(Environment.GetEnvironmentVariable("logContainer"));
             var parselogBlob = logContainerClient.GetAppendBlobClient("ParseLog");
             parselogBlob.CreateIfNotExists();
@@ -31,7 +33,15 @@ namespace Excel2Turtle.Functions.Xlst2Turtle
 
                 try
                 {
-                    var content = Doc2RdfTransformer.Initialize(name);
+                    var content = new SpreadsheetContent();
+                    content.Workbook = name;
+
+                    var settings =  readSettingsBlob(blobServiceClient);
+                    content.RdfSettings = Doc2RdfTransformer.GetRdfSettings(settings);
+
+                    content.SpreadsheetDetails = Doc2RdfTransformer.GetSpreadsheetDetails(name, content.RdfSettings);
+
+                    content.DataTable = Doc2RdfTransformer.GetSpreadsheetData(name, content.SpreadsheetDetails);
                     resString = Doc2RdfTransformer.Transform(content);
                 }
                 catch (Exception ex)
@@ -74,6 +84,17 @@ namespace Excel2Turtle.Functions.Xlst2Turtle
             writer.Flush();
             stream.Position = 0;
             blobClient.AppendBlock(stream);
+        }
+
+        private static string readSettingsBlob(BlobServiceClient blobServiceClient)
+        {
+            BlobContainerClient settingsContainerClient = blobServiceClient.GetBlobContainerClient(Environment.GetEnvironmentVariable("settingsContainer"));
+            var settingsBlob = settingsContainerClient.GetBlobClient("settings");
+
+            Stream settingsStream = settingsBlob.OpenRead();
+            StreamReader settingsReader = new StreamReader(settingsStream);
+
+            return settingsReader.ReadToEnd();
         }
     }
 }
