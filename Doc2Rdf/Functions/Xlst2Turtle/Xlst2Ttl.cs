@@ -36,8 +36,9 @@ namespace Doc2Rdf.Functions.Xlst2Turtle
                     var content = new SpreadsheetContent();
                     content.Workbook = name;
 
-                    var settings =  readSettingsBlob(blobServiceClient);
+                    var settings =  readSettingsBlob(blobServiceClient, log);
                     content.RdfSettings = Doc2RdfTransformer.GetRdfSettings(settings);
+                    log.LogInformation(settings);
 
                     content.SpreadsheetDetails = Doc2RdfTransformer.GetSpreadsheetDetails(name, content.RdfSettings);
 
@@ -86,10 +87,15 @@ namespace Doc2Rdf.Functions.Xlst2Turtle
             blobClient.AppendBlock(stream);
         }
 
-        private static string readSettingsBlob(BlobServiceClient blobServiceClient)
+        private static string readSettingsBlob(BlobServiceClient blobServiceClient, ILogger logger)
         {
+
             BlobContainerClient settingsContainerClient = blobServiceClient.GetBlobContainerClient(Environment.GetEnvironmentVariable("settingsContainer"));
-            var settingsBlob = settingsContainerClient.GetBlobClient("settings");
+            
+            logger.LogInformation(Environment.GetEnvironmentVariable("settingsContainer"));
+            var settingsBlob = settingsContainerClient.GetBlobClient("settings.json");
+
+            logger.LogInformation(settingsBlob.BlobContainerName);
 
             Stream settingsStream = settingsBlob.OpenRead();
             StreamReader settingsReader = new StreamReader(settingsStream);
