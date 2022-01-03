@@ -14,11 +14,17 @@ namespace SD2Rdf.Tests
         {
             var files = Directory.GetFiles("TestData", "*.xml").ToList();
             var dexpiMapper = new DexpiXml2Rdf();
-            var turtles = new List<string>();
+            var turtles = new List<(string, string)>();
 
-            files.ForEach(f => turtles.Add(dexpiMapper.Map(f, File.Open(f, FileMode.Open))));
 
-            Assert.True(turtles.Any()); //Silly autopilot autocomplete
+            files.ForEach(f => turtles.Add((f, dexpiMapper.Map(f, File.Open(f, FileMode.Open)))));
+
+            foreach((string, string) turtle in turtles )
+            {
+                File.WriteAllText($"{turtle.Item1}.ttl", turtle.Item2);
+            }
+
+            Assert.True(turtles.Any()); //Silly autopilot autocomplete that was to good to throw out
         }
     }
 }

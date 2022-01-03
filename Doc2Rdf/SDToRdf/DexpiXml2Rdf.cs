@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using VDS.RDF;
+using System.Text;
+using VDS.RDF.Writing;
 
 namespace SD2Rdf.Lib
 {
@@ -32,14 +34,11 @@ namespace SD2Rdf.Lib
         {
             var xmlDoc = new XmlDocument();
             xmlDoc.Load(inputStream);
-
-            var nodesOfInterest = new List<INode>();
-
             var graph = new Graph();
             findNodesOfInterest(xmlDoc.ChildNodes, graph);
-
-
-            throw new NotImplementedException();
+            MemoryStream outputStream = new MemoryStream();
+            graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new CompressingTurtleWriter());
+            return Encoding.UTF8.GetString(outputStream.ToArray());
         }
 
 
@@ -54,14 +53,14 @@ namespace SD2Rdf.Lib
                 }
                 if (DexpiXMLElementExtractConfig.Contains(xmlNode.Name))
                 {
-                    var IdNode = TriplesFromXmlNode(xmlNode, graph);
+                    var IdNode = AddTriplesFromXmlNodeToGraph(xmlNode, graph);
                     foreach (XmlNode genericAttributesNode in xmlNode.ChildNodes)
                     {
                         if (genericAttributesNode.Name == "GenericAttributes")
                         {
                             foreach (XmlNode genericAttribute in genericAttributesNode.ChildNodes)
                             {
-                                TriplesFromXmlNode(genericAttribute, graph, IdNode);
+                                AddTriplesFromGenericAttributesNodeToGraph(genericAttribute, graph, IdNode);
                             }
                         }
                     }
@@ -69,8 +68,9 @@ namespace SD2Rdf.Lib
             }
             return graph;
         }
-        private IUriNode TriplesFromXmlNode(XmlNode node, IGraph graph, IUriNode IDNode = null)
+        private IUriNode AddTriplesFromXmlNodeToGraph(XmlNode node, IGraph graph)
         {
+            IUriNode IDNode = null;
             if (IDNode == null)
             {
                 string ID = null;
@@ -100,5 +100,40 @@ namespace SD2Rdf.Lib
 
             return IDNode;
         }
+        private void AddTriplesFromGenericAttributesNodeToGraph(XmlNode xmlNode, IGraph graph, IUriNode ParentNode)
+        {
+            bool valueFound = false;
+            IUriNode localNode = null;
+            string genericAttribName = string.Empty;
+            List<(INode, INode)> rightHandNodeTuples = new List<(INode, INode)>();
+            foreach (XmlAttribute xmlAttribute in xmlNode.Attributes)
+            {
+                if (xmlAttribute.Name == "Name")
+                {
+                    genericAttribName = xmlAttribute.Value;
+                    var localNodeUri = new Uri($"{ParentNode.Uri.ToString()}/{xmlAttribute.Value}");
+                    localNode = graph.CreateUriNode(localNodeUri);
+                }
+                else
+                {
+                    if (xmlAttribute.Name == "Value")
+                    {
+                        valueFound = true;
+                    }
+                    var attribNameUri = new Uri(EquinorUri, xmlAttribute.Name);
+                    rightHandNodeTuples.Add((graph.CreateUriNode(attribNameUri), graph.CreateLiteralNode(xmlAttribute.Value)));
+                }
+            }
+            graph.Assert(ParentNode,graph.CreateUriNode(new Uri(EquinorUri, $"{DexpiPrefix}/rels/genericAttribute/{genericAttribName}")),localNode);
+            if (!valueFound)
+            {
+                rightHandNodeTuples.Add((graph.CreateUriNode(new Uri(EquinorUri, "Value")), graph.CreateBlankNode()));
+            }
+            foreach ((INode, INode) rightHandTuple in rightHandNodeTuples)
+            {
+                graph.Assert(localNode, rightHandTuple.Item1, rightHandTuple.Item2);
+            }
+        }
+
     }
 }
