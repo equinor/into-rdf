@@ -37,6 +37,7 @@ unzip $ZIP_LOCATION -d $BUILD_LOCATION
 cp entrypoint.sh $FUSEKI_LOCATION -v
 cp reasoning_config.ttl $FUSEKI_LOCATION -v
 cp stid_config.ttl $FUSEKI_LOCATION -v
+cp mel_persisted_reasoning_config.ttl $FUSEKI_LOCATION -v
 cp Dockerfile $FUSEKI_LOCATION -v
 
 #build
