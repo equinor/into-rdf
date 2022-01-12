@@ -10,7 +10,7 @@ namespace SD2Rdf.Tests
     public class DexpiXML2RDFTests
     {
         //Disabled as the tested method dexpiMapper.Map throws NotImplementedException
-        /*[Fact]
+        [Fact]
         public void DexpiXML2RDF()
         {
             var files = Directory.GetFiles("TestData", "*.xml").ToList();
@@ -26,7 +26,7 @@ namespace SD2Rdf.Tests
                 File.WriteAllText($"{turtle.Item1}.ttl", turtle.Item2);
             }
 
-            Assert.True(turtles.Any()); //Silly autopilot autocomplete that was to good to throw out
+            Assert.True(turtles.Any()); 
         }
 =======
             Assert.True(turtles.Any()); //Silly autopilot autocomplete
