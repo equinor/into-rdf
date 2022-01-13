@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="swashbuckle.aspnetcore" Version="6.2.3" />
+  </ItemGroup>
+
 </Project>
