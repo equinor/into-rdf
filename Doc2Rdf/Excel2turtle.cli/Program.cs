@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using Doc2Rdf.Library;
-using Excel2Turtle.Core.Entities;
-
 
 namespace Excel2Turtle.Cli
 {
@@ -47,18 +45,12 @@ namespace Excel2Turtle.Cli
         private static void TransformFile(string fileName)
         {
             Console.WriteLine($"Transforming: {fileName}");
+            var ttl = string.Empty;
 
-            var content = new SpreadsheetContent();
-            content.Workbook = fileName;
-
-            var settingContent = File.ReadAllText("..\\Excel2Turtle.Infrastructure\\settings.json");
-            content.RdfSettings = Doc2RdfTransformer.GetRdfSettings(settingContent);
-
-            content.SpreadsheetDetails = Doc2RdfTransformer.GetSpreadsheetDetails(fileName, content.RdfSettings);
-
-            content.DataTable = Doc2RdfTransformer.GetSpreadsheetData(fileName, content.SpreadsheetDetails);
-
-            var ttl = Doc2RdfTransformer.Transform(content);
+            using (var stream = File.Open(fileName, FileMode.Open, FileAccess.Read))
+            {
+                ttl = Doc2RdfTransformer.Transform(stream);
+            }
 
             var outputFile = $"output/{Path.GetFileNameWithoutExtension(fileName)}.ttl";
             File.WriteAllText(outputFile, ttl);

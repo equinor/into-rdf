@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AzureFunctionsVersion>v3</AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -10,7 +10,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Doc2Rdf.Library\Doc2Rdf.Library.csproj" />
-    <ProjectReference Include="..\..\Excel2Turtle.Core\Excel2Turtle.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">

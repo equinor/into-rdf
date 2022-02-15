@@ -1,11 +1,9 @@
 using System;
 using System.IO;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
-using Excel2Turtle.Core.Entities;
 using Doc2Rdf.Library;
 
 namespace Doc2Rdf.Functions.Xlst2Turtle
@@ -27,30 +25,13 @@ namespace Doc2Rdf.Functions.Xlst2Turtle
 
             if (name.ToLower().EndsWith(".xlsx"))
             {
-                writeToParseLog($"Starting parsing of {name}", parselogBlob);
+                writeToParseLog($"Starting parsing of {name}", parselogBlob);             
 
-                string resString = string.Empty;
+                var settings =  readSettingsBlob(blobServiceClient, log);
+                log.LogInformation(settings);
 
-                try
-                {
-                    var content = new SpreadsheetContent();
-                    content.Workbook = name;
-
-                    var settings =  readSettingsBlob(blobServiceClient, log);
-                    content.RdfSettings = Doc2RdfTransformer.GetRdfSettings(settings);
-                    log.LogInformation(settings);
-
-                    content.SpreadsheetDetails = Doc2RdfTransformer.GetSpreadsheetDetails(name, content.RdfSettings);
-
-                    content.DataTable = Doc2RdfTransformer.GetSpreadsheetData(name, content.SpreadsheetDetails);
-                    resString = Doc2RdfTransformer.Transform(content);
-                }
-                catch (Exception ex)
-                {
-                    log.LogWarning(ex.Message);
-                    log.LogInformation($"Error parsing {name} {ex.Message}");
-                }
-
+                var resString =  Doc2RdfTransformer.Transform(inputMel);
+                
                 if (resString != string.Empty)
                 {
                     writeToParseLog($"Successfully parsed {name}", parselogBlob);

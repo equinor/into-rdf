@@ -1,16 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Excel2Turtle.Core\Excel2Turtle.Core.csproj" />
-    <ProjectReference Include="..\Excel2Turtle.Infrastructure\Excel2Turtle.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.15.0" />
     <PackageReference Include="dotnetRDF" Version="2.7.0" />
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
 </Project>
