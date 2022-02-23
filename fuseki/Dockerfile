@@ -109,9 +109,7 @@ RUN \
     mkdir -p $TTL_DATA && \
     chown -R fuseki ${FUSEKI_DIR}
 
-COPY reasoning_config.ttl ${CONFIGS}
-COPY stid_config.ttl ${CONFIGS}
-COPY mel_persisted_reasoning_config.ttl ${CONFIGS}
+COPY config ${CONFIGS}
 
 ## End changes from dugtrio team
 
