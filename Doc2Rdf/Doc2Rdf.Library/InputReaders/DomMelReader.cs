@@ -1,5 +1,5 @@
 ﻿using Doc2Rdf.Library.Models;
-using DocumentFormat.OpenXml;
+using Doc2Rdf.Library.Interfaces;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System;
@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Doc2Rdf.Library
+namespace Doc2Rdf.Library.IO
 {
     internal class DomMelReader : IMelReader
     {
@@ -38,7 +38,7 @@ namespace Doc2Rdf.Library
                 DataStartRow = int.Parse(rows["DataStartRow"]),
                 DataEndRow = int.Parse(rows["DataEndRow"]),
                 Contractor = rows["Contractor"],
-                DataType = Enum.Parse<DataType>(rows.TryGetValue("DataType", out string dataType) ? dataType : "NA"),
+                DataSource = Enum.Parse<DataSource>(rows.TryGetValue("DataType", out string dataType) ? dataType : "NA"),
                 IsTransposed = bool.Parse(rows.TryGetValue("IsTransposed", out string isTransposed) ? isTransposed : "false"),
                 ProjectCode = rows["ProjectCode"],
                 Revision = int.Parse(rows["Revision"].TrimStart('0')),
@@ -48,13 +48,12 @@ namespace Doc2Rdf.Library
             };
         }
 
-        public ExcelData GetSpreadsheetData(Stream excelFile, SpreadsheetDetails details)
+        public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails details)
         {
             var doc = SpreadsheetDocument.Open(excelFile, false);
 
             var workbookPart = doc.WorkbookPart;
             var worksheetPart = GetWorksheetPart(doc, details.SheetName);
-
 
             var columnSkip = details.StartColumn - 1;
             var columnTake = details.EndColumn - columnSkip;
@@ -79,7 +78,8 @@ namespace Doc2Rdf.Library
                 .Select(row => GetCompleteRow(workbookPart, row, details.StartColumn, details.EndColumn).ToList())
                 .ToList();
 
-            return new ExcelData (headerRow, dataRows);
+            var data = CreateDataTable(details.DataStartRow, headerRow, dataRows);
+            return data;
         }
 
         private static IEnumerable<string> GetCompleteRow(WorkbookPart wbPart, Row row, int startColumn, int endColumn)
@@ -183,6 +183,32 @@ namespace Doc2Rdf.Library
                 retVal = retVal + colNum * (int)Math.Pow(26, col.Length - (iChar + 1));
             }
             return retVal;
+        }
+
+        private static DataTable CreateDataTable(int startRow, List<string> headers, List<List<string>> data)
+        {
+            var inputDataTable = new DataTable();
+
+            inputDataTable.Columns.Add("id");
+
+            foreach (var header in headers)
+            {
+                inputDataTable.Columns.Add(header);
+            }
+
+            for (int i = 0; i < data.Count(); i++)
+            {
+                var row = inputDataTable.NewRow();
+                row[0] = (startRow + i).ToString();
+
+                for (int j = 1; j <= data[i].Count; j++)
+                {
+                    row[j] = data[i][j-1]; 
+                }
+                inputDataTable.Rows.Add(row);
+            }
+
+            return inputDataTable;
         }
     }
 }

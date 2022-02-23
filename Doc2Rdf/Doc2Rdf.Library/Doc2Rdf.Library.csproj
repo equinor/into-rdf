@@ -3,10 +3,12 @@
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.15.0" />
     <PackageReference Include="dotnetRDF" Version="2.7.0" />
+    <PackageReference Include="microsoft.data.sqlclient" Version="4.0.1" />
   </ItemGroup>
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
 </Project>

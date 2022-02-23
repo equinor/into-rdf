@@ -16,13 +16,16 @@ namespace Doc2Rdf.Library
             { "ext", new Uri("http://rdf.equinor.com/ext/") },
             { "transformation", new Uri("http://rdf.equinor.com/ext/transformation#") },
             { "project", new Uri("http://rdf.equinor.com/ext/project#") },
+            { "facility", new Uri("http://rdf.equinor.com/ontology/facility#") },
             { "sor", new Uri("http://rdf.equinor.com/ontology/sor#") },
             { "mel", new Uri("http://rdf.equinor.com/ontology/mel#") },
             { "melraw", new Uri("http://rdf.equinor.com/raw/melexcel#") },
             { "capacity", new Uri("http://rdf.equinor.com/ontology/capacity#") },
             { "capacityraw", new Uri("http://rdf.equinor.com/raw/capacityexcel#") },
             { "alarm", new Uri("http://rdf.equinor.com/ontology/alarm#") },
-            { "alarmraw", new Uri("http://rdf.equinor.com/raw/alarmexcel#") }
+            { "alarmraw", new Uri("http://rdf.equinor.com/raw/alarmexcel#") },
+            { "shipweight", new Uri("http://rdf.equinor.com/ontology/shipweight#") },
+            { "shipweightraw", new Uri("http://rdf.equinor.com/raw/shipweight#") }
         };
 
         public static Dictionary<Uri, string> Uri2Prfix => Prefix2Uri.ToDictionary(

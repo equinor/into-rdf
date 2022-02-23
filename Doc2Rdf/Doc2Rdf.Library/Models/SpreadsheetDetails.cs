@@ -2,14 +2,6 @@ using System;
 
 namespace Doc2Rdf.Library.Models
 {
-
-    public enum DataType
-    {
-        Mel,
-        Dexpi,
-        NA
-    }
-
     public class SpreadsheetDetails
     {
         public string ProjectCode { get; set; }
@@ -17,7 +9,7 @@ namespace Doc2Rdf.Library.Models
         public bool IsTransposed { get; set; }
         public DateTime RevisionDate { get; set; }
         public string Contractor { get; set; }
-        public DataType DataType { get; set; }
+        public DataSource DataSource { get; set; }
         public string SheetName { get; set; }
         public int HeaderRow { get; set; }
         public int DataStartRow { get; set; }

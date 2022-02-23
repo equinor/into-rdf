@@ -49,7 +49,7 @@ namespace Excel2Turtle.Cli
 
             using (var stream = File.Open(fileName, FileMode.Open, FileAccess.Read))
             {
-                ttl = Doc2RdfTransformer.Transform(stream);
+                ttl = MelTransformer.Transform(stream);
             }
 
             var outputFile = $"output/{Path.GetFileNameWithoutExtension(fileName)}.ttl";

@@ -14,12 +14,9 @@ namespace Doc2Rdf.Tests
         public void TestDomParsing()
         {
             var testFile = "TestData/test.xlsx";
-            string data = null;
 
-            using (var file = File.Open(testFile, FileMode.Open, FileAccess.Read))
-            {
-                data = Doc2RdfTransformer.Transform(file);
-            }
+            var stream = File.Open(testFile, FileMode.Open, FileAccess.Read);
+            var data = MelTransformer.Transform(stream);
 
             Assert.NotNull(data);
 
@@ -31,13 +28,13 @@ namespace Doc2Rdf.Tests
             RdfTestUtils.AssertTripleAsserted(
                 graph,
                 new Uri("http://rdf.equinor.com/ext/mel/c232_01"),
-                new Uri("http://rdf.equinor.com/ext/project#projectCode"),
-                "c232"
+                new Uri("http://rdf.equinor.com/ontology/facility#hasDocumentProjectId"),
+                new Uri("http://rdf.equinor.com/ontology/facility#c232")
             );
             RdfTestUtils.AssertTripleAsserted(
                 graph,
                 new Uri("http://rdf.equinor.com/ext/mel/c232_01"),
-                new Uri("http://rdf.equinor.com/ontology/sor#file"),
+                new Uri("http://rdf.equinor.com/ontology/sor#fromDataCollection"),
                 "test.xlsx"
             );
             RdfTestUtils.AssertTripleAsserted(
