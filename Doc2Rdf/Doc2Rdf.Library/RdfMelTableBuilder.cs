@@ -91,14 +91,8 @@ namespace Doc2Rdf.Library
         {
             const int NumberOfFixedColumns = 3;
 
-            int k = 0;
             foreach (DataRow row in inputData.Rows)
             {   
-                if (k <= 1)
-                {
-                    Console.WriteLine($"{row[0]}, {row[1]}, {row[2]}");
-                    k++;
-                }
                 var itemUri = new Uri($"{dataCollectionUri.AbsoluteUri}#row={row["id"]}");
 
                 var dataRow = _dataTable.NewRow();
@@ -113,15 +107,6 @@ namespace Doc2Rdf.Library
                     dataRow[columnIndex - 1 + NumberOfFixedColumns] = row[columnIndex];
                 }
                 _dataTable.Rows.Add(dataRow);
-
-                if(k <= 1)
-                {
-                    Console.WriteLine($"{_dataTable.Columns[0]}, {dataRow[0]}");
-                    Console.WriteLine($"{_dataTable.Columns[1]}, {dataRow[1]}");
-                    Console.WriteLine($"{_dataTable.Columns[2]}, {dataRow[2]}");
-                    Console.WriteLine($"{_dataTable.Columns[3]}, {dataRow[3]}");
-                    Console.WriteLine($"{_dataTable.Columns[4]}, {dataRow[4]}");
-                }
             }
         }
 
