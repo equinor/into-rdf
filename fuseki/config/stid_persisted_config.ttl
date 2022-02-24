@@ -48,6 +48,6 @@
     fuseki:dataset :datasetTDB2 ;
     .
 
-:datasetTDB2 a tdb2:datasetTDB2 ;
+:datasetTDB2 a tdb2:DatasetTDB2 ;
     tdb2:location  "/stidTDB2" .
 
