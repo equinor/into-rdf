@@ -9,6 +9,7 @@ var resourcePrefix = '${env}-dugtriofuseki'
 var webAppName = resourcePrefix
 var planName = '${resourcePrefix}-plan'
 var clientSecretName = 'AAD_SECRET'
+var usrManagedIdentity = 'guid'
 var resourceTags = {
   Product: 'Dugtrio Fuseki'
 }
@@ -32,19 +33,17 @@ resource Fuseki 'Microsoft.Web/sites@2021-03-01' = {
   kind: 'app'
   tags: resourceTags
   location: location
-  identity: {
-    type: 'UserAssigned'
-  }
+
   properties: {
     serverFarmId: planName
     httpsOnly: true
     reserved: true
     siteConfig: {
-      linuxFxVersion: 'DOCKER|spineacr.azurecr.io/fuseki:${env}'
+      linuxFxVersion: 'DOCKER|spineacr.azurecr.io/fuseki:latest'
+      // linuxFxVersion: 'DOCKER|spineacr.azurecr.io/fuseki:${env}'
       http20Enabled: true
       acrUseManagedIdentityCreds: true
-      acrUserManagedIdentityID: 'GUID'
-      appSettings: []
+      acrUserManagedIdentityID: usrManagedIdentity
     }
   }
   dependsOn: [
