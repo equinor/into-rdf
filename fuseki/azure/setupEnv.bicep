@@ -9,9 +9,13 @@ var resourcePrefix = '${env}-dugtriofuseki'
 var webAppName = resourcePrefix
 var planName = '${resourcePrefix}-plan'
 var clientSecretName = 'AAD_SECRET'
-var usrManagedIdentity = 'guid'
 var resourceTags = {
   Product: 'Dugtrio Fuseki'
+}
+
+resource AcrPullIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
+  name: 'acr-pull-identity'
+  scope: resourceGroup('spine-acr')
 }
 
 resource FusekiPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
@@ -33,7 +37,12 @@ resource Fuseki 'Microsoft.Web/sites@2021-03-01' = {
   kind: 'app'
   tags: resourceTags
   location: location
-
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${AcrPullIdentity.id}': {}
+    }
+  }
   properties: {
     serverFarmId: planName
     httpsOnly: true
@@ -43,7 +52,8 @@ resource Fuseki 'Microsoft.Web/sites@2021-03-01' = {
       // linuxFxVersion: 'DOCKER|spineacr.azurecr.io/fuseki:${env}'
       http20Enabled: true
       acrUseManagedIdentityCreds: true
-      acrUserManagedIdentityID: usrManagedIdentity
+      acrUserManagedIdentityID: AcrPullIdentity.properties.clientId
+      appCommandLine: '--conf /fuseki/config/reasoning_config.ttl'
     }
   }
   dependsOn: [
