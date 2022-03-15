@@ -32,7 +32,9 @@ namespace Doc2Rdf.Library
         }
 
         public void AddProvenanceRow(Uri dataCollectionUri, Provenance provenance)
-        {
+        {            
+             var revisionOf = provenance.RevisionOf != string.Empty ? new Uri(Prefixes.Prefix2Uri["ext"] + "mel/" + provenance.RevisionOf) : null;
+
             _dataTable.Rows.Add(
                 dataCollectionUri,
                 provenance.RevisionDate,
@@ -42,7 +44,7 @@ namespace Doc2Rdf.Library
                 new Uri(Prefixes.Prefix2Uri["sor"] + provenance.DataFormat.ToString()),
                 new Uri(Prefixes.Prefix2Uri["sor"] + provenance.DataSource.ToString()),
                 new Uri(Prefixes.Prefix2Uri["sor"] + provenance.DataSourceType.ToString()),
-                new Uri(Prefixes.Prefix2Uri["ext"] + "mel/" + provenance.RevisionOf)
+                revisionOf
                 );
         }
 

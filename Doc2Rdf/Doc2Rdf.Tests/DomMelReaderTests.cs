@@ -61,21 +61,21 @@ namespace Doc2Rdf.Tests
 
             RdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("http://rdf.equinor.com/ext/mel/c232_01#row=500"),
+                new Uri("http://rdf.equinor.com/ext/mel/c232_01#row=499"),
                 new Uri("http://rdf.equinor.com/raw/melexcel#Header55"),
                 "BC500"
             );
 
             RdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("http://rdf.equinor.com/ext/mel/c232_01#row=499"),
+                new Uri("http://rdf.equinor.com/ext/mel/c232_01#row=498"),
                 new Uri("http://rdf.equinor.com/raw/melexcel#Header55"),
                 "BC499"
             );
 
             RdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("http://rdf.equinor.com/ext/mel/c232_01#row=498"),
+                new Uri("http://rdf.equinor.com/ext/mel/c232_01#row=497"),
                 new Uri("http://rdf.equinor.com/raw/melexcel#Header53"),
                 "BA498"
             );

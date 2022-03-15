@@ -31,7 +31,7 @@ namespace Doc2Rdf.Library
         {
             var facility = new FacilityIdentifiers(documentProjectId: details.ProjectCode);
 
-            var previousRevision = details.Revision > 1 ? $"{details.ProjectCode}_{(details.Revision - 1).ToString("00")}" : "";
+            var previousRevision = details.Revision > 1 ? $"{details.ProjectCode}_{(details.Revision - 1).ToString("00")}" : string.Empty;
 
             var provenance = new Provenance(facility,
                                             details.FileName,

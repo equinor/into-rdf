@@ -70,16 +70,27 @@ namespace Doc2Rdf.Library.IO
             var rowSkip = details.DataStartRow - 1;
             var rowTake = details.DataEndRow - rowSkip;
 
+            var tagNumberIndex = headerRow.FindIndex(x => x == "Tag Number");
+
             var dataRows = worksheetPart
                 .Worksheet
                 .Descendants<Row>()
                 .Skip(rowSkip)
                 .Take(rowTake)
+                .Where(row => ValidRow(row, tagNumberIndex))
                 .Select(row => GetCompleteRow(workbookPart, row, details.StartColumn, details.EndColumn).ToList())
                 .ToList();
 
             var data = CreateDataTable(details.DataStartRow, headerRow, dataRows);
             return data;
+        }
+
+        private static bool ValidRow(Row row, int tagNumberIndex)
+        {
+            var decendants = row.Descendants<Cell>();
+            var cell = decendants.ElementAt(tagNumberIndex);
+
+            return cell.CellValue != null ? true : false;
         }
 
         private static IEnumerable<string> GetCompleteRow(WorkbookPart wbPart, Row row, int startColumn, int endColumn)
