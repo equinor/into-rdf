@@ -8,6 +8,8 @@ param location string = resourceGroup().location
 var resourcePrefix = '${env}-dugtriofuseki'
 var webAppName = resourcePrefix
 var planName = '${resourcePrefix}-plan'
+var storageAccountName = '${env}dugtriofusekistorage'
+var fileShareName = 'fusekifileshare'
 var clientSecretName = 'AAD_SECRET'
 var resourceTags = {
   Product: 'Dugtrio Fuseki'
@@ -16,6 +18,22 @@ var resourceTags = {
 resource AcrPullIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
   name: 'acr-pull-identity'
   scope: resourceGroup('spine-acr')
+}
+
+resource FusekiStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
+  name: storageAccountName
+  location: location
+  kind: 'StorageV2'
+  sku: {
+    name: 'Standard_LRS'
+  }
+  properties: {
+    accessTier: 'Hot'
+  }
+}
+
+resource FusekiFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-08-01' = {
+  name: '${FusekiStorageAccount.name}/default/${fileShareName}'
 }
 
 resource FusekiPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
@@ -53,11 +71,21 @@ resource Fuseki 'Microsoft.Web/sites@2021-03-01' = {
       http20Enabled: true
       acrUseManagedIdentityCreds: true
       acrUserManagedIdentityID: AcrPullIdentity.properties.clientId
-      appCommandLine: '--conf /fuseki/config/reasoning_config.ttl'
+      appCommandLine: '--conf /fuseki/config/mel_persisted_reasoning_config.ttl'
+      azureStorageAccounts: {
+        '${fileShareName}': {
+          type: 'AzureFiles'
+          accountName: FusekiStorageAccount.name
+          shareName: fileShareName
+          mountPath: '/meltdb2'
+          accessKey: listKeys(FusekiStorageAccount.id, FusekiStorageAccount.apiVersion).keys[0].value
+        }
+      }
     }
   }
   dependsOn: [
     FusekiPlan
+    FusekiFileShare
   ]
 }
 
