@@ -1,5 +1,7 @@
 param env string
-param clientId string = 'NOT_CONFIGURED'
+param clientId string
+@secure()
+param clientSecret string
 param appSvcSku string = 'P1v2'
 param appSvcSkuTier string = 'PremiumV2'
 param tenantId string = '3aa4a235-b6e2-48d5-9195-7fcf05b459b0'
@@ -7,8 +9,6 @@ param location string = resourceGroup().location
 
 var resourcePrefix = '${env}-dugtriofuseki'
 var webAppName = resourcePrefix
-var planName = '${resourcePrefix}-plan'
-var storageAccountName = '${env}dugtriofusekistorage'
 var fileShareName = 'fusekifileshare'
 var clientSecretName = 'AAD_SECRET'
 var resourceTags = {
@@ -21,8 +21,9 @@ resource AcrPullIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-
 }
 
 resource FusekiStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
-  name: storageAccountName
+  name: '${env}dugtriofusekistorage'
   location: location
+  tags: resourceTags
   kind: 'StorageV2'
   sku: {
     name: 'Standard_LRS'
@@ -37,7 +38,7 @@ resource FusekiFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@
 }
 
 resource FusekiPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
-  name: planName
+  name: '${resourcePrefix}-plan'
   location: location
   tags: resourceTags
   kind: 'linux'
@@ -62,7 +63,7 @@ resource Fuseki 'Microsoft.Web/sites@2021-03-01' = {
     }
   }
   properties: {
-    serverFarmId: planName
+    serverFarmId: FusekiPlan.id
     httpsOnly: true
     reserved: true
     siteConfig: {
@@ -81,15 +82,20 @@ resource Fuseki 'Microsoft.Web/sites@2021-03-01' = {
           accessKey: listKeys(FusekiStorageAccount.id, FusekiStorageAccount.apiVersion).keys[0].value
         }
       }
+      appSettings: [
+        {
+          name: clientSecretName
+          value: clientSecret
+        }
+      ]
     }
   }
   dependsOn: [
-    FusekiPlan
     FusekiFileShare
   ]
 }
 
-resource AuthSettings 'Microsoft.Web/sites/config@2021-03-01' = {
+resource FusekiAuthSettings 'Microsoft.Web/sites/config@2021-03-01' = {
   name: 'authsettingsV2'
   kind: 'string'
   parent: Fuseki
