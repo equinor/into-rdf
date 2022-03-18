@@ -1,7 +1,5 @@
 param env string
 param clientId string
-@secure()
-param clientSecret string
 param appSvcSku string = 'P1v2'
 param appSvcSkuTier string = 'PremiumV2'
 param tenantId string = '3aa4a235-b6e2-48d5-9195-7fcf05b459b0'
@@ -82,12 +80,6 @@ resource Fuseki 'Microsoft.Web/sites@2021-03-01' = {
           accessKey: listKeys(FusekiStorageAccount.id, FusekiStorageAccount.apiVersion).keys[0].value
         }
       }
-      appSettings: [
-        {
-          name: clientSecretName
-          value: clientSecret
-        }
-      ]
     }
   }
   dependsOn: [
