@@ -1,3 +1,4 @@
+param fusekiType string
 param env string
 param clientId string
 param appSvcSku string = 'P1v2'
@@ -5,10 +6,9 @@ param appSvcSkuTier string = 'PremiumV2'
 param tenantId string = '3aa4a235-b6e2-48d5-9195-7fcf05b459b0'
 param location string = resourceGroup().location
 
-var resourcePrefix = '${env}-dugtriofuseki'
+var resourcePrefix = '${env}-${fusekiType}'
 var webAppName = resourcePrefix
 var fileShareName = 'fusekifileshare'
-var clientSecretName = 'AAD_SECRET'
 var resourceTags = {
   Product: 'Dugtrio Fuseki'
 }
@@ -19,7 +19,7 @@ resource AcrPullIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-
 }
 
 resource FusekiStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
-  name: '${env}dugtriofusekistorage'
+  name: '${env}${fusekiType}storage'
   location: location
   tags: resourceTags
   kind: 'StorageV2'
@@ -101,7 +101,6 @@ resource FusekiAuthSettings 'Microsoft.Web/sites/config@2021-03-01' = {
         enabled: true
         registration: {
           clientId: clientId
-          clientSecretSettingName: clientSecretName
           openIdIssuer: 'https://sts.windows.net/${tenantId}/v2.0'
         }
       }
