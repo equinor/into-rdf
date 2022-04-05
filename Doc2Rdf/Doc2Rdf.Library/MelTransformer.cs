@@ -21,10 +21,14 @@ namespace Doc2Rdf.Library
         {
             var melReader = new DomMelReader();
             var data = melReader.GetSpreadsheetData(excelStream, details);
+
+            DataSet dataset = new DataSet();
+            dataset.Tables.Add(data);
+
             var provenance = CreateProvenance(details);
 
             var rdfTransformer = new RdfTransformer(); 
-            return rdfTransformer.Transform(provenance, data);
+            return rdfTransformer.Transform(provenance, dataset);
         }
 
         private static Provenance CreateProvenance(SpreadsheetDetails details)

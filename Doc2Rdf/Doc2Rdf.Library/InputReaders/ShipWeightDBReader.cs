@@ -15,7 +15,17 @@ namespace Doc2Rdf.Library.IO
             return $"Server={omniaServer}; Authentication=Active Directory Default; Database={omniaDb};";
         }
 
-        public static DataTable GetWeightData(string assetName)
+        public static DataSet GetData(string assetName)
+        {
+            DataSet dataset = new DataSet();
+            dataset.Tables.Add(GetWeightData(assetName));
+            dataset.Tables.Add(GetPhaseCodeData(assetName));
+            dataset.Tables.Add(GetPhaseFilterData(assetName));
+
+            return dataset;
+        }
+
+        private static DataTable GetWeightData(string assetName)
         {
             string connectionString = GetConnectionString();
 
@@ -23,10 +33,62 @@ namespace Doc2Rdf.Library.IO
             columns.AddRange(GetCodeTypeColumns(assetName, connectionString));
 
             DataTable data = GetEquipment(assetName, connectionString, columns);
-
-            return data;
+            data.TableName = "Weight";
+            
+            return data.Copy();
         }
 
+        //Phase referes to building phase, i.e when something was built
+        private static DataTable GetPhaseCodeData(string assetName)
+        {
+            string connectionString = GetConnectionString();
+            DataSet dataset = new DataSet();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT ProjectID, CodeID, Description, Start, Stop FROM om.Code WHERE ProjectId = '{assetName}' AND CodeType = 'C02'";
+
+                SqlCommand command = new SqlCommand(query, connection);
+                SqlDataAdapter dataAdapter = new SqlDataAdapter();
+
+                dataAdapter.SelectCommand = command;
+                dataAdapter.SelectCommand.CommandTimeout = 120;
+
+                connection.Open();
+                dataAdapter.Fill(dataset);
+            }
+    
+            var data = dataset.Tables[0];
+            data.TableName = "PhaseCode";
+
+            return data.Copy();
+        }
+
+        //Phase filter is an normalized timestamp that can be used to detect (among other things) the as-built state
+        private static DataTable GetPhaseFilterData(string assetName)
+        {
+            string connectionString = GetConnectionString();
+            DataSet dataset = new DataSet();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT ProjectID, FilterID, Time FROM om.ITEM_FILTER WHERE ProjectId = '{assetName}'";
+
+                SqlCommand command = new SqlCommand(query, connection);
+                SqlDataAdapter dataAdapter = new SqlDataAdapter();
+
+                dataAdapter.SelectCommand = command;
+                dataAdapter.SelectCommand.CommandTimeout = 120;
+
+                connection.Open();
+                dataAdapter.Fill(dataset);
+            }
+
+            var data = dataset.Tables[0];
+            data.TableName = "PhaseFilter";
+
+            return data.Copy();
+        }
 
         private static List<Tuple<string, string>> GetCodeTypeColumns(string assetName, string connectionString)
         {
@@ -71,7 +133,7 @@ namespace Doc2Rdf.Library.IO
                 connection.Open();
                 dataAdapter.Fill(dataset);
             }
-
+            
             return dataset.Tables[0];
         }
 

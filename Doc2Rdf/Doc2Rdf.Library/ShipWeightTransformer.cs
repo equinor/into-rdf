@@ -10,8 +10,15 @@ namespace Doc2Rdf.Library
     {
         public string Transform(string facilityName)
         {
-            var inputData = ShipWeightDBReader.GetWeightData(facilityName);
-            var facilityPlantId = inputData.Rows[0]["Plant"].ToString();
+            var inputDataSet = ShipWeightDBReader.GetData(facilityName);
+            var weightTable = inputDataSet.Tables["Weight"] ?? null;
+
+            if (weightTable == null)
+            {
+                throw new NullReferenceException($"Empty weight table for {facilityName}");
+            }
+
+            var facilityPlantId = weightTable.Rows[0]["Plant"].ToString();
 
             if (string.IsNullOrWhiteSpace(facilityPlantId))
             {
@@ -21,7 +28,7 @@ namespace Doc2Rdf.Library
             var provenance = CreateProvenance(facilityName, facilityPlantId);
             
             var rdfTransformer = new RdfTransformer();
-            return rdfTransformer.Transform(provenance, inputData);
+            return rdfTransformer.Transform(provenance, inputDataSet);
         }
 
         private Provenance CreateProvenance(string facilityName, string plantId)

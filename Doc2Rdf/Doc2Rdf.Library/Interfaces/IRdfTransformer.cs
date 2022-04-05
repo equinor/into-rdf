@@ -5,6 +5,6 @@ namespace Doc2Rdf.Library.Interfaces
 {
     public interface IRdfTransformer
     {
-        public string Transform(Provenance provenance, DataTable inputData);
+        public string Transform(Provenance provenance, DataSet inputData);
     }
 }

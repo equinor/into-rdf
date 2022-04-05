@@ -6,6 +6,6 @@ namespace Doc2Rdf.Library.Interfaces
 {
     internal interface IRdfPreprocessor
     {
-        DataSet CreateRdfTables(Provenance provenance, DataTable inputData);
+        DataSet CreateRdfTables(Provenance provenance, DataSet inputData);
     }
 }

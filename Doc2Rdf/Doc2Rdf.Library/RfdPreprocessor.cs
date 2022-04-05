@@ -13,7 +13,7 @@ namespace Doc2Rdf.Library
         {
             _builderFactory = new RdfTableBuilderFactory(dataSource);
         }
-        public DataSet CreateRdfTables(Provenance provenance, DataTable inputData)
+        public DataSet CreateRdfTables(Provenance provenance, DataSet inputData)
         {
             var dataCollectionUri = CreateDataCollectionUri(provenance);
             var transformationUri = CreateTransformationUri(provenance);
@@ -21,7 +21,22 @@ namespace Doc2Rdf.Library
             var rdfDataSet = new DataSet();
             rdfDataSet.Tables.Add(CreateProvenanceTable(dataCollectionUri, provenance));
             rdfDataSet.Tables.Add(CreateTransformationTable(dataCollectionUri, transformationUri));
-            rdfDataSet.Tables.Add(CreateInputTable(dataCollectionUri, transformationUri, inputData));
+
+            for (int i = 0; i < inputData.Tables.Count; i++)
+            {
+                if (inputData.Tables[i].TableName.Contains("PhaseFilter"))
+                {
+                    rdfDataSet.Tables.Add(CreatePhaseFilterTable(dataCollectionUri, transformationUri, inputData.Tables[i]));
+                    continue;
+                } 
+                else if (inputData.Tables[i].TableName.Contains("PhaseCode"))
+                {
+                    rdfDataSet.Tables.Add(CreatePhaseCodeTable(dataCollectionUri, transformationUri, inputData.Tables[i]));
+                    continue;
+                }
+
+                rdfDataSet.Tables.Add(CreateInputTable(dataCollectionUri, transformationUri, inputData.Tables[i]));
+            }
 
             return rdfDataSet; 
         }
@@ -42,12 +57,28 @@ namespace Doc2Rdf.Library
             return tableBuilder.GetDataTable();
         }
 
+        private DataTable CreatePhaseFilterTable(Uri dataCollectionUri, Uri transformationUri, DataTable phaseFilterTable)
+        {
+            RdfShipWeightTableBuilder tableBuilder = (RdfShipWeightTableBuilder) _builderFactory.GetRdfTableBuilder(phaseFilterTable.TableName);
+            tableBuilder.CreatePhaseFilterSchema(phaseFilterTable.Columns);
+            tableBuilder.AddPhaseFilterRows(dataCollectionUri, transformationUri, phaseFilterTable);
+            return tableBuilder.GetDataTable();
+        }
+
+        private DataTable CreatePhaseCodeTable(Uri dataCollectionUri, Uri transformationUri, DataTable phaseCodeTable)
+        {
+            RdfShipWeightTableBuilder tableBuilder = (RdfShipWeightTableBuilder) _builderFactory.GetRdfTableBuilder(phaseCodeTable.TableName);
+            tableBuilder.CreatePhaseCodeSchema(phaseCodeTable.Columns);
+            tableBuilder.AddPhaseCodeRows(dataCollectionUri, transformationUri, phaseCodeTable);
+            return tableBuilder.GetDataTable();
+        }
+
         private DataTable CreateInputTable(Uri dataCollectionUri, Uri transformationUri, DataTable inputData)
         {
-            IRdfTableBuilder tableCreator = _builderFactory.GetRdfTableBuilder("InputData");
-            tableCreator.CreateInputDataSchema(inputData.Columns);
-            tableCreator.AddInputDataRows(dataCollectionUri, transformationUri, inputData);
-            return tableCreator.GetDataTable();
+            IRdfTableBuilder tableBuilder = _builderFactory.GetRdfTableBuilder(inputData.TableName);
+            tableBuilder.CreateInputDataSchema(inputData.Columns);
+            tableBuilder.AddInputDataRows(dataCollectionUri, transformationUri, inputData);
+            return tableBuilder.GetDataTable();
         }
 
         private Uri CreateDataCollectionUri(Provenance provenance)

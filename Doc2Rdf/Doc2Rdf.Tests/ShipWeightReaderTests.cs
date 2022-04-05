@@ -15,8 +15,11 @@ namespace Doc2Rdf.Tests
             Provenance provenance = GetProvenance();
             DataTable inputData = GetTestData();
 
+            DataSet dataSet = new DataSet();
+            dataSet.Tables.Add(inputData);
+
             var rdfPreprocessor= new RdfPreprocessor(provenance.DataSource);
-            var transformedData = rdfPreprocessor.CreateRdfTables(provenance, inputData);
+            var transformedData = rdfPreprocessor.CreateRdfTables(provenance, dataSet);
 
             Assert.True(transformedData.Tables.Count == 3, $"Wrong number of rdf-preprocessedtables: {transformedData.Tables.Count}");
 
@@ -24,11 +27,11 @@ namespace Doc2Rdf.Tests
 
             Assert.True(transformedData.Tables["Transformation"] != Enumerable.Empty<DataTable>(), "Failed to create transformation table");
 
-            Assert.True(transformedData.Tables["InputData"].Columns.Contains("id"), "InputData table does not contain the id column");
+            Assert.True(transformedData.Tables["TestData"].Columns.Contains("id"), "InputData table does not contain the id column");
 
-            Assert.True(transformedData.Tables["InputData"].Columns.Count == inputData.Columns.Count + 3, $"Wrong number of columns in InputData table {transformedData.Tables["InputData"].Columns.Count}");
+            Assert.True(transformedData.Tables["TestData"].Columns.Count == inputData.Columns.Count + 3, $"Wrong number of columns in InputData table {transformedData.Tables["TestData"].Columns.Count}");
 
-            Assert.True(transformedData.Tables["InputData"].Rows.Count == inputData.Rows.Count, $"Wrong number of rows in InputData table: {transformedData.Tables["InputData"].Rows.Count}");
+            Assert.True(transformedData.Tables["TestData"].Rows.Count == inputData.Rows.Count, $"Wrong number of rows in InputData table: {transformedData.Tables["TestData"].Rows.Count}");
         }
 
         private Provenance GetProvenance()
@@ -42,6 +45,7 @@ namespace Doc2Rdf.Tests
         private DataTable GetTestData()
         {
             var testTable = new DataTable();
+            testTable.TableName = "TestData";
 
             testTable.Columns.Add(new DataColumn("UniqueNo", typeof(string)));
             testTable.Columns.Add(new DataColumn("timestamp", typeof(string)));
