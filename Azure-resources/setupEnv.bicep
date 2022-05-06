@@ -93,6 +93,11 @@ resource KeyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
           secrets: [
             'get'
             'list'
+            'set'
+            'delete'
+            'recover'
+            'backup'
+            'restore'
           ]
         }
       }
@@ -103,6 +108,11 @@ resource KeyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
           secrets: [
             'get'
             'list'
+            'set'
+            'delete'
+            'recover'
+            'backup'
+            'restore'
           ]
         }
       }
