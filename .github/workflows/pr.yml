@@ -11,6 +11,6 @@ concurrency:
 jobs:
   build_test:
     name: "💎 Code Quality"
-    uses: equinor/spinereviewapi/.github/workflows/codequality.yml@main
+    uses: equinor/spine-splinter/.github/workflows/codequality.yml@main
     secrets:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
