@@ -17,6 +17,14 @@ namespace Doc2Rdf.Library
             return Transform(excelStream, details);
         }
 
+        public static string Transform(Stream excelStream, string fileName)
+        {
+            var melReader = new DomMelReader();
+            var details = melReader.GetSpreadsheetDetails(excelStream, fileName);
+
+            return Transform(excelStream, details);
+        }
+
         public static string Transform(Stream excelStream, SpreadsheetDetails details)
         {
             var melReader = new DomMelReader();

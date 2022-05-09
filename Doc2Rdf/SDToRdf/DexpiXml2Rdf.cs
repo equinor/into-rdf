@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using Doc2Rdf.Common;
-using Doc2Rdf.Common.Interfaces;
 using System.Xml;
 using System.Linq;
 using System.Collections;
@@ -11,6 +9,7 @@ using System.Text.Json.Serialization;
 using VDS.RDF;
 using System.Text;
 using VDS.RDF.Writing;
+using Doc2Rdf.Common.Interfaces;
 
 namespace SD2Rdf.Lib
 {

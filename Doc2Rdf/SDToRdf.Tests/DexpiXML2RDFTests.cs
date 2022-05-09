@@ -18,7 +18,6 @@ namespace SD2Rdf.Tests
             var turtles = new List<(string, string)>();
 
 
-<<<<<<< HEAD
             files.ForEach(f => turtles.Add((f, dexpiMapper.Map(f, File.Open(f, FileMode.Open)))));
 
             foreach((string, string) turtle in turtles )
@@ -28,8 +27,5 @@ namespace SD2Rdf.Tests
 
             Assert.True(turtles.Any()); 
         }
-=======
-            Assert.True(turtles.Any()); //Silly autopilot autocomplete
-        }*/
     }
 }

@@ -15,6 +15,11 @@ namespace Doc2Rdf.Library.IO
     {
         public SpreadsheetDetails GetSpreadsheetDetails(FileStream excelFile)
         {
+            return GetSpreadsheetDetails(excelFile, excelFile.Name);
+        }
+
+        public SpreadsheetDetails GetSpreadsheetDetails(Stream excelFile, string fileName)
+        {
             var doc = SpreadsheetDocument.Open(excelFile, false);
 
             var workbookPart = doc.WorkbookPart;
@@ -44,7 +49,7 @@ namespace Doc2Rdf.Library.IO
                 Revision = int.Parse(rows["Revision"].TrimStart('0')),
                 RevisionDate = DateTime.Parse(rows["RevisionDate"]),
                 SheetName = rows["SheetName"],
-                FileName = Path.GetFileName(excelFile.Name)
+                FileName = Path.GetFileName(fileName)
             };
         }
 
