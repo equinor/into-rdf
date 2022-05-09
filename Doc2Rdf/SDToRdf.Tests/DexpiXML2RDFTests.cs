@@ -31,6 +31,5 @@ namespace SD2Rdf.Tests
 =======
             Assert.True(turtles.Any()); //Silly autopilot autocomplete
         }*/
->>>>>>> Updates to Azure pipelines
     }
 }
