@@ -1,5 +1,6 @@
 using Api;
 using Api.Utils.Cors;
+using Api.Utils.Mvc;
 using Api.Utils.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Azure;
@@ -16,6 +17,7 @@ builder.Services.AddApplicationInsightsTelemetry();
 builder.SetupCustomSwagger();
 
 builder.Services.AddControllers();
+builder.Services.AddMvc(options => options.Filters.Add<SplinterExceptionActionFilter>());
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSplinterServices();

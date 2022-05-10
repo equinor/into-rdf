@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Services.Doc2RdfService;
+﻿using Services.Doc2RdfService;
 
 namespace Api
 {

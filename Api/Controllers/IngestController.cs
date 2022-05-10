@@ -9,7 +9,7 @@ namespace Api.Controllers
     [Route("[controller]")]
     public class IngestController : ControllerBase
     {
-        readonly IDoc2RdfService _doc2RdfService;
+        private readonly IDoc2RdfService _doc2RdfService;
 
         public IngestController(IDoc2RdfService doc2RdfService)
         {
@@ -19,9 +19,9 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [RequestSizeLimit(Int32.MaxValue)]
+        [RequestSizeLimit(int.MaxValue)]
         [HttpPost("convert", Name = "Convert to ttl")]
-        public async Task<IActionResult> Post(IFormFile postedFile)
+        public async Task<IActionResult> Post(IFormFile? postedFile)
         {
             if (postedFile is null) return BadRequest("No file");
             using var stream = new MemoryStream();

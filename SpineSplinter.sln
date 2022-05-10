@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SDToRdf.Lib", "Doc2Rdf\SDTo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SD2Rdf.Tests", "Doc2Rdf\SDToRdf.Tests\SD2Rdf.Tests.csproj", "{BBB394B6-1EFA-4DC9-95E3-4DF63481E4CE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{5504589D-4475-4C94-AD28-6BD1D253958A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{BBB394B6-1EFA-4DC9-95E3-4DF63481E4CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBB394B6-1EFA-4DC9-95E3-4DF63481E4CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBB394B6-1EFA-4DC9-95E3-4DF63481E4CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5504589D-4475-4C94-AD28-6BD1D253958A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5504589D-4475-4C94-AD28-6BD1D253958A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5504589D-4475-4C94-AD28-6BD1D253958A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5504589D-4475-4C94-AD28-6BD1D253958A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
