@@ -1,13 +1,9 @@
 using Api;
 using Api.Utils.Cors;
-using Api.Utils.KeyVault;
 using Api.Utils.Mvc;
+using Api.Utils.Setups;
 using Api.Utils.Swagger;
-using Azure.Extensions.AspNetCore.Configuration.Secrets;
-using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Azure;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,7 +23,7 @@ builder.Services.AddMvc(options => options.Filters.Add<SplinterExceptionActionFi
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSplinterServices(builder.Configuration);
-
+builder.Services.SetupAuthorization();
 builder.SetupKeyVault();
 
 var app = builder.Build();

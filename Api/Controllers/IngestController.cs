@@ -2,18 +2,19 @@
 using Microsoft.AspNetCore.Mvc;
 using Services.RdfService;
 using System.Text;
+using Api.Authorization;
 
 namespace Api.Controllers
 {
     /// <summary>
     /// Controller for handling rdf uploads
     /// </summary>
-    [Authorize]
+    [Authorize(Roles = Roles.Admin)]
     [ApiController]
     [Route("[controller]/{server}")]
     public class IngestController : ControllerBase
     {
-        readonly IRdfService _rdfService;
+        private readonly IRdfService _rdfService;
 
         public IngestController(IRdfService doc2RdfService)
         {
@@ -28,7 +29,7 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [RequestSizeLimit(Int32.MaxValue)]
+        [RequestSizeLimit(int.MaxValue)]
         [HttpPost("upload/excel")]
         public async Task<IActionResult> UploadExcel(string server, IFormFile? postedFile)
         {
@@ -46,13 +47,13 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [RequestSizeLimit(Int32.MaxValue)]
+        [RequestSizeLimit(int.MaxValue)]
         [HttpPost("upload/rdf")]
         public async Task<IActionResult> UploadRdf(string server, IFormFile? formFile)
         {
             if (formFile is null) return BadRequest("No file");
             using var streamReader = new StreamReader(formFile.OpenReadStream(), Encoding.UTF8);
-            var content = streamReader.ReadToEnd();
+            var content = await streamReader.ReadToEndAsync();
             var result = await _rdfService.PostToFuseki(server, content ?? string.Empty);
             return result.IsSuccessStatusCode ? Ok(content) : BadRequest(result);
         }

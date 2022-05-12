@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Api.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.RdfService;
 
 namespace Api.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = Roles.Admin)]
     [ApiController]
     [Route("[controller]")]
     public class QueryController : ControllerBase
@@ -24,7 +25,7 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [RequestSizeLimit(Int32.MaxValue)]
+        [RequestSizeLimit(int.MaxValue)]
         [HttpPost("{server}/sparql")]
         public async Task<IActionResult> Query(string server, [FromBody] SparqlQuery sparql)
         {
