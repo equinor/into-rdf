@@ -398,3 +398,11 @@ FodyWeavers.xsd
 *.sln.iml
 *.idea
 Api/appsettings.Development.json
+
+#Excel data (used in the Excel2Rdf.Cli)
+data/
+*.xlsx
+
+#Rdf data (used in Excel2Rdf.Cli and ShipWeight2Rdf.Cli)
+output/
+*.ttl
