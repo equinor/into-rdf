@@ -1,4 +1,5 @@
 ﻿using Doc2Rdf.Library;
+using Doc2Rdf.Library.Interfaces;
 using System;
 using System.IO;
 using System.Text;
@@ -10,13 +11,20 @@ namespace Doc2Rdf.Tests
 {
     public class DomMelReaderTests
     {
+        private readonly IMelTransformer _melTransformer;
+
+        public DomMelReaderTests(IMelTransformer melTransformer)
+        {
+            _melTransformer = melTransformer;
+        }
+
         [Fact]
         public void TestDomParsing()
         {
             var testFile = "TestData/test.xlsx";
 
             var stream = File.Open(testFile, FileMode.Open, FileAccess.Read);
-            var data = MelTransformer.Transform(stream);
+            var data = _melTransformer.Transform(stream, testFile);
 
             Assert.NotNull(data);
 
@@ -27,56 +35,56 @@ namespace Doc2Rdf.Tests
             //Provenance
             RdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("http://rdf.equinor.com/ext/mel/c232_01"),
-                new Uri("http://rdf.equinor.com/ontology/facility#hasDocumentProjectId"),
-                new Uri("http://rdf.equinor.com/ontology/facility#c232")
+                new Uri("https://rdf.equinor.com/kra/c232/mel/01"),
+                new Uri("https://rdf.equinor.com/ontology/facility#hasDocumentProjectId"),
+                new Uri("https://rdf.equinor.com/ontology/facility#c232")
             );
             RdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("http://rdf.equinor.com/ext/mel/c232_01"),
-                new Uri("http://rdf.equinor.com/ontology/sor#fromDataCollection"),
+                new Uri("https://rdf.equinor.com/kra/c232/mel/01"),
+                new Uri("https://rdf.equinor.com/ontology/sor#fromDataCollection"),
                 "test.xlsx"
             );
             RdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("http://rdf.equinor.com/ext/mel/c232_01#row=2"),
-                new Uri("http://www.w3.org/ns/prov#wasDerivedFrom"),
-                new Uri("http://rdf.equinor.com/ext/mel/c232_01")
+                new Uri("https://rdf.equinor.com/kra/c232/mel/01"),
+                new Uri("http://www.w3.org/ns/prov#hadMember"),
+                new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=2")          
             );
 
             //Actual Data
             RdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("http://rdf.equinor.com/ext/mel/c232_01#row=2"),
-                new Uri("http://rdf.equinor.com/raw/melexcel#Header3"),
+                new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=2"),
+                new Uri("https://rdf.equinor.com/source/mel/xlsx#Header3"),
                 "1729"
             );
 
             RdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("http://rdf.equinor.com/ext/mel/c232_01#row=2"),
-                new Uri("http://rdf.equinor.com/raw/melexcel#Header4"),
+                new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=2"),
+                new Uri("https://rdf.equinor.com/source/mel/xlsx#Header4"),
                 "3300.375"
             );
 
             RdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("http://rdf.equinor.com/ext/mel/c232_01#row=499"),
-                new Uri("http://rdf.equinor.com/raw/melexcel#Header55"),
+                new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=499"),
+                new Uri("https://rdf.equinor.com/source/mel/xlsx#Header55"),
                 "BC500"
             );
 
             RdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("http://rdf.equinor.com/ext/mel/c232_01#row=498"),
-                new Uri("http://rdf.equinor.com/raw/melexcel#Header55"),
+                new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=498"),
+                new Uri("https://rdf.equinor.com/source/mel/xlsx#Header55"),
                 "BC499"
             );
 
             RdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("http://rdf.equinor.com/ext/mel/c232_01#row=497"),
-                new Uri("http://rdf.equinor.com/raw/melexcel#Header53"),
+                new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=497"),
+                new Uri("https://rdf.equinor.com/source/mel/xlsx#Header53"),
                 "BA498"
             );
         }

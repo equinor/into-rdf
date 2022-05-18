@@ -4,9 +4,9 @@ using System.IO;
 
 namespace Doc2Rdf.Library.Interfaces
 {
-    internal interface IMelReader
+    public interface IMelReader
     {
-        SpreadsheetDetails GetSpreadsheetDetails(FileStream excelFile);
+        SpreadsheetDetails GetSpreadsheetDetails(Stream excelFile, string fileName);
         DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails details);
     }
 }

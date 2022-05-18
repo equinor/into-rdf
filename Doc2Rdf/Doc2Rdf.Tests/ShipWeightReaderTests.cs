@@ -1,7 +1,7 @@
 using System;
 using System.Data;
 using System.Linq;
-using Doc2Rdf.Library;
+using Doc2Rdf.Library.Interfaces;
 using Doc2Rdf.Library.Models;
 using Xunit;
 
@@ -9,6 +9,13 @@ namespace Doc2Rdf.Tests
 {
     public class ShipWeightReaderTests
     {
+        private readonly IRdfPreprocessor _rdfPreprocessor;
+
+        public ShipWeightReaderTests(IRdfPreprocessor rdfPreprocessor)
+        {
+            _rdfPreprocessor = rdfPreprocessor;
+        }
+
         [Fact]
         public void TestConvertingInputToRdfDataTable()
         {
@@ -18,12 +25,11 @@ namespace Doc2Rdf.Tests
             DataSet dataSet = new DataSet();
             dataSet.Tables.Add(inputData);
 
-            var rdfPreprocessor= new RdfPreprocessor(provenance.DataSource);
-            var transformedData = rdfPreprocessor.CreateRdfTables(provenance, dataSet);
+            var transformedData = _rdfPreprocessor.CreateRdfTables(provenance, dataSet);
 
             Assert.True(transformedData.Tables.Count == 3, $"Wrong number of rdf-preprocessedtables: {transformedData.Tables.Count}");
 
-            Assert.Equal(transformedData.Tables["Provenance"].Rows[0]["http://rdf.equinor.com/ontology/facility#hasPlantId"], "http://rdf.equinor.com/ontology/facility#1234");
+            Assert.Equal(transformedData.Tables["Provenance"].Rows[0]["https://rdf.equinor.com/ontology/facility#hasPlantId"], "https://rdf.equinor.com/ontology/facility#1234");
 
             Assert.True(transformedData.Tables["Transformation"] != Enumerable.Empty<DataTable>(), "Failed to create transformation table");
 
@@ -36,7 +42,7 @@ namespace Doc2Rdf.Tests
 
         private Provenance GetProvenance()
         {
-            var facility = new FacilityIdentifiers(sAPPlantId: "1234");
+            var facility = new FacilityIdentifiers(facilityId: "Test", sAPPlantId: "1234");
             var provenance = new Provenance(facility, "MyFacility", "01", "NA", DateTime.Now, DataSource.Shipweight, DataSourceType.Database, DataFormat.NA);
 
             return provenance;

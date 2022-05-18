@@ -11,13 +11,8 @@ using System.Text.RegularExpressions;
 
 namespace Doc2Rdf.Library.IO
 {
-    internal class DomMelReader : IMelReader
+    public class DomMelReader : IMelReader
     {
-        public SpreadsheetDetails GetSpreadsheetDetails(FileStream excelFile)
-        {
-            return GetSpreadsheetDetails(excelFile, excelFile.Name);
-        }
-
         public SpreadsheetDetails GetSpreadsheetDetails(Stream excelFile, string fileName)
         {
             var doc = SpreadsheetDocument.Open(excelFile, false);
@@ -69,7 +64,7 @@ namespace Doc2Rdf.Library.IO
                 .First(r => int.Parse(r.RowIndex) == details.HeaderRow)
                 .Skip(columnSkip)
                 .Take(columnTake)
-                .Select(xmlElement => GetCellValue((Cell) xmlElement, workbookPart))
+                .Select(xmlElement => GetCellValue((Cell)xmlElement, workbookPart))
                 .ToList();
 
             var rowSkip = details.DataStartRow - 1;
@@ -107,7 +102,7 @@ namespace Doc2Rdf.Library.IO
             // maintaining a negative offset to pass to ElementAt which is zero-indexed. If we hit
             // empty cell they will not be stored in decendants and the difference between actual
             // excel columns and what we are iterating through using ElementAt will increase.
-            var offset = - 1;
+            var offset = -1;
 
             for (int i = startColumn; i <= endColumn && i + offset < decendants.Count(); i++)
             {
@@ -119,7 +114,7 @@ namespace Doc2Rdf.Library.IO
                 // row.Decendants<Cell> will not give us empty cells so if we notice skip in
                 // cell reference yield empty cells until we catch up. See
                 // https://stackoverflow.com/questions/36100011/c-sharp-open-xml-empty-cells-are-getting-skipped-while-getting-data-from-excel
-                for (; i<columnNumber; i++)
+                for (; i < columnNumber; i++)
                 {
                     offset--;
                     yield return string.Empty;
@@ -141,7 +136,7 @@ namespace Doc2Rdf.Library.IO
             var sheet = sheets
                 .First(s => s.Name == sheetName);
 
-            var worksheetPart = (WorksheetPart) doc.WorkbookPart.GetPartById(sheet.Id);
+            var worksheetPart = (WorksheetPart)doc.WorkbookPart.GetPartById(sheet.Id);
 
             return worksheetPart;
         }
@@ -180,7 +175,8 @@ namespace Doc2Rdf.Library.IO
                         value = cell.CellValue.InnerText;
                         break;
                 }
-            } else if (cell.CellValue != null)
+            }
+            else if (cell.CellValue != null)
             {
                 // For formulas
                 value = cell.CellValue.InnerText;
@@ -219,7 +215,7 @@ namespace Doc2Rdf.Library.IO
 
                 for (int j = 1; j <= data[i].Count; j++)
                 {
-                    row[j] = data[i][j-1]; 
+                    row[j] = data[i][j - 1];
                 }
                 inputDataTable.Rows.Add(row);
             }

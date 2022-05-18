@@ -4,7 +4,7 @@ using Doc2Rdf.Library.Models;
 
 namespace Doc2Rdf.Library.Interfaces
 {
-    internal interface IRdfPreprocessor
+    public interface IRdfPreprocessor
     {
         DataSet CreateRdfTables(Provenance provenance, DataSet inputData);
     }
