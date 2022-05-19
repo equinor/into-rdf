@@ -1,7 +1,7 @@
 using Doc2Rdf.Library.Interfaces;
 using Doc2Rdf.Library.Models;
 using System;
-using Doc2Rdf.Library.IO;
+using System.Data;
 
 namespace Doc2Rdf.Library.Services;
 
@@ -12,10 +12,9 @@ public class ShipWeightTransformer : IShipWeightTransformer
     {
         _rdfTransformer = rdfTransformer;
     }
-    public string Transform(string facilityName)
+    public string Transform(string facilityName, DataSet inputData)
     {
-        var inputDataSet = ShipWeightDBReader.GetData(facilityName);
-        var weightTable = inputDataSet.Tables["Weight"] ?? null;
+        var weightTable = inputData.Tables["Weight"] ?? null;
 
         if (weightTable == null)
         {
@@ -31,7 +30,7 @@ public class ShipWeightTransformer : IShipWeightTransformer
 
         var provenance = CreateProvenance(facilityName, facilityPlantId);
 
-        return _rdfTransformer.Transform(provenance, inputDataSet);
+        return _rdfTransformer.Transform(provenance, inputData);
     }
 
     private Provenance CreateProvenance(string facilityName, string plantId)

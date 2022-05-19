@@ -119,15 +119,16 @@ public class RdfShipWeightTableBuilder : IRdfTableBuilder
         _dataTable.Columns.Add(RdfCommonColumns.CreateHadMember());
         _dataTable.Columns.Add(RdfCommonColumns.CreateWasGeneratedBy());
 
+        var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSource}/{provenance.DataFormat}#";
+
         foreach (DataColumn column in columns)
         {
             if (column.ColumnName.Contains("FilterID"))
             {
-                _dataTable.Columns.Add($"{Prefix2Uri["shipweightraw"]}Description", typeof(string));
-                _dataTable.Columns.Add($"{Prefix2Uri["shipweightraw"]}hasBuildPhase", typeof(Uri));
+                _dataTable.Columns.Add($"{dataUri}Description", typeof(string));
+                _dataTable.Columns.Add($"{dataUri}hasBuildPhase", typeof(Uri));
                 continue;
             }
-            var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSource}/{provenance.DataFormat}#";
             _dataTable.Columns.Add(dataUri + column.ColumnName, typeof(string));
         }
     }
