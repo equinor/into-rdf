@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
     .EnableTokenAcquisitionToCallDownstreamApi()
+    .AddFusekiApis(builder.Configuration)
     .AddInMemoryTokenCaches();
 
 builder.Services.AddApplicationInsightsTelemetry();
@@ -22,7 +23,7 @@ builder.Services.AddControllers();
 builder.Services.AddMvc(options => options.Filters.Add<SplinterExceptionActionFilter>());
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSplinterServices(builder.Configuration);
+builder.Services.AddSplinterServices();
 builder.Services.SetupAuthorization();
 builder.SetupKeyVault();
 
