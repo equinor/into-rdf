@@ -38,7 +38,7 @@ namespace Doc2Rdf.Library.IO
                 DataStartRow = int.Parse(rows["DataStartRow"]),
                 DataEndRow = int.Parse(rows["DataEndRow"]),
                 Contractor = rows["Contractor"],
-                DataSource = Enum.Parse<DataSource>(rows.TryGetValue("DataType", out string dataType) ? dataType : "NA"),
+                DataSource = rows.TryGetValue("DataType", out string dataType) ? dataType : DataSourceType.Unknown(),
                 IsTransposed = bool.Parse(rows.TryGetValue("IsTransposed", out string isTransposed) ? isTransposed : "false"),
                 ProjectCode = rows["ProjectCode"],
                 Revision = int.Parse(rows["Revision"].TrimStart('0')),

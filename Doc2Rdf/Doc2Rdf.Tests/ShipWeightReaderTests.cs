@@ -22,20 +22,17 @@ namespace Doc2Rdf.Tests
             Provenance provenance = GetProvenance();
             DataTable inputData = GetTestData();
 
-            DataSet dataSet = new DataSet();
-            dataSet.Tables.Add(inputData);
+            var transformedData = _rdfPreprocessor.CreateRdfTables(provenance, inputData);
 
-            var transformedData = _rdfPreprocessor.CreateRdfTables(provenance, dataSet);
+            Assert.True(transformedData.Tables.Count == 4, $"Wrong number of rdf-preprocessedtables: {transformedData.Tables.Count}");
 
-            Assert.True(transformedData.Tables.Count == 3, $"Wrong number of rdf-preprocessedtables: {transformedData.Tables.Count}");
-
-            Assert.Equal(transformedData.Tables["Provenance"].Rows[0]["https://rdf.equinor.com/ontology/facility#hasPlantId"], "https://rdf.equinor.com/ontology/facility#1234");
+            Assert.Equal(new Uri("https://rdf.equinor.com/ontology/facility#1234"), transformedData.Tables["Provenance"].Rows[0]["https://rdf.equinor.com/ontology/facility#hasPlantId"]);
 
             Assert.True(transformedData.Tables["Transformation"] != Enumerable.Empty<DataTable>(), "Failed to create transformation table");
 
             Assert.True(transformedData.Tables["TestData"].Columns.Contains("id"), "InputData table does not contain the id column");
 
-            Assert.True(transformedData.Tables["TestData"].Columns.Count == inputData.Columns.Count + 3, $"Wrong number of columns in InputData table {transformedData.Tables["TestData"].Columns.Count}");
+            Assert.True(transformedData.Tables["TestData"].Columns.Count == inputData.Columns.Count + 2, $"Wrong number of columns in InputData table {transformedData.Tables["TestData"].Columns.Count}");
 
             Assert.True(transformedData.Tables["TestData"].Rows.Count == inputData.Rows.Count, $"Wrong number of rows in InputData table: {transformedData.Tables["TestData"].Rows.Count}");
         }
@@ -43,7 +40,7 @@ namespace Doc2Rdf.Tests
         private Provenance GetProvenance()
         {
             var facility = new FacilityIdentifiers(facilityId: "Test", sAPPlantId: "1234");
-            var provenance = new Provenance(facility, "MyFacility", "01", "NA", DateTime.Now, DataSource.Shipweight, DataSourceType.Database, DataFormat.NA);
+            var provenance = new Provenance(facility, "MyFacility", "01", "NA", DateTime.Now, DataSource.Shipweight(), DataSourceType.Database(), DataFormat.Unknown());
 
             return provenance;
         }

@@ -10,10 +10,11 @@ namespace Doc2Rdf.Library.Models
                           string revisionNumber,
                           string revisionOf,
                           DateTime revisionDate,
-                          DataSource dataSource,
-                          DataSourceType dataSourceType,
-                          DataFormat dataFormat,
-                          string contractor = "NA")
+                          string dataSource,
+                          string dataSourceType,
+                          string dataFormat,
+                          string contractor = "NA",
+                          string tableName = "NA")
         {
             Facility = facility;
             DataCollectionName = dataCollectionName;
@@ -24,6 +25,7 @@ namespace Doc2Rdf.Library.Models
             DataSourceType = dataSourceType;
             DataFormat = dataFormat;
             Contractor = contractor;
+            TableName = tableName.ToLower();
         }
 
         public FacilityIdentifiers Facility { get; }
@@ -36,11 +38,12 @@ namespace Doc2Rdf.Library.Models
 
         public DateTime RevisionDate { get; }
 
-        public DataSource DataSource { get; set; }
+        public string DataSource { get; set; }
 
-        public DataSourceType DataSourceType { get; set; }
+        public string DataSourceType { get; set; }
 
-        public DataFormat DataFormat { get; set; }
+        public string DataFormat { get; set; }
         public string? Contractor { get; set; }
+        public string? TableName { get; set; }
     }
 }

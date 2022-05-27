@@ -89,6 +89,8 @@ public class RdfMelTableBuilder : IRdfTableBuilder
 
         _dataTable.Columns.Add(RdfCommonColumns.CreateWasGeneratedBy());
 
+        var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSource}#";
+
         foreach (DataColumn column in columns)
         {
             //For excel input, row numbers are temporarily stored in an id column. The row number is 
@@ -97,8 +99,6 @@ public class RdfMelTableBuilder : IRdfTableBuilder
             {
                 continue;
             }
-
-            var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSource.ToString().ToLower()}/{provenance.DataFormat.ToString().ToLower()}#";
 
             _dataTable.Columns.Add(dataUri + column.ColumnName, typeof(string));
         }

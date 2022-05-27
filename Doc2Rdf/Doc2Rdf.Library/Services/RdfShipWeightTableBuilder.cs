@@ -72,34 +72,67 @@ public class RdfShipWeightTableBuilder : IRdfTableBuilder
         );
     }
 
+        public void CreateDataCollectionSchema()
+    {
+        var idColumn = RdfCommonColumns.CreateIdColumn();
+        _dataTable.Columns.Add(idColumn);
+
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHadMember());
+
+    }
+
+    public void AddDataCollectionRows(Uri dataCollectionUri, DataTable inputData)
+    {
+        var isItem = inputData.Columns.Contains("UniqueNo");
+        var index = 0;
+
+        foreach (DataRow row in inputData.Rows)
+        {
+            index++;
+            var itemUri = isItem ?
+                             new Uri($"{dataCollectionUri.AbsoluteUri}#{row["UniqueNo"]}") :
+                             new Uri($"{dataCollectionUri.AbsoluteUri}#row{index}");
+
+            var dataRow = _dataTable.NewRow();
+            dataRow[0] = dataCollectionUri;
+            dataRow[1] = itemUri;
+
+            _dataTable.Rows.Add(dataRow);
+        }
+    }
+
     public void CreateInputDataSchema(Provenance provenance, DataColumnCollection columns)
     {
         var idColumn = RdfCommonColumns.CreateIdColumn();
         _dataTable.Columns.Add(idColumn);
         _dataTable.PrimaryKey = new DataColumn[] { idColumn };
 
-        _dataTable.Columns.Add(RdfCommonColumns.CreateHadMember());
         _dataTable.Columns.Add(RdfCommonColumns.CreateWasGeneratedBy());
 
+        var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSource}/{provenance.TableName}#";
+        
         foreach (DataColumn column in columns)
         {
-            var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSource}/{provenance.DataFormat}#";
             _dataTable.Columns.Add(dataUri + column.ColumnName, typeof(string));
         }
     }
 
     public void AddInputDataRows(Uri dataCollectionUri, Uri transformationUri, DataTable inputData)
     {
-        const int NumberOfFixedColumns = 3;
+        const int NumberOfFixedColumns = 2;
+        var isItem = inputData.Columns.Contains("UniqueNo");
+        var index = 0;
 
         foreach (DataRow row in inputData.Rows)
         {
-            var itemUri = new Uri($"{dataCollectionUri.AbsoluteUri}#{row["UniqueNo"]}");
+            index++;
+            var itemUri = isItem ?
+                             new Uri($"{dataCollectionUri.AbsoluteUri}#{row["UniqueNo"]}") :
+                             new Uri($"{dataCollectionUri.AbsoluteUri}#row{index}");
 
             var dataRow = _dataTable.NewRow();
             dataRow[0] = itemUri;
-            dataRow[1] = dataCollectionUri;
-            dataRow[2] = transformationUri;
+            dataRow[1] = transformationUri;
 
             for (var columnIndex = 0; columnIndex < inputData.Columns.Count; columnIndex++)
             {
@@ -109,7 +142,7 @@ public class RdfShipWeightTableBuilder : IRdfTableBuilder
         }
     }
 
-    public void CreatePhaseFilterSchema(Provenance provenance, DataColumnCollection columns)
+   /*  public void CreatePhaseFilterSchema(Provenance provenance, DataColumnCollection columns)
     {
         var Prefix2Uri = new Dictionary<string, Uri>();
         var idColumn = RdfCommonColumns.CreateIdColumn();
@@ -119,7 +152,7 @@ public class RdfShipWeightTableBuilder : IRdfTableBuilder
         _dataTable.Columns.Add(RdfCommonColumns.CreateHadMember());
         _dataTable.Columns.Add(RdfCommonColumns.CreateWasGeneratedBy());
 
-        var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSource}/{provenance.DataFormat}#";
+        var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSource}#";
 
         foreach (DataColumn column in columns)
         {
@@ -136,6 +169,7 @@ public class RdfShipWeightTableBuilder : IRdfTableBuilder
     public void AddPhaseFilterRows(Uri dataCollectionUri, Provenance provenance, Uri transformationUri, DataTable phaseFilterData)
     {
         var index = 1;
+        var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSource}#";
 
         foreach (DataRow row in phaseFilterData.Rows)
         {
@@ -155,8 +189,7 @@ public class RdfShipWeightTableBuilder : IRdfTableBuilder
                     numberOfAdditionalColumns++;
 
                     var cell = row[columnIndex];
-                    var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSource}/{provenance.DataFormat}#";
-
+                    
                     //"As built" is written in different ways, with " ", "-" and possible in one word
                     if (cell.ToString()!.Contains("As") &&
                         cell.ToString()!.Contains("Built"))
@@ -193,9 +226,10 @@ public class RdfShipWeightTableBuilder : IRdfTableBuilder
         _dataTable.Columns.Add(RdfCommonColumns.CreateHadMember());
         _dataTable.Columns.Add(RdfCommonColumns.CreateWasGeneratedBy());
 
+        var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSource}#";
+
         foreach (DataColumn column in columns)
-        {
-            var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSource}/{provenance.DataFormat}#";
+        {           
             _dataTable.Columns.Add(dataUri + column.ColumnName, typeof(string));
         }
     }
@@ -220,7 +254,7 @@ public class RdfShipWeightTableBuilder : IRdfTableBuilder
             _dataTable.Rows.Add(dataRow);
             index++;
         }
-    }
+    } */
 
     public DataTable GetDataTable() => _dataTable;
 }

@@ -11,38 +11,76 @@ public static class ShipWeightDBReader
         return $"Server={omniaServer}; Authentication=Active Directory Default; Database={omniaDb};";
     }
 
-    public static DataSet GetData(string assetName)
+    public static string GetPlantId(string facilityName)
     {
-        DataSet dataset = new DataSet();
-        dataset.Tables.Add(GetWeightData(assetName));
-        dataset.Tables.Add(GetPhaseCodeData(assetName));
-        dataset.Tables.Add(GetPhaseFilterData(assetName));
+        string connectionString = GetConnectionString();
 
-        return dataset;
+        var codeColumns = GetCodeTypeColumns(facilityName, connectionString);
+        var plantIdColumn = (codeColumns.First(x => x.Item2 == "Plant")).Item1;
+
+        var plantId = string.Empty;
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            string query = $"SELECT TOP 1 {plantIdColumn} FROM om.ITEM WHERE ProjectID = '{facilityName}'";
+
+            SqlCommand command = new SqlCommand(query, connection);
+            connection.Open();
+            
+            plantId = (string)command.ExecuteScalar();
+        }
+        return plantId;
     }
 
-    private static DataTable GetWeightData(string assetName)
+    public static DataTable GetData(string facilityName, string tableName)
+    {
+        string connectionString = GetConnectionString();
+
+        DataSet dataset = new DataSet();
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            string query = $"SELECT * FROM om.{tableName} WHERE ProjectId = '{facilityName}'";
+
+            SqlCommand command = new SqlCommand(query, connection);
+            SqlDataAdapter dataAdapter = new SqlDataAdapter();
+
+            dataAdapter.SelectCommand = command;
+            dataAdapter.SelectCommand.CommandTimeout = 120;
+
+            connection.Open();
+            dataAdapter.Fill(dataset);
+        }
+
+        var data = dataset.Tables[0];
+        data.TableName = tableName.ToLower();
+
+        return data.Copy();
+    }
+
+    public static DataTable GetAsBuiltData(string facilityName)
     {
         string connectionString = GetConnectionString();
 
         List<(string, string)> columns = GetDefaultColumns();
-        columns.AddRange(GetCodeTypeColumns(assetName, connectionString));
+        columns.AddRange(GetCodeTypeColumns(facilityName, connectionString));
 
-        DataTable data = GetEquipment(assetName, connectionString, columns);
-        data.TableName = "Weight";
+        DataTable items = GetAsBuiltItems(facilityName, connectionString, columns);
+        items.TableName = "item";
 
-        return data.Copy();
+        return items.Copy();
     }
 
     //Phase referes to building phase, i.e when something was built
-    private static DataTable GetPhaseCodeData(string assetName)
+    private static List<string> GetAsBuiltPhases(string facilityName)
     {
+        var builtTime = GetAsBuiltTime(facilityName);
+
         string connectionString = GetConnectionString();
         DataSet dataset = new DataSet();
 
         using (SqlConnection connection = new SqlConnection(connectionString))
         {
-            string query = $"SELECT ProjectID, CodeID, Description, Start, Stop FROM om.Code WHERE ProjectId = '{assetName}' AND CodeType = 'C02'";
+            string query = $"SELECT ProjectID, CodeID, Description, Start, Stop FROM om.Code WHERE ProjectId = '{facilityName}' AND CodeType = 'C02'";
 
             SqlCommand command = new SqlCommand(query, connection);
             SqlDataAdapter dataAdapter = new SqlDataAdapter();
@@ -54,45 +92,51 @@ public static class ShipWeightDBReader
             dataAdapter.Fill(dataset);
         }
 
-        var data = dataset.Tables[0];
-        data.TableName = "PhaseCode";
+        var dataRows = dataset.Tables[0].Select($"Start <= {builtTime} AND Stop >= {builtTime}");
 
-        return data.Copy();
+        List<string> asBuiltPhases = dataRows.Select(r => r["CodeId"].ToString()!).ToList();
+
+        return asBuiltPhases;
     }
 
     //Phase filter is an normalized timestamp that can be used to detect (among other things) the as-built state
-    private static DataTable GetPhaseFilterData(string assetName)
+    private static int GetAsBuiltTime(string facilityName)
     {
         string connectionString = GetConnectionString();
         DataSet dataset = new DataSet();
 
+        var builtTime = -1;
+
         using (SqlConnection connection = new SqlConnection(connectionString))
         {
-            string query = $"SELECT ProjectID, FilterID, Time FROM om.ITEM_FILTER WHERE ProjectId = '{assetName}'";
-
-            SqlCommand command = new SqlCommand(query, connection);
-            SqlDataAdapter dataAdapter = new SqlDataAdapter();
-
-            dataAdapter.SelectCommand = command;
-            dataAdapter.SelectCommand.CommandTimeout = 120;
+            string query = $"SELECT ProjectID, FilterID, Time FROM om.ITEM_FILTER WHERE ProjectId = '{facilityName}' AND FilterID LIKE '%Built%'";
 
             connection.Open();
-            dataAdapter.Fill(dataset);
+            SqlCommand command = new SqlCommand(query, connection);
+            SqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Int32.TryParse(reader["Time"].ToString(), out builtTime);
+                break;
+            }
         }
 
-        var data = dataset.Tables[0];
-        data.TableName = "PhaseFilter";
+        if (builtTime == -1)
+        {
+            throw new InvalidOperationException($"No As-Built phase found for {facilityName}");
+        }
 
-        return data.Copy();
+        return builtTime;
     }
 
-    private static List<(string, string)> GetCodeTypeColumns(string assetName, string connectionString)
+    private static List<(string, string)> GetCodeTypeColumns(string facilityName, string connectionString)
     {
         List<(string, string)> codeTypesColumns = new List<(string, string)>();
 
         using (SqlConnection connection = new SqlConnection(connectionString))
         {
-            string query = $"SELECT CodeType, Title FROM om.CODETYPE WHERE ProjectID = '{assetName}'";
+            string query = $"SELECT CodeType, Title FROM om.CODETYPE WHERE ProjectID = '{facilityName}'";
 
             SqlCommand command = new SqlCommand(query, connection);
             command.Connection.Open();
@@ -101,7 +145,7 @@ public static class ShipWeightDBReader
 
             if (!reader.HasRows)
             {
-                throw new InvalidDataException($"{assetName} does not have code types. ProjectID may be wrong, or data doesn't exist");
+                throw new InvalidDataException($"{facilityName} does not have code types. ProjectID may be wrong, or data doesn't exist");
             }
 
             while (reader.Read())
@@ -114,9 +158,14 @@ public static class ShipWeightDBReader
         return codeTypesColumns;
     }
 
-    private static DataTable GetEquipment(string assetName, string connectionString, List<(string, string)> columns)
+    private static DataTable GetAsBuiltItems(string facilityName, 
+                                            string connectionString, 
+                                            List<(string, string)> columns)
     {
-        string query = CreateQuery(assetName, columns);
+
+        var asBuiltPhases = GetAsBuiltPhases(facilityName);
+
+        string query = CreateQuery(facilityName, columns);
         DataSet dataset = new DataSet();
         
         using (SqlConnection connection = new SqlConnection(connectionString))
@@ -131,14 +180,22 @@ public static class ShipWeightDBReader
             dataAdapter.Fill(dataset);
         }
 
-        return dataset.Tables[0];
+        DataTable items = dataset.Tables[0].Clone();
+
+        foreach (DataRow row in dataset.Tables[0].Rows)
+        {
+            if (asBuiltPhases.Contains(row["Phase Code"]))
+            {
+                items.ImportRow(row);
+            }
+        }
+
+        return items;
     }
 
-    private static string CreateQuery(string assetName, List<(string, string)> columns)
+    private static string CreateQuery(string facilityName, List<(string, string)> columns)
     {
         var query = $"SELECT ";
-
-        
 
         foreach (var column in columns)
         {
@@ -147,7 +204,7 @@ public static class ShipWeightDBReader
 
         query = query.Remove(query.Length - 1);
 
-        query = $"{query} FROM om.ITEM WHERE ProjectID = '{assetName}' AND C12 = 'E'";
+        query = $"{query} FROM om.ITEM WHERE ProjectID = '{facilityName}' AND C12 = 'E'";
         return query;
     }
 

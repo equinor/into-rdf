@@ -1,13 +1,8 @@
 using System;
 using Doc2Rdf.Library.Interfaces;
-using Doc2Rdf.Library.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Doc2Rdf.Library.Services;
-
-public interface IRdfTableBuilderFactory
-{
-    IRdfTableBuilder GetRdfTableBuilder(DataSource dataSource);
-}
 
 public class RdfTableBuilderFactory : IRdfTableBuilderFactory
 {
@@ -23,14 +18,14 @@ public class RdfTableBuilderFactory : IRdfTableBuilderFactory
         _serviceProvider = serviceProvider;
     }
 
-    public IRdfTableBuilder GetRdfTableBuilder(DataSource dataSource)
+    public IRdfTableBuilder GetRdfTableBuilder(string dataSource)
     {
         switch (dataSource)
         {
-            case DataSource.Mel:
-                return (IRdfTableBuilder)_serviceProvider.GetService(typeof(RdfMelTableBuilder));
-            case DataSource.Shipweight:
-                return (IRdfTableBuilder)_serviceProvider.GetService(typeof(RdfShipWeightTableBuilder));
+            case "mel":
+                return (IRdfTableBuilder)_serviceProvider.GetRequiredService(typeof(RdfMelTableBuilder));
+            case "shipweight":
+                return (IRdfTableBuilder)_serviceProvider.GetRequiredService(typeof(RdfShipWeightTableBuilder));
             default:
                 throw new InvalidOperationException($"Unknown source: {dataSource}");
         }

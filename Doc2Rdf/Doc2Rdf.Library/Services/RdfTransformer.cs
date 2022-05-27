@@ -1,6 +1,7 @@
 using System.Data;
 using Doc2Rdf.Library.Models;
 using Doc2Rdf.Library.Interfaces;
+using System;
 
 namespace Doc2Rdf.Library.Services;
 
@@ -14,7 +15,7 @@ internal class RdfTransformer : IRdfTransformer
         _rdfGraphWrapper = rdfGraphWrapper;
     }
 
-    public string Transform(Provenance provenance, DataSet inputData)
+    public string Transform(Provenance provenance, DataTable inputData)
     {
         var rdfDataSet = _rdfPreprocessor.CreateRdfTables(provenance, inputData);
 

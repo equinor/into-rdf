@@ -27,13 +27,9 @@ public class MelTransformer : IMelTransformer
     public string Transform(Stream excelStream, SpreadsheetDetails details)
     {
         var data = _melReader.GetSpreadsheetData(excelStream, details);
-
-        DataSet dataset = new DataSet();
-        dataset.Tables.Add(data);
-
         var provenance = CreateProvenance(details);
 
-        return _rdfTransformer.Transform(provenance, dataset);
+        return _rdfTransformer.Transform(provenance, data);
     }
 
     private Provenance CreateProvenance(SpreadsheetDetails details)
@@ -48,9 +44,9 @@ public class MelTransformer : IMelTransformer
                                         details.Revision.ToString("D2"),
                                         previousRevision,
                                         details.RevisionDate,
-                                        DataSource.Mel,
-                                        DataSourceType.File,
-                                        DataFormat.Xlsx);
+                                        DataSource.Mel(),
+                                        DataSourceType.File(),
+                                        DataFormat.Xlsx());
 
         return provenance;
     }
@@ -69,6 +65,5 @@ public class MelTransformer : IMelTransformer
             default:
                 throw new ArgumentException("Unknown projectId");
         }
-
     }
 }

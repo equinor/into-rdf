@@ -16,7 +16,16 @@ try
 {
     string outputDir = "output";
     string facilityName = args[0].Contains("Drift") ? args[0] : $"{args[0]}_Drift";
-    if (args.Length != 1)
+    string tableName = string.Empty;
+    if (args.Length == 1)
+    {
+        tableName = "Item";
+    }
+    else if (args.Length == 2)
+    {
+        tableName = args[1];
+    }
+    else 
     {
         Console.WriteLine("Wrong number of input args. Please enter Platform identifier, i.e. Grane, Gudrun, Gina Krog, Aasta Hanstein, Valemon");
         return 0;
@@ -29,9 +38,13 @@ try
 
     var shipWeightTransformer = provider.GetRequiredService<IShipWeightTransformer>();
 
-    var inputData = ShipWeightDBReader.GetData(facilityName);
+    var plantId = ShipWeightDBReader.GetPlantId(facilityName);
 
-    TransformData(shipWeightTransformer, inputData, facilityName);
+    DataTable inputData = args[1].ToLower() == "as-built" ?
+                 ShipWeightDBReader.GetAsBuiltData(facilityName) :
+                 ShipWeightDBReader.GetData(facilityName, tableName);
+
+    TransformData(shipWeightTransformer, inputData, facilityName, plantId, tableName);
 }
 
 catch (Exception ex)
@@ -41,11 +54,11 @@ catch (Exception ex)
 
 return 0;
 
-static void TransformData(IShipWeightTransformer shipWeightTransformer, DataSet inputData, string facilityName)
+static void TransformData(IShipWeightTransformer shipWeightTransformer, DataTable inputData, string facilityName, string plantId, string tableName)
 {
-    var ttl = shipWeightTransformer.Transform(facilityName, inputData);
+    var ttl = shipWeightTransformer.Transform(facilityName, plantId, inputData);
 
-    var outputFile = $"output/shipweight-{facilityName}-{DateTime.Now.ToString("yy-MM-dd")}.ttl";
+    var outputFile = $"output/shipweight-{facilityName}-{tableName}-{DateTime.Now.ToString("yy-MM-dd")}.ttl";
     File.WriteAllText(outputFile, ttl);
 }
 

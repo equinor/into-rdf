@@ -12,39 +12,54 @@ public class ShipWeightTransformer : IShipWeightTransformer
     {
         _rdfTransformer = rdfTransformer;
     }
-    public string Transform(string facilityName, DataSet inputData)
+    public string Transform(string facilityName, string plantId, DataTable inputData)
     {
-        var weightTable = inputData.Tables["Weight"] ?? null;
-
-        if (weightTable == null)
-        {
-            throw new NullReferenceException($"Empty weight table for {facilityName}");
-        }
-
-        var facilityPlantId = weightTable.Rows[0]["Plant"].ToString();
-
-        if (string.IsNullOrWhiteSpace(facilityPlantId))
-        {
-            throw new InvalidOperationException($"Invalid plant id for {facilityName}");
-        }
-
-        var provenance = CreateProvenance(facilityName, facilityPlantId);
+        var provenance = CreateProvenance(facilityName, inputData.TableName, plantId);
 
         return _rdfTransformer.Transform(provenance, inputData);
     }
 
-    private Provenance CreateProvenance(string facilityName, string plantId)
+    private Provenance CreateProvenance(string facilityName, string tableName, string plantId)
     {
-        var facility = new FacilityIdentifiers(sAPPlantId: plantId);
+        var facilityId = GetFacilityId(plantId);
+        var facility = new FacilityIdentifiers(facilityId: facilityId, sAPPlantId: plantId);
 
         var provenance = new Provenance(facility,
                                         facilityName,
                                         "01",
                                         "NA",
                                         DateTime.Now,
-                                        DataSource.Shipweight,
-                                        DataSourceType.Database,
-                                        DataFormat.NA);
+                                        DataSource.Shipweight(),
+                                        DataSourceType.Database(),
+                                        DataFormat.Unknown(),
+                                        "NA",
+                                        tableName);
         return provenance;
+    }
+
+    //Hack to add facilityIds to namespace URIs
+    //TODO - Remove when task Feature 65986 - Review - Enrich with Facility Data is implemented
+    //https://dev.azure.com/EquinorASA/Spine/_backlogs/backlog/Loudred/Epics/?showParents=true&workitem=65986
+    private string GetFacilityId(string plantId)
+    {
+        switch (plantId)
+        {
+            case "1219":
+                return "aha";
+            case "1163":
+                return "grd";
+            case "1218":
+                return "gkr";
+            case "1755":
+                return "gra";
+            case "1930":
+                return "jca";
+            case "1782":
+                return "kra";
+            case "1138":
+                return "val";
+            default:
+                throw new ArgumentException("Unknown plantId");
+        }
     }
 }

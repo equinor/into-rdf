@@ -9,7 +9,7 @@ namespace Doc2Rdf.Library.Models
         public bool IsTransposed { get; set; }
         public DateTime RevisionDate { get; set; }
         public string Contractor { get; set; }
-        public DataSource DataSource { get; set; }
+        public string DataSource { get; set; }
         public string SheetName { get; set; }
         public int HeaderRow { get; set; }
         public int DataStartRow { get; set; }

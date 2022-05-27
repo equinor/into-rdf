@@ -13,7 +13,7 @@ public class RdfPreprocessor : IRdfPreprocessor
         _rdfTableBuilderFactory = rdfTableBuilderFactory;
     }
 
-    public DataSet CreateRdfTables(Provenance provenance, DataSet inputData)
+    public DataSet CreateRdfTables(Provenance provenance, DataTable inputData)
     {   
         var dataCollectionUri = CreateDataCollectionUri(provenance);
         var transformationUri = CreateTransformationUri(provenance);
@@ -22,26 +22,9 @@ public class RdfPreprocessor : IRdfPreprocessor
         rdfDataSet.Tables.Add(CreateProvenanceTable(dataCollectionUri, provenance));
         rdfDataSet.Tables.Add(CreateTransformationTable(dataCollectionUri, provenance, transformationUri));
 
-        for (int i = 0; i < inputData.Tables.Count; i++)
-        {
-            if (inputData.Tables[i].TableName.Contains("PhaseFilter"))
-            {
-                rdfDataSet.Tables.Add(CreatePhaseFilterTable(dataCollectionUri, provenance, transformationUri, inputData.Tables[i]));
-                continue;
-            }
-            else if (inputData.Tables[i].TableName.Contains("PhaseCode"))
-            {
-                rdfDataSet.Tables.Add(CreatePhaseCodeTable(dataCollectionUri, provenance, transformationUri, inputData.Tables[i]));
-                continue;
-            }
-
-            if (provenance.DataSource == DataSource.Mel)
-            {
-                rdfDataSet.Tables.Add(CreateDataCollectionTable(dataCollectionUri, provenance, inputData.Tables[i]));
-            }
-            rdfDataSet.Tables.Add(CreateInputTable(dataCollectionUri, provenance, transformationUri, inputData.Tables[i]));
-        }
-
+        rdfDataSet.Tables.Add(CreateDataCollectionTable(dataCollectionUri, provenance, inputData));
+        rdfDataSet.Tables.Add(CreateInputTable(dataCollectionUri, provenance, transformationUri, inputData));
+    
         return rdfDataSet;
     }
 
@@ -66,29 +49,11 @@ public class RdfPreprocessor : IRdfPreprocessor
 
     private DataTable CreateDataCollectionTable(Uri dataCollectionUri, Provenance provenance, DataTable inputData)
     {
-        RdfMelTableBuilder tableBuilder = (RdfMelTableBuilder)_rdfTableBuilderFactory.GetRdfTableBuilder(provenance.DataSource);
+        IRdfTableBuilder tableBuilder = _rdfTableBuilderFactory.GetRdfTableBuilder(provenance.DataSource);
 
         tableBuilder.AddTableName("DataCollection");
         tableBuilder.CreateDataCollectionSchema();
         tableBuilder.AddDataCollectionRows(dataCollectionUri, inputData);
-        return tableBuilder.GetDataTable();
-    }
-
-    private DataTable CreatePhaseFilterTable(Uri dataCollectionUri, Provenance provenance, Uri transformationUri, DataTable phaseFilterTable)
-    {
-        RdfShipWeightTableBuilder tableBuilder = (RdfShipWeightTableBuilder)_rdfTableBuilderFactory.GetRdfTableBuilder(provenance.DataSource);
-        tableBuilder.AddTableName(phaseFilterTable.TableName);
-        tableBuilder.CreatePhaseFilterSchema(provenance, phaseFilterTable.Columns);
-        tableBuilder.AddPhaseFilterRows(dataCollectionUri, provenance, transformationUri, phaseFilterTable);
-        return tableBuilder.GetDataTable();
-    }
-
-    private DataTable CreatePhaseCodeTable(Uri dataCollectionUri, Provenance provenance, Uri transformationUri, DataTable phaseCodeTable)
-    {
-        RdfShipWeightTableBuilder tableBuilder = (RdfShipWeightTableBuilder)_rdfTableBuilderFactory.GetRdfTableBuilder(provenance.DataSource);
-        tableBuilder.AddTableName(phaseCodeTable.TableName);
-        tableBuilder.CreatePhaseCodeSchema(provenance, phaseCodeTable.Columns);
-        tableBuilder.AddPhaseCodeRows(dataCollectionUri, transformationUri, phaseCodeTable);
         return tableBuilder.GetDataTable();
     }
 
@@ -103,21 +68,20 @@ public class RdfPreprocessor : IRdfPreprocessor
 
     private Uri CreateDataCollectionUri(Provenance provenance)
     {
-        var facilityIdentifier = (provenance.Facility.FacilityId + "/" + (provenance.DataSource == DataSource.Mel ?
+        
+        var facilityIdentifier = (provenance.Facility.FacilityId + "/" + (provenance.Facility.DocumentProjectId != "NA" ?
                                     provenance.Facility.DocumentProjectId :
                                     provenance.Facility.SAPPlantId)).ToLower();
 
-        var dataSource = provenance.DataSource.ToString().ToLower();
-
-        var dataCollectionUri = new Uri($"{RdfPrefixes.Prefix2Uri["equinor"]}{facilityIdentifier}/{dataSource}/{provenance.RevisionNumber}");
-
+        var dataCollectionUri = provenance.TableName != "na" ?
+                    new Uri($"{RdfPrefixes.Prefix2Uri["equinor"]}{facilityIdentifier}/{provenance.DataSource}/{provenance.TableName}/{provenance.RevisionNumber}") :
+                    new Uri($"{RdfPrefixes.Prefix2Uri["equinor"]}{facilityIdentifier}/{provenance.DataSource}/{provenance.RevisionNumber}");
         return dataCollectionUri;
     }
 
     private Uri CreateTransformationUri(Provenance provenance)
     {
-        var dataSource = provenance.DataSource.ToString().ToLower();
-        var transformationUri = new Uri($"{RdfPrefixes.Prefix2Uri["transformation"]}{dataSource}_{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd")}");
+        var transformationUri = new Uri($"{RdfPrefixes.Prefix2Uri["transformation"]}{provenance.DataSource}_{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd")}");
 
         return transformationUri;
     }

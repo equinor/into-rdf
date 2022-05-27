@@ -11,6 +11,8 @@ namespace Doc2Rdf.Library.Interfaces
         void AddProvenanceRow(Uri dataCollectionUri, Provenance provenance);
         void CreateTransformationSchema();
         void AddTransformationRow(Uri dataCollectionUri, Uri transformationUri);
+        void CreateDataCollectionSchema();
+        void AddDataCollectionRows(Uri dataCollectionUri, DataTable inputData);
         void CreateInputDataSchema(Provenance provenance, DataColumnCollection columns);
         void AddInputDataRows(Uri dataCollectionUri, Uri transformationUri, DataTable inputData);
         DataTable GetDataTable();
