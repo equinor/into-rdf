@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure.Storage.Blobs.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Services.RdfService
 {
@@ -7,5 +8,6 @@ namespace Services.RdfService
         Task<string> ConvertDocToRdf(IFormFile formFile);
         Task<HttpResponseMessage> PostToFuseki(string server, string data);
         Task<string> QueryFuseki(string server, string query);
+        Task HandleStorageFiles(List<BlobDownloadResult> blobData);
     }
 }

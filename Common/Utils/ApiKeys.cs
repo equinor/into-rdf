@@ -1,4 +1,4 @@
-﻿namespace Api.Authorization
+﻿namespace Common.Utils
 {
     public static class ApiKeys
     {

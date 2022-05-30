@@ -59,3 +59,9 @@
             with:
               app-name: "${{ env.ENV }}-spinesplinter-api"
               package: api/
+
+          - name: Deploy Functions
+            uses: Azure/functions-action@v1.4.6
+            with:
+              app-name: '${{ env.ENV }}-spinesplinter-func'
+              package: functions/

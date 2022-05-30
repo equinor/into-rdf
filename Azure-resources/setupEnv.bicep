@@ -12,6 +12,11 @@ var resourceTags = {
   Product: 'Spine Splinter'
 }
 
+resource StorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
+  name: 'prodmeladapterstorageacc'
+  scope: resourceGroup('prod-tie-mel-adapter')
+}
+
 resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: '${resourcePrefix}-insights'
   location: location
@@ -59,9 +64,55 @@ resource Api 'Microsoft.Web/sites@2021-03-01' = {
           value: ApplicationInsights.properties.ConnectionString
         }
       ]
+      connectionStrings: [
+        {
+          name: 'SpineReviewStorage'
+          type: 'Custom'
+          connectionString: 'DefaultEndpointsProtocol=https;AccountName=${StorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(StorageAccount.id, StorageAccount.apiVersion).keys[0].value}'
+        }
+      ]
     }
   }
   dependsOn: []
+}
+
+resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
+  name: '${resourcePrefix}-func'
+  kind: 'functionapp,linux'
+  tags: resourceTags
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    serverFarmId: AppServicePlan.id
+    httpsOnly: true
+    reserved: true
+    siteConfig: {
+      netFrameworkVersion: dotnetVersion
+      linuxFxVersion: linuxFxVersion
+      http20Enabled: true
+      alwaysOn: true
+      appSettings: [
+        {
+          name: 'FUNCTIONS_EXTENSION_VERSION'
+          value: '~4'
+        }
+        {
+          name: 'FUNCTIONS_WORKER_RUNTIME'
+          value: 'dotnet'
+        }
+        {
+          name: 'AzureWebJobsStorage'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${StorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(StorageAccount.id, StorageAccount.apiVersion).keys[0].value}'
+        }
+        {
+          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+          value: ApplicationInsights.properties.InstrumentationKey
+        }
+      ]
+    }
+  }
 }
 
 resource KeyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {

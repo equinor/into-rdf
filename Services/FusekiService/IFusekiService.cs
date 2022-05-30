@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
+﻿
 namespace Services.FusekiService
 {
     public interface IFusekiService

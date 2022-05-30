@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Services.FusekiService;
 using Doc2Rdf.Library.Interfaces;
+using Azure.Storage.Blobs.Models;
 
 namespace Services.RdfService
 {
@@ -21,6 +22,12 @@ namespace Services.RdfService
             using var stream = new MemoryStream();
             await formFile.CopyToAsync(stream);
             return _melTransformer.Transform(stream, formFile.FileName);
+        }
+
+        public Task HandleStorageFiles(List<BlobDownloadResult> blobData)
+        {
+            // Do work
+            return Task.CompletedTask;
         }
 
         public async Task<HttpResponseMessage> PostToFuseki(string server, string data)

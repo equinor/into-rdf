@@ -1,11 +1,14 @@
 ﻿using Common.AppsettingsModels;
+using Common.Utils;
+using Doc2Rdf.Library.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Identity.Web;
 using Services.FusekiService;
 using Services.RdfService;
-using Doc2Rdf.Library.Extensions.DependencyInjection;
-using Microsoft.Identity.Web;
-using Common.Utils;
+using System.Collections.Generic;
 
-namespace Api
+namespace TieMelConsumer
 {
     public static class SetupServices
     {
