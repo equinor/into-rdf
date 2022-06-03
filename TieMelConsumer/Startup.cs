@@ -34,9 +34,9 @@ public class Startup : FunctionsStartup
         
         // avoid calling builder.Services.AddAuthentication() since it overrides internal Azure Function authentication
         // https://github.com/AzureAD/microsoft-identity-web/issues/1548
-        new AuthenticationBuilder(builder.Services)
-            .AddMicrosoftIdentityWebApi(configuration)
+            services.AddMicrosoftIdentityWebApiAuthentication(configuration)
             .EnableTokenAcquisitionToCallDownstreamApi()
+            .AddFusekiApis(configuration)
             .AddInMemoryTokenCaches();
 
         services.AddSplinterServices();
