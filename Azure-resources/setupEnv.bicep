@@ -136,6 +136,16 @@ resource KeyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
             'list'
           ]
         }
+      },
+      {
+        tenantId: subscription().tenantId
+        objectId: AzFunction.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+            'list'
+          ]
+        }
       }
       {
         tenantId: subscription().tenantId
