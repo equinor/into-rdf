@@ -8,6 +8,9 @@
           env:
             required: true
             type: string
+          sku:
+            required: true
+            type: string
         secrets:
             AZURE_CLIENT_ID:
                 required: true
@@ -42,7 +45,7 @@
             working-directory: azure
             run: | 
               chmod +x runBicep.sh
-              ./runBicep.sh -e  ${{ env.ENV }}
+              ./runBicep.sh -e  ${{ env.ENV }} -s {{ inputs.sku }}
 
           - name: Replace Env-specific settings
             uses: microsoft/variable-substitution@v1

@@ -22,6 +22,7 @@ jobs:
     with:
       ENV: dev
       ARTIFACT: ${{ needs.build.outputs.artifact-name }}
+      SKU: 'B1'
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}

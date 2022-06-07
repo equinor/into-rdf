@@ -1,6 +1,5 @@
 param resourcePrefix string
-param appSvcSku string = 'P1v2'
-param appSvcSkuTier string = 'PremiumV2'
+param sku string
 param location string = resourceGroup().location
 
 var dotnetVersion = 'v6.0'
@@ -36,8 +35,7 @@ resource AppServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
     reserved: true
   }
   sku: {
-    name: appSvcSku
-    tier: appSvcSkuTier
+    name: sku
   }
 }
 
