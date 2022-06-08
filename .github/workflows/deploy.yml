@@ -45,7 +45,7 @@
             working-directory: azure
             run: | 
               chmod +x runBicep.sh
-              ./runBicep.sh -e  ${{ env.ENV }} -s {{ inputs.sku }}
+              ./runBicep.sh -e  ${{ env.ENV }} -s ${{ inputs.sku }}
 
           - name: Replace Env-specific settings
             uses: microsoft/variable-substitution@v1
