@@ -410,3 +410,5 @@ TieMelConsumer/local.settings.json
 __azurite*
 __blob*
 __queue*
+
+TieMelConsumer/.vscode*

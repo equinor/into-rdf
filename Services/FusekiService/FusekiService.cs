@@ -1,5 +1,7 @@
 ﻿using Common.Exceptions;
 using Microsoft.Identity.Web;
+using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Services.FusekiService
 {
@@ -32,13 +34,22 @@ namespace Services.FusekiService
         {
             var response = await ExecuteSparql(server, sparql, "application/json");
             var content = await response.Content.ReadAsStringAsync();
+
             if (content.StartsWith("Parse error")) throw new FusekiException(content);
+            
             return content;
+        }
+
+        public async Task<FusekiResponse> QueryFusekiServer(string server, string sparql)
+        {
+            var result = await Query(server, sparql);
+
+            return JsonConvert.DeserializeObject<FusekiResponse>(result);
         }
 
         private async Task<HttpResponseMessage> ExecuteSparql(string server, string sparql, string contentType)
         {
-            return await _downstreamWebApi.CallWebApiForUserAsync(server.ToLower(), options =>
+            return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options =>
             {
                 options.HttpMethod = HttpMethod.Post;
                 options.RelativePath = "ds/query";
@@ -53,4 +64,27 @@ namespace Services.FusekiService
             });
         }
     }
+}
+
+public class FusekiResponse
+{
+    public FusekiHead Head { get; set; } = new();
+    public FusekiResult Results { get; set; } = new();
+}
+
+public class FusekiHead
+{
+    public List<string> Vars { get; set; } = new();
+}
+
+public class FusekiResult
+{
+    public List<Dictionary<string, Triplet>> Bindings { get; set; } = new();
+}
+
+public class Triplet
+{
+    public string? Type { get; set; }
+    public string? Datatype { get; set; }
+    public string? Value { get; set; }
 }

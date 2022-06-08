@@ -29,7 +29,7 @@ namespace TieMelConsumer
             var blobs = await GetBlobsInSameDirectory(name);
             if (blobs.Count <= 1) return;
 
-            await _rdfService.HandleStorageFiles(await GetData(blobs));
+            _rdfService.HandleStorageFiles(await GetData(blobs));
         }
 
         private async Task<List<BlobItem>> GetBlobsInSameDirectory(string name)

@@ -5,33 +5,36 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
 using Services.FusekiService;
+using Services.ProvenanceService;
 using Services.RdfService;
+using Services.TieMessageService;
 using System.Collections.Generic;
 
-namespace TieMelConsumer
+namespace TieMelConsumer;
+
+public static class SetupServices
 {
-    public static class SetupServices
+    public static IServiceCollection AddSplinterServices(this IServiceCollection services)
     {
-        public static IServiceCollection AddSplinterServices(this IServiceCollection services)
-        {
-            services.AddScoped<IRdfService, RdfService>();
-            services.AddScoped<IFusekiService, FusekiService>();
+        services.AddScoped<IRdfService, RdfService>();
+        services.AddScoped<IFusekiService, FusekiService>();
+        services.AddScoped<ITieMessageService, TieMessageService>();
+        services.AddScoped <IProvenanceService, ProvenanceService>(); 
             services.AddDoc2RdfLibraryServices();
 
-            return services;
-        }
+        return services;
+    }
 
-        public static MicrosoftIdentityAppCallsWebApiAuthenticationBuilder AddFusekiApis(this MicrosoftIdentityAppCallsWebApiAuthenticationBuilder builder, IConfiguration configuration)
+    public static MicrosoftIdentityAppCallsWebApiAuthenticationBuilder AddFusekiApis(this MicrosoftIdentityAppCallsWebApiAuthenticationBuilder builder, IConfiguration configuration)
+    {
+        foreach (var server in configuration.GetSection(ApiKeys.Servers).Get<List<RdfServer>>())
         {
-            foreach (var server in configuration.GetSection(ApiKeys.Servers).Get<List<RdfServer>>())
+            builder.AddDownstreamWebApi(server.Name.ToLower(), options =>
             {
-                builder.AddDownstreamWebApi(server.Name.ToLower(), options =>
-                {
-                    options.BaseUrl = server.BaseUrl;
-                    options.Scopes = server.Scopes;
-                });
-            }
-            return builder;
+                options.BaseUrl = server.BaseUrl;
+                options.Scopes = server.Scopes;
+            });
         }
+        return builder;
     }
 }
