@@ -32,4 +32,5 @@ az deployment group create \
 --template-file ./setupEnv.bicep \
 --parameters \
 resourcePrefix=$group \
-sku=$sku
+sku=$sku \
+env=$environment

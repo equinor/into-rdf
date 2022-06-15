@@ -1,6 +1,7 @@
 param resourcePrefix string
 param sku string
 param location string = resourceGroup().location
+param env string
 
 var dotnetVersion = 'v6.0'
 var linuxFxVersion = 'DOTNETCORE|6.0'
@@ -9,6 +10,8 @@ var loudredGroupId = 'bdf2d33e-44a0-4774-9a11-204301b8e502'
 
 var resourceTags = {
   Product: 'Spine Splinter'
+  Team: 'Dugtrio'
+  Env: env
 }
 
 resource StorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
