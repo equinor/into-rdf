@@ -5,18 +5,25 @@ namespace Common.ProvenanceModels
 {
     public class Provenance
     {
-        public string? FacilityId { get; init; }
-        public string? DocumentProjectId { get; init; }
-        public string? PlantId { get; init; }
-        public string? DataCollectionName { get; init; }
-        public string? RevisionName { get; init; }
-        public int RevisionNumber { get; init; }
-        public Uri? PreviousRevision { get; init; }
-        public DateTime RevisionDate { get; init; }
-        public string? DataSource { get; init; }
-        public string? DataSourceType { get; init; }
-        public string? DataSourceTable { get; init; }
-        public string? Contractor { get; init; }
-        public string? RevisionStatus { get; init; }
+        public Provenance(string facilityId, string dataSource)
+        {
+            FacilityId = facilityId;
+            DataSource = dataSource;
+        }
+
+        public string FacilityId { get; }
+        public string? DocumentProjectId { get; set; }
+        public string? PlantId { get; set; }
+        public string? DataCollectionName { get; set; }
+        public string? RevisionName { get; set; }
+        public int RevisionNumber { get; set; }
+        public string? PreviousRevisionNumber { get; set; }
+        public Uri? PreviousRevision { get; set; }
+        public DateTime RevisionDate { get; set; }
+        public string DataSource { get; }
+        public string? DataSourceType { get; set; }
+        public string? DataSourceTable { get; set; }
+        public string? Contractor { get; set; }
+        public RevisionStatus RevisionStatus { get; set; }
     }
 }
