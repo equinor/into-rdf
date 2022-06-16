@@ -4,6 +4,7 @@ using Doc2Rdf.Library.Extensions.DependencyInjection;
 using Doc2Rdf.Library.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Excel2Rdf.Cli;
 
@@ -14,9 +15,10 @@ class Program
         using IHost host = Host.CreateDefaultBuilder(args)
             .ConfigureServices((context, services) =>
                 {
+                    services.AddLogging(options => options.AddConfiguration(context.Configuration));
                     services.AddDoc2RdfLibraryServices();
-                }
-            ).Build();
+                })
+            .Build();
 
         try
         {

@@ -70,7 +70,7 @@ public static class ShipWeightDBReader
         return items.Copy();
     }
 
-    //Phase referes to building phase, i.e when something was built
+    //Phase refers to building phase, i.e when something was built
     private static List<string> GetAsBuiltPhases(string facilityName)
     {
         var builtTime = GetAsBuiltTime(facilityName);

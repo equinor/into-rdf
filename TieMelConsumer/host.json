@@ -8,7 +8,12 @@
       }
     },
     "logLevel": {
-      "Services.RdfService.RdfService": "Information"
+      "Services.RdfService.RdfService": "Information",
+      "Services.ProvenanceService.ProvenanceService": "Information",
+      "Doc2Rdf.Library.Services.MelTransformer": "Information",
+      "Doc2Rdf.Library.IO.DomMelReader": "Information",
+      "Doc2Rdf.Library.Services.RdfPreprocessor" : "Information",
+      "Doc2Rdf.Library.Services.RdfTransformer" : "Information"
     }
   }
 }

@@ -3,7 +3,7 @@ using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using System;
 using TieMelConsumer;
-using Microsoft.AspNetCore.Authentication;
+using Doc2Rdf.Library.Extensions.DependencyInjection;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Web;

@@ -1,6 +1,5 @@
 ﻿using Azure.Storage.Blobs.Models;
 using Common.ProvenanceModels;
-using Common.TieModels;
 using Doc2Rdf.Library.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -39,16 +38,56 @@ namespace Services.RdfService
 
         public async Task HandleStorageFiles(List<BlobDownloadResult> blobData)
         {
-            TieData tieData = _tieMessageService.ParseXmlMessage(blobData);
-            _logger.LogInformation("Parsed TIE message for {TieFileData}", tieData.FileData.Name);
+            var tieData = _tieMessageService.ParseXmlMessage(blobData);
+            _logger.LogInformation("<RdfService> - HandleStorageFiles: Successfully parsed TIE message for {TieFileData}", tieData.FileData.Name);
 
-            Provenance provenance = await _provenanceService.CreateProvenanceFromTieMessage(tieData);
-            _logger.LogInformation("Created provenance information for facility '{FacilityId}' with revision name '{RevisionName}'",
+            var provenance = await _provenanceService.CreateProvenanceFromTieMessage(tieData);
+
+            switch (provenance.RevisionStatus)
+            {
+                case RevisionStatus.Old:
+                    {
+                        _logger.LogError("<RdfService> - HandleStorageFiles: Newer revisions of the submitted TIE data in {TieFileData} exist. Data will not be uploaded", tieData.FileData.Name);
+                        return;
+                    }
+                //TODO - How to handle unknown revisions? Discard or attempt to place them in their proper place in the revision chain.
+                //Task created 73431 - Handling previously "unknown" revisions.
+                case RevisionStatus.Unknown:
+                    {
+                        _logger.LogError("<RdfService> - HandleStorageFiles: TIE data in {TieFileData} contains a previously unknown revision that is older than the current latest revision. Data will not be uploaded",
+                            tieData.FileData.Name);
+                        return;
+                    }
+                default:
+                    break;
+            }
+
+            _logger.LogInformation("<RdfService> - HandleStorageFiles: Successfully created provenance information for facility '{FacilityId}' with revision name '{RevisionName}'",
                         provenance.FacilityId, provenance.RevisionName);
 
-            //TODO - Update transform
+            var xlsxBlob = blobData.FirstOrDefault(blob => blob.Details.Metadata["Name"].ToLower().Contains("xlsx"))
+                    ?? throw new ArgumentException("Blobdata does not exist");
+
+            string rdfGraphData = _melTransformer.Transform(provenance, xlsxBlob);
+            _logger.LogInformation("<RdfService> - HandleStorageFiles: {TieFileName} Successfully transformed to rdf", tieData.FileData.Name);
+
+            //TODO - How to handle updated revisions? I.e. the ones that are seemingly unaltered when looking at the XML. At one point the transformed
+            //data should be compared to the data in the Fuseki. What do we do if they differ, add or replace?
+            //Task created 73432 - Handle revision "updates"
 
             //TODO - Push transformed data to Fuseki
+            //Task created 73432 - Push transformed data to correct Fuseki instance
+            /*var server = "dugtrio";
+            var response = await PostToFuseki(server, rdfGraphData);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                _logger.LogInformation("<RdfService> - HandleStorageFiles: Successfully uploaded to Fuseki server {name}", server);
+            } 
+            else
+            {
+                _logger.LogError("<RdfService> - HandleStorageFiles: Upload to Fuseki server {name} failed", server);
+            }*/
         }
 
         public async Task<HttpResponseMessage> PostToFuseki(string server, string data)

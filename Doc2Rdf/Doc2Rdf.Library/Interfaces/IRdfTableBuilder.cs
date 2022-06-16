@@ -1,20 +1,15 @@
 using System;
 using System.Data;
-using Doc2Rdf.Library.Models;
+using Common.ProvenanceModels;
 
 namespace Doc2Rdf.Library.Interfaces
 {
     public interface IRdfTableBuilder
     {
-        void AddTableName(string tableName);
-        void CreateProvenanceSchema();
-        void AddProvenanceRow(Uri dataCollectionUri, Provenance provenance);
-        void CreateTransformationSchema();
-        void AddTransformationRow(Uri dataCollectionUri, Uri transformationUri);
-        void CreateDataCollectionSchema();
-        void AddDataCollectionRows(Uri dataCollectionUri, DataTable inputData);
-        void CreateInputDataSchema(Provenance provenance, DataColumnCollection columns);
-        void AddInputDataRows(Uri dataCollectionUri, Uri transformationUri, DataTable inputData);
-        DataTable GetDataTable();
+        DataTable GetProvenanceTable(Uri dataCollectionUri, Provenance provenance);
+        DataTable GetTransformationTable(Uri dataCollectionUri, Uri transformationUri);
+        DataTable GetDataCollectionTable(Uri dataCollectionUri, DataTable inputData);
+        DataTable GetInputDataTable(Uri dataCollectionUri, Uri transformationUri, Provenance provenance, DataTable inputData);
+        string GetBuilderType();
     }
 }

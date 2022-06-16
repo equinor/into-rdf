@@ -1,6 +1,6 @@
-using System;
+
+using Common.ProvenanceModels;
 using System.Data;
-using Doc2Rdf.Library.Models;
 
 namespace Doc2Rdf.Library.Interfaces
 {

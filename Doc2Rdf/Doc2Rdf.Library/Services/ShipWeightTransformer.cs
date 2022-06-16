@@ -1,3 +1,4 @@
+using Common.ProvenanceModels;
 using Doc2Rdf.Library.Interfaces;
 using Doc2Rdf.Library.Models;
 using System;
@@ -24,16 +25,19 @@ public class ShipWeightTransformer : IShipWeightTransformer
         var facilityId = GetFacilityId(plantId);
         var facility = new FacilityIdentifiers(facilityId: facilityId, sAPPlantId: plantId);
 
-        var provenance = new Provenance(facility,
-                                        facilityName,
-                                        "01",
-                                        "NA",
-                                        DateTime.Now,
-                                        DataSource.Shipweight(),
-                                        DataSourceType.Database(),
-                                        DataFormat.Unknown(),
-                                        "NA",
-                                        tableName);
+        var provenance = new Provenance(facilityId, DataSource.Shipweight());
+
+        provenance.DocumentProjectId = "na";
+        provenance.PlantId = plantId;
+        provenance.DataCollectionName = facilityName;
+        provenance.RevisionName = "01";
+        provenance.RevisionNumber = 1;
+        provenance.RevisionDate = DateTime.Now;
+        provenance.DataSourceType = DataSourceType.Database();
+        provenance.DataSourceTable = tableName;
+        provenance.Contractor = "na";
+        provenance.RevisionStatus = RevisionStatus.New;
+
         return provenance;
     }
 

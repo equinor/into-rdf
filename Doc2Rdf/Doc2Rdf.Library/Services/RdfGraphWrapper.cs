@@ -25,7 +25,6 @@ public class RdfGraphWrapper : IRdfGraphWrapper
 
     public void AssertDataTable(DataTable dataTable)
     {
-
         foreach (DataRow row in dataTable.Rows)
         {
             var rdfSubject = CreateUriNode((Uri)row["id"]);
@@ -63,6 +62,7 @@ public class RdfGraphWrapper : IRdfGraphWrapper
         return value switch
         {
             string undefinedLiteral => CreateUndefinedLiteralNode(undefinedLiteral),
+            int intLiteral => CreateIntLiteral(intLiteral),
             Uri uri => CreateUriNode(uri),
             DateTime dateTime => CreateDateTimeLiteral(dateTime),
             _ => HandleError(value)
@@ -79,13 +79,19 @@ public class RdfGraphWrapper : IRdfGraphWrapper
         return _graph.CreateLiteralNode(dateTime.ToUniversalTime().ToString("o"), new Uri(XmlSpecsHelper.XmlSchemaDataTypeDateTime));
     }
 
-    private ILiteralNode CreateUndefinedLiteralNode(string udefinedLiteral)
+    private ILiteralNode CreateIntLiteral(int intLiteral)
     {
-        return _graph.CreateLiteralNode(udefinedLiteral);
+        return _graph.CreateLiteralNode(intLiteral.ToString(), new Uri(RdfPrefixes.Prefix2Uri["xsd"] + "int"));
+    }
+
+    private ILiteralNode CreateUndefinedLiteralNode(string undefinedLiteral)
+    {
+        return _graph.CreateLiteralNode(undefinedLiteral);
     }
 
     private IUriNode CreateUriNode(Uri uri)
     {
-        return _graph.CreateUriNode(RdfPrefixes.FullForm2PrefixForm(uri));
+        return _graph.CreateUriNode(uri);
+        //return _graph.CreateUriNode(RdfPrefixes.FullForm2PrefixForm(uri));
     }
 }

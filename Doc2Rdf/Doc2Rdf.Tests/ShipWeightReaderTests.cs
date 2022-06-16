@@ -1,6 +1,8 @@
+
 using System;
 using System.Data;
 using System.Linq;
+using Common.ProvenanceModels;
 using Doc2Rdf.Library.Interfaces;
 using Doc2Rdf.Library.Models;
 using Xunit;
@@ -24,7 +26,7 @@ namespace Doc2Rdf.Tests
 
             var transformedData = _rdfPreprocessor.CreateRdfTables(provenance, inputData);
 
-            Assert.True(transformedData.Tables.Count == 4, $"Wrong number of rdf-preprocessedtables: {transformedData.Tables.Count}");
+            Assert.True(transformedData.Tables.Count == 4, $"Wrong number of rdf-preprocessed tables: {transformedData.Tables.Count}");
 
             Assert.Equal(new Uri("https://rdf.equinor.com/ontology/facility#1234"), transformedData.Tables["Provenance"].Rows[0]["https://rdf.equinor.com/ontology/facility#hasPlantId"]);
 
@@ -40,7 +42,17 @@ namespace Doc2Rdf.Tests
         private Provenance GetProvenance()
         {
             var facility = new FacilityIdentifiers(facilityId: "Test", sAPPlantId: "1234");
-            var provenance = new Provenance(facility, "MyFacility", "01", "NA", DateTime.Now, DataSource.Shipweight(), DataSourceType.Database(), DataFormat.Unknown());
+
+            var provenance = new Provenance(facility.FacilityId, DataSource.Shipweight());
+
+            provenance.DocumentProjectId = "na";
+            provenance.PlantId = facility.SAPPlantId;
+            provenance.DataCollectionName = "MyFacility";
+            provenance.RevisionName = "01";
+            provenance.RevisionNumber = 1;
+            provenance.RevisionDate = DateTime.Now;
+            provenance.DataSourceType = DataSourceType.Database();
+            provenance.DataSourceTable = "TestData";
 
             return provenance;
         }

@@ -16,10 +16,10 @@ public static class RdfCommonColumns
     public static DataColumn CreateWasRevisionOf() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "wasRevisionOf", typeof(Uri));
     public static DataColumn CreateType() => new DataColumn(RdfPrefixes.Prefix2Uri["rdf"] + "type", typeof(Uri));
     public static DataColumn CreateFromDataCollection() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "fromDataCollection", typeof(string));
-    public static DataColumn CreateHasFormat() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasFormat", typeof(Uri));
     public static DataColumn CreateHasSource() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasSource", typeof(Uri));
     public static DataColumn CreateHasSourceType() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasSourceType", typeof(Uri));
-    public static DataColumn CreateIsRevision() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "isRevision", typeof(string));
+    public static DataColumn CreateHasRevisionNumber() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasRevisionNumber", typeof(int));
+    public static DataColumn CreateHasRevisionName() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasRevisionName", typeof(string));
     public static DataColumn CreateStartedAtTime() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "startedAtTime", typeof(DateTime));
     public static DataColumn CreateTransformedBy() => new DataColumn(RdfPrefixes.Prefix2Uri["transformation"] + "transformedBy", typeof(string));
 }

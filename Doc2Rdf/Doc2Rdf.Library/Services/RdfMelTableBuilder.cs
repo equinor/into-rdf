@@ -1,3 +1,4 @@
+using Common.ProvenanceModels;
 using System;
 using System.Data;
 using Doc2Rdf.Library.Interfaces;
@@ -7,17 +8,67 @@ namespace Doc2Rdf.Library.Services;
 
 public class RdfMelTableBuilder : IRdfTableBuilder
 {
+    private string _builderType;
     private DataTable _dataTable;
 
     public RdfMelTableBuilder()
     {
         _dataTable = new DataTable();
+        _builderType = "mel";
     }
-    public void AddTableName(string tableName)
+
+    public string GetBuilderType() => _builderType;
+
+    public DataTable GetProvenanceTable(Uri dataCollectionUri, Provenance provenance)
+    {
+        _dataTable = new DataTable(); 
+        
+        AddTableName("Provenance");
+        CreateProvenanceSchema();
+        AddProvenanceRow(dataCollectionUri, provenance);
+        
+        return _dataTable;
+    }
+
+    public DataTable GetTransformationTable(Uri dataCollectionUri, Uri transformationUri)
+    {
+        _dataTable = new DataTable();
+        
+        AddTableName("Transformation");
+        CreateTransformationSchema();
+        AddTransformationRow(dataCollectionUri, transformationUri);
+        
+        return _dataTable;
+    }
+
+    public DataTable GetDataCollectionTable(Uri dataCollectionUri, DataTable inputData)
+    {
+        _dataTable = new DataTable();
+
+        AddTableName("DataCollection");
+        CreateDataCollectionSchema();
+        AddDataCollectionRows(dataCollectionUri, inputData);
+
+        return _dataTable;
+    }
+
+    public DataTable GetInputDataTable(Uri dataCollectionUri, Uri transformationUri, Provenance provenance, DataTable inputData)
+    {
+        _dataTable = new DataTable();
+        
+        AddTableName(inputData.TableName);
+        CreateInputDataSchema(provenance, inputData.Columns);
+        AddInputDataRows(dataCollectionUri, transformationUri, inputData);
+
+        return _dataTable;
+    }
+
+    private void AddTableName(string tableName)
     {
         _dataTable.TableName = tableName;
     }
-    public void CreateProvenanceSchema()
+
+    private void CreateProvenanceSchema()
     {
         var idColumn = RdfCommonColumns.CreateIdColumn();
         _dataTable.Columns.Add(idColumn);
@@ -26,34 +77,38 @@ public class RdfMelTableBuilder : IRdfTableBuilder
         _dataTable.Columns.Add(RdfCommonColumns.CreateType());
         _dataTable.Columns.Add(RdfCommonColumns.CreateGeneratedAtTime());
         _dataTable.Columns.Add(RdfCommonColumns.CreateHasDocumentProjectId());
-        _dataTable.Columns.Add(RdfCommonColumns.CreateIsRevision());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasRevisionNumber());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasRevisionName());
         _dataTable.Columns.Add(RdfCommonColumns.CreateFromDataCollection());
-        _dataTable.Columns.Add(RdfCommonColumns.CreateHasFormat());
         _dataTable.Columns.Add(RdfCommonColumns.CreateHasSource());
         _dataTable.Columns.Add(RdfCommonColumns.CreateHasSourceType());
         _dataTable.Columns.Add(RdfCommonColumns.CreateWasRevisionOf());
     }
 
-    public void AddProvenanceRow(Uri dataCollectionUri, Provenance provenance)
+    private void AddProvenanceRow(Uri dataCollectionUri, Provenance provenance)
     {
-        var projectUriSegment = $"{provenance.Facility.FacilityId}/{provenance.Facility.DocumentProjectId}";
-        var revisionOf = provenance.RevisionOf != string.Empty ? new Uri(RdfPrefixes.Prefix2Uri["equinor"] + projectUriSegment + "/mel/" + provenance.RevisionOf) : null;
+        var projectUriSegment = $"{provenance.FacilityId}/{provenance.DocumentProjectId}";
 
+        var previousRevision = provenance.PreviousRevision 
+                                ?? (provenance.PreviousRevisionNumber != string.Empty 
+                                        ? new Uri(RdfPrefixes.Prefix2Uri["equinor"] + projectUriSegment + "/mel/" + provenance.PreviousRevisionNumber) 
+                                        : null);
+        
         _dataTable.Rows.Add(
             dataCollectionUri,
             RdfCommonTypes.CreateCollectionType(),
             provenance.RevisionDate,
-            new Uri(RdfPrefixes.Prefix2Uri["facility"] + provenance.Facility.DocumentProjectId.ToLower()),
+            new Uri(RdfPrefixes.Prefix2Uri["facility"] + provenance.DocumentProjectId),
             provenance.RevisionNumber,
+            provenance.RevisionName,
             provenance.DataCollectionName,
-            new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataFormat.ToString()),
-            new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSource.ToString()),
-            new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSourceType.ToString()),
-            revisionOf
+            new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSource?.ToString() ?? DataSource.Unknown()),
+            new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSourceType?.ToString() ?? DataSourceType.Unknown()),
+            previousRevision
             );
     }
 
-    public void CreateTransformationSchema()
+    private void CreateTransformationSchema()
     {
         var idColumn = RdfCommonColumns.CreateIdColumn();
         _dataTable.Columns.Add(idColumn);
@@ -63,7 +118,7 @@ public class RdfMelTableBuilder : IRdfTableBuilder
         _dataTable.Columns.Add(RdfCommonColumns.CreateUsed());
     }
 
-    public void AddTransformationRow(Uri dataCollectionUri, Uri transformationUri)
+    private void AddTransformationRow(Uri dataCollectionUri, Uri transformationUri)
     {
         _dataTable.Rows.Add(
            transformationUri,
@@ -72,16 +127,29 @@ public class RdfMelTableBuilder : IRdfTableBuilder
         );
     }
 
-    public void CreateDataCollectionSchema()
+    private void CreateDataCollectionSchema()
     {
         var idColumn = RdfCommonColumns.CreateIdColumn();
         _dataTable.Columns.Add(idColumn);
 
         _dataTable.Columns.Add(RdfCommonColumns.CreateHadMember());
-
     }
 
-    public void CreateInputDataSchema(Provenance provenance, DataColumnCollection columns)
+    private void AddDataCollectionRows(Uri dataCollectionUri, DataTable inputData)
+    {
+        foreach (DataRow row in inputData.Rows)
+        {
+            var itemUri = new Uri($"{dataCollectionUri.AbsoluteUri}#row={row["id"]}");
+
+            var dataRow = _dataTable.NewRow();
+            dataRow[0] = dataCollectionUri;
+            dataRow[1] = itemUri;
+
+            _dataTable.Rows.Add(dataRow);
+        }
+    }
+
+    private void CreateInputDataSchema(Provenance provenance, DataColumnCollection columns)
     {
         var idColumn = RdfCommonColumns.CreateIdColumn();
         _dataTable.Columns.Add(idColumn);
@@ -104,21 +172,9 @@ public class RdfMelTableBuilder : IRdfTableBuilder
         }
     }
 
-    public void AddDataCollectionRows(Uri dataCollectionUri, DataTable inputData)
-    {
-        foreach (DataRow row in inputData.Rows)
-        {
-            var itemUri = new Uri($"{dataCollectionUri.AbsoluteUri}#row={row["id"]}");
 
-            var dataRow = _dataTable.NewRow();
-            dataRow[0] = dataCollectionUri;
-            dataRow[1] = itemUri;
 
-            _dataTable.Rows.Add(dataRow);
-        }
-    }
-
-    public void AddInputDataRows(Uri dataCollectionUri, Uri transformationUri, DataTable inputData)
+    private void AddInputDataRows(Uri dataCollectionUri, Uri transformationUri, DataTable inputData)
     {
         const int NumberOfFixedColumns = 2;
 
@@ -130,7 +186,7 @@ public class RdfMelTableBuilder : IRdfTableBuilder
             dataRow[0] = itemUri;
             dataRow[1] = transformationUri;
 
-            //Row number, adjusted for startrow, was added to the input data as column 0 and is
+            //Row number, adjusted for the start row, was added to the input data as column 0 and is
             //skipped here.
             for (var columnIndex = 1; columnIndex < inputData.Columns.Count; columnIndex++)
             {
@@ -140,6 +196,5 @@ public class RdfMelTableBuilder : IRdfTableBuilder
         }
     }
 
-    public DataTable GetDataTable() => _dataTable;
 }
 

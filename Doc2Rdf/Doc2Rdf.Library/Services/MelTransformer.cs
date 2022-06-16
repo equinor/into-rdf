@@ -1,54 +1,89 @@
+using Azure.Storage.Blobs.Models;
+using Common.ProvenanceModels;
+using Common.SpreadsheetModels;
 using Doc2Rdf.Library.Interfaces;
-using Doc2Rdf.Library.Models;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Data;
 using System.IO;
 
 namespace Doc2Rdf.Library.Services;
 
 public class MelTransformer : IMelTransformer
 {
-    private IMelReader _melReader;
-    private IRdfTransformer _rdfTransformer;
+    private readonly IMelReader _melReader;
+    private readonly IRdfTransformer _rdfTransformer;
+    private readonly ILogger<MelTransformer> _logger;
 
-    public MelTransformer(IMelReader melReader, IRdfTransformer rdfTransformer)
+    public MelTransformer(IMelReader melReader, IRdfTransformer rdfTransformer, ILogger<MelTransformer> logger)
     {
         _melReader = melReader;
         _rdfTransformer = rdfTransformer;
+        _logger = logger;
     }
 
-    public string Transform(Stream excelStream, string fileName)
+    public string Transform(Provenance provenance, BlobDownloadResult blob)
     {
-        var details = _melReader.GetSpreadsheetDetails(excelStream, fileName);
+        using Stream excelStream = blob.Content.ToStream();
 
-        return Transform(excelStream, details);
-    }
+        var details = GetDefaultSpreadsheetDetailsForMel();
 
-    public string Transform(Stream excelStream, SpreadsheetDetails details)
-    {
+        _logger.LogInformation("<MelTransformer> - Transform: Starting parsing of spreadsheet data from TIE message");
+
         var data = _melReader.GetSpreadsheetData(excelStream, details);
-        var provenance = CreateProvenance(details);
+
+        _logger.LogInformation("<MelTransformer> - Transform: Spreadsheet table with {numberOfColumns} columns and {numberOfRows} rows retrieved", data.Columns.Count, data.Rows.Count);
 
         return _rdfTransformer.Transform(provenance, data);
     }
 
-    private Provenance CreateProvenance(SpreadsheetDetails details)
+    public string Transform(Stream excelStream, string fileName)
     {
-        var facilityId = GetFacilityId(details.ProjectCode);
-        var facility = new FacilityIdentifiers(facilityId: facilityId, documentProjectId: details.ProjectCode);
+        var spreadsheetInfo = _melReader.GetSpreadsheetInfo(excelStream, fileName);
+
+        return Transform(excelStream, spreadsheetInfo);
+    }
+
+    public string Transform(Stream excelStream, SpreadsheetInfo spreadsheetInfo)
+    {
+        var spreadsheetDetails = spreadsheetInfo.GetSpreadSheetDetails();
+        var data = _melReader.GetSpreadsheetData(excelStream, spreadsheetDetails);
+        var provenance = CreateProvenance(spreadsheetInfo);
+
+        return _rdfTransformer.Transform(provenance, data);
+    }
+
+    private Provenance CreateProvenance(SpreadsheetInfo details)
+    {
+        var facilityId = details.ProjectCode != null ?
+            GetFacilityId(details.ProjectCode) :
+            throw new ArgumentNullException("Spreadsheet information does not contain facility Id");
 
         var previousRevision = details.Revision > 1 ? $"{(details.Revision - 1).ToString("D2")}" : string.Empty;
 
-        var provenance = new Provenance(facility,
-                                        details.FileName,
-                                        details.Revision.ToString("D2"),
-                                        previousRevision,
-                                        details.RevisionDate,
-                                        DataSource.Mel(),
-                                        DataSourceType.File(),
-                                        DataFormat.Xlsx());
+        var provenance = new Provenance(facilityId, DataSource.Mel());
+
+        provenance.DocumentProjectId = details.ProjectCode;
+        provenance.PlantId = "na";
+        provenance.DataCollectionName = details.FileName;
+        provenance.RevisionName = details.Revision.ToString("D2");
+        provenance.RevisionNumber = details.Revision;
+        provenance.RevisionDate = details.RevisionDate;
+        provenance.PreviousRevisionNumber = previousRevision;
+        provenance.DataSourceType = DataSourceType.File();
+        provenance.Contractor = details.Contractor;
+        provenance.RevisionStatus = RevisionStatus.New;
 
         return provenance;
+    }
+
+    private SpreadsheetDetails GetDefaultSpreadsheetDetailsForMel()
+    {
+        const string sheetName = "MEL";
+        const int headerRow = 6;
+        const int dataStartRow = 8;
+        const int startColumn = 1;
+
+        return new SpreadsheetDetails(sheetName, headerRow, dataStartRow, startColumn);
     }
 
     //Hack to add facilityIds to namespace URIs

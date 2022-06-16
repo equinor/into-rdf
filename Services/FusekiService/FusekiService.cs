@@ -43,8 +43,14 @@ namespace Services.FusekiService
         public async Task<FusekiResponse> QueryFusekiServer(string server, string sparql)
         {
             var result = await Query(server, sparql);
+            var fusekiResponse = JsonConvert.DeserializeObject<FusekiResponse>(result);
 
-            return JsonConvert.DeserializeObject<FusekiResponse>(result);
+            if (fusekiResponse == null)
+            {
+                throw new InvalidOperationException("Failed to get response from Sparql query");
+            }
+
+            return fusekiResponse;
         }
 
         private async Task<HttpResponseMessage> ExecuteSparql(string server, string sparql, string contentType)

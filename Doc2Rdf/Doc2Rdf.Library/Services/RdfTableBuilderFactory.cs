@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Doc2Rdf.Library.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -6,28 +8,17 @@ namespace Doc2Rdf.Library.Services;
 
 public class RdfTableBuilderFactory : IRdfTableBuilderFactory
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IEnumerable<IRdfTableBuilder> _rdfTableBuilders;
 
-    public RdfTableBuilderFactory(IServiceProvider serviceProvider)
+    public RdfTableBuilderFactory(IEnumerable<IRdfTableBuilder> rdfTableBuilders)
     {
-        if (serviceProvider == null)
-        {
-            throw new ArgumentNullException("No service provider added to RdfTableBuilder");
-        }
-
-        _serviceProvider = serviceProvider;
+        _rdfTableBuilders = rdfTableBuilders;
     }
 
     public IRdfTableBuilder GetRdfTableBuilder(string dataSource)
     {
-        switch (dataSource)
-        {
-            case "mel":
-                return (IRdfTableBuilder)_serviceProvider.GetRequiredService(typeof(RdfMelTableBuilder));
-            case "shipweight":
-                return (IRdfTableBuilder)_serviceProvider.GetRequiredService(typeof(RdfShipWeightTableBuilder));
-            default:
-                throw new InvalidOperationException($"Unknown source: {dataSource}");
-        }
+        var builder = _rdfTableBuilders.FirstOrDefault(x => x.GetBuilderType() == dataSource) ?? throw new ArgumentException($"Builder of type {dataSource} not available");
+
+        return builder;
     }
 }

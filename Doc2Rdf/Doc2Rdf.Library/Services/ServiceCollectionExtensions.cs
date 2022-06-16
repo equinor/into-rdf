@@ -16,10 +16,8 @@ public static class ServiceCollectionExtension
         services.AddTransient<IShipWeightTransformer, ShipWeightTransformer>();
         services.AddTransient<IRdfPreprocessor, RdfPreprocessor>();
         services.AddTransient<IRdfTableBuilderFactory, RdfTableBuilderFactory>();
-        services.AddTransient<RdfMelTableBuilder>()
-                        .AddTransient<IRdfTableBuilder, RdfMelTableBuilder>(s => s.GetService<RdfMelTableBuilder>()!);
-        services.AddTransient<RdfShipWeightTableBuilder>()
-                        .AddTransient<IRdfTableBuilder, RdfShipWeightTableBuilder>(s => s.GetService<RdfShipWeightTableBuilder>()!);
+        services.AddTransient<IRdfTableBuilder, RdfMelTableBuilder>();
+        services.AddTransient<IRdfTableBuilder, RdfShipWeightTableBuilder>();
         services.AddTransient<IRdfGraphWrapper, RdfGraphWrapper>();
         return services;
     }

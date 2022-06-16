@@ -1,7 +1,9 @@
-﻿using Doc2Rdf.Library.Models;
+﻿using Common.ProvenanceModels;
+using Common.SpreadsheetModels;
 using Doc2Rdf.Library.Interfaces;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,11 +15,17 @@ namespace Doc2Rdf.Library.IO
 {
     public class DomMelReader : IMelReader
     {
-        public SpreadsheetDetails GetSpreadsheetDetails(Stream excelFile, string fileName)
+        private readonly ILogger<DomMelReader> _logger;
+
+        public DomMelReader(ILogger<DomMelReader> logger)
+        {
+            _logger = logger;
+        }
+        public SpreadsheetInfo GetSpreadsheetInfo(Stream excelFile, string fileName)
         {
             var doc = SpreadsheetDocument.Open(excelFile, false);
 
-            var workbookPart = doc.WorkbookPart;
+            var workbookPart = doc.WorkbookPart ?? throw new ArgumentNullException($"The file {fileName} does not contain a workbook");
             var worksheetPart = GetWorksheetPart(doc, "Provenance");
 
             var rows = worksheetPart
@@ -30,7 +38,7 @@ namespace Doc2Rdf.Library.IO
                     pair => pair[1]
                 );
 
-            return new SpreadsheetDetails
+            return new SpreadsheetInfo
             {
                 HeaderRow = int.Parse(rows["HeaderRow"]),
                 StartColumn = NumberFromExcelColumn(rows["StartColumn"]),
@@ -38,8 +46,8 @@ namespace Doc2Rdf.Library.IO
                 DataStartRow = int.Parse(rows["DataStartRow"]),
                 DataEndRow = int.Parse(rows["DataEndRow"]),
                 Contractor = rows["Contractor"],
-                DataSource = rows.TryGetValue("DataType", out string dataType) ? dataType : DataSourceType.Unknown(),
-                IsTransposed = bool.Parse(rows.TryGetValue("IsTransposed", out string isTransposed) ? isTransposed : "false"),
+                DataSource = rows.TryGetValue("DataType", out string? dataType) ? dataType : DataSourceType.Unknown(),
+                IsTransposed = bool.Parse(rows.TryGetValue("IsTransposed", out string? isTransposed) ? isTransposed : "false"),
                 ProjectCode = rows["ProjectCode"],
                 Revision = int.Parse(rows["Revision"].TrimStart('0')),
                 RevisionDate = DateTime.Parse(rows["RevisionDate"]),
@@ -52,66 +60,98 @@ namespace Doc2Rdf.Library.IO
         {
             var doc = SpreadsheetDocument.Open(excelFile, false);
 
-            var workbookPart = doc.WorkbookPart;
+            var workbookPart = doc.WorkbookPart ?? throw new ArgumentNullException("The file does not contain a workbook");
             var worksheetPart = GetWorksheetPart(doc, details.SheetName);
 
+            var headerRow = GetHeaderRow(worksheetPart, workbookPart, details);
+
+            _logger.LogDebug("<DomMelReader> - GetSpreadsheetData: - Created header row with {nbOfColumns} columns", headerRow.Count);
+
+            var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, details);
+
+            _logger.LogDebug("<DomMelReader> - GetSpreadsheetData: - Created dataset with {nbOfRows} rows", dataRows.Count);
+
+            var data = CreateDataTable(details.DataStartRow, headerRow, dataRows, details.SheetName);
+
+            _logger.LogDebug("<DomMelReader> - GetSpreadsheetData: - Created table with {nbOfRows} rows", data.Rows.Count);
+            return data;
+        }
+
+        private List<string> GetHeaderRow(WorksheetPart worksheetPart, WorkbookPart workbookPart, SpreadsheetDetails details)
+        {
             var columnSkip = details.StartColumn - 1;
             var columnTake = details.EndColumn - columnSkip;
-
-            var headerRow = worksheetPart
+            
+            var completeHeaderRow = worksheetPart
                 .Worksheet
                 .Descendants<Row>()
-                .First(r => int.Parse(r.RowIndex) == details.HeaderRow)
-                .Skip(columnSkip)
-                .Take(columnTake)
-                .Select(xmlElement => GetCellValue((Cell)xmlElement, workbookPart))
-                .ToList();
+                .First(r => (r.RowIndex ?? 0) == details.HeaderRow)
+                .Skip(columnSkip);
 
+            var trimmedHeaderRow = columnTake > 0 ? completeHeaderRow.Take(columnTake) : completeHeaderRow;
+
+            return trimmedHeaderRow
+                .Select(xmlElement => GetCellValue((Cell)xmlElement, workbookPart))
+                .Where(xmlElement => xmlElement != "")
+                .ToList();
+        }
+
+        private List<List<string>> GetDataRows(WorksheetPart worksheetPart,
+                                                WorkbookPart workbookPart, 
+                                                List<string> headerRow, 
+                                                SpreadsheetDetails details)
+        {
             var rowSkip = details.DataStartRow - 1;
             var rowTake = details.DataEndRow - rowSkip;
 
             var tagNumberIndex = headerRow.FindIndex(x => x == "Tag Number");
 
-            var dataRows = worksheetPart
+            var completeDataRows = worksheetPart
                 .Worksheet
                 .Descendants<Row>()
-                .Skip(rowSkip)
-                .Take(rowTake)
-                .Where(row => ValidRow(row, tagNumberIndex))
-                .Select(row => GetCompleteRow(workbookPart, row, details.StartColumn, details.EndColumn).ToList())
-                .ToList();
+                .Skip(rowSkip);
+            
+            var trimmedDataRows = rowTake > 0 ? completeDataRows.Take(rowTake) : completeDataRows;
 
-            var data = CreateDataTable(details.DataStartRow, headerRow, dataRows);
-            return data;
+            return trimmedDataRows
+                .Where(row => ValidRow(row, tagNumberIndex))
+                .Select(row => GetCompleteRow(workbookPart, row, details.StartColumn, headerRow.Count).ToList())
+                .ToList();
         }
 
-        private static bool ValidRow(Row row, int tagNumberIndex)
+        private bool ValidRow(Row row, int tagNumberIndex)
         {
-            var decendants = row.Descendants<Cell>();
-            var cell = decendants.ElementAt(tagNumberIndex);
+            var descendants = row.Descendants<Cell>();
 
+            if (descendants.Count() < tagNumberIndex)
+            {
+                return false;
+            }
+            
+            var cell = descendants.ElementAt(tagNumberIndex);
+            
             return cell.CellValue != null;
         }
 
-        private static IEnumerable<string> GetCompleteRow(WorkbookPart wbPart, Row row, int startColumn, int endColumn)
+        private IEnumerable<string> GetCompleteRow(WorkbookPart wbPart, Row row, int startColumn, int endColumn)
         {
-            var decendants = row.Descendants<Cell>();
+            var descendants = row.Descendants<Cell>();
 
             // `i` in the loop below should always be the actual column I am looking at in excel
             // (A = 1, B = 2, ...)
             // maintaining a negative offset to pass to ElementAt which is zero-indexed. If we hit
-            // empty cell they will not be stored in decendants and the difference between actual
+            // empty cell they will not be stored in descendants and the difference between actual
             // excel columns and what we are iterating through using ElementAt will increase.
             var offset = -1;
 
-            for (int i = startColumn; i <= endColumn && i + offset < decendants.Count(); i++)
+            for (int i = startColumn; i <= endColumn && i + offset < descendants.Count(); i++)
             {
-                var cell = decendants.ElementAt(i + offset);
-                var reference = cell.CellReference.ToString().ToLower();
+                var cell = descendants.ElementAt(i + offset) ?? throw new InvalidOperationException("Spreadsheet does not contain cell");
+                var reference = cell.CellReference?.ToString()?.ToLower() ?? throw new InvalidOperationException("Spreadsheet cell does not contain cell reference");
                 var columnLetters = Regex.Match(reference, @"[a-z]+").Value;
                 var columnNumber = NumberFromExcelColumn(columnLetters);
 
-                // row.Decendants<Cell> will not give us empty cells so if we notice skip in
+                // row.Descendants<Cell> will not give us empty cells so if we notice skip in
                 // cell reference yield empty cells until we catch up. See
                 // https://stackoverflow.com/questions/36100011/c-sharp-open-xml-empty-cells-are-getting-skipped-while-getting-data-from-excel
                 for (; i < columnNumber; i++)
@@ -126,22 +166,34 @@ namespace Doc2Rdf.Library.IO
 
         private static WorksheetPart GetWorksheetPart(SpreadsheetDocument doc, string sheetName)
         {
-            var book = doc
-                .WorkbookPart
-                .Workbook;
+            var book = doc?
+                .WorkbookPart?
+                .Workbook ?? throw new InvalidOperationException("Spreadsheet does not contain workbook");
 
             var sheets = book
                 .Descendants<Sheet>();
 
             var sheet = sheets
-                .First(s => s.Name == sheetName);
+                .First(s => s.Name?.ToString()?.Contains(sheetName) ?? false);
 
-            var worksheetPart = (WorksheetPart)doc.WorkbookPart.GetPartById(sheet.Id);
+            //Handling nullable warning for GetPartById
+            var sheetId = String.Empty;
+            if (sheet?.Id is not null)
+            {
+                sheetId = sheet.Id;
+            }
 
+            if (string.IsNullOrEmpty(sheetId))
+            {
+                throw new InvalidOperationException($"Spreadsheet does not contain sheet {sheetName}");
+            }
+
+            var worksheetPart = (WorksheetPart)doc.WorkbookPart.GetPartById(sheetId);
+                    
             return worksheetPart;
         }
 
-        private static string GetCellValue(Cell cell, WorkbookPart wbPart)
+        private string GetCellValue(Cell cell, WorkbookPart wbPart)
         {
             if (cell == null)
             {
@@ -172,7 +224,11 @@ namespace Doc2Rdf.Library.IO
                         }
                         break;
                     case CellValues.String:
-                        value = cell.CellValue.InnerText;
+                        if (cell.CellValue != null)
+                        {
+                            value = cell.CellValue.InnerText;
+                        }
+                        
                         break;
                 }
             }
@@ -181,6 +237,7 @@ namespace Doc2Rdf.Library.IO
                 // For formulas
                 value = cell.CellValue.InnerText;
             }
+
             return value;
         }
 
@@ -197,9 +254,10 @@ namespace Doc2Rdf.Library.IO
             return retVal;
         }
 
-        private static DataTable CreateDataTable(int startRow, List<string> headers, List<List<string>> data)
+        private static DataTable CreateDataTable(int startRow, List<string> headers, List<List<string>> data, string sheetName)
         {
             var inputDataTable = new DataTable();
+            inputDataTable.TableName = sheetName ?? "InputData";
 
             inputDataTable.Columns.Add("id");
 
@@ -213,13 +271,14 @@ namespace Doc2Rdf.Library.IO
                 var row = inputDataTable.NewRow();
                 row[0] = (startRow + i).ToString();
 
-                for (int j = 1; j <= data[i].Count; j++)
+                var dataColumns = data[i].Count > headers.Count ? headers.Count : data[i].Count;
+                for (int j = 1; j <= dataColumns; j++)
                 {
                     row[j] = data[i][j - 1];
                 }
                 inputDataTable.Rows.Add(row);
             }
-
+            
             return inputDataTable;
         }
     }

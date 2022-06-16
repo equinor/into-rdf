@@ -2,6 +2,7 @@ using Common.AppsettingsModels;
 using Common.ProvenanceModels;
 using Common.TieModels;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Services.FusekiService;
 
 namespace Services.ProvenanceService;
@@ -10,53 +11,70 @@ public class ProvenanceService : IProvenanceService
 {
     private readonly IConfiguration _configuration;
     private readonly IFusekiService _fusekiService;
+    private readonly ILogger<ProvenanceService> _logger;
 
-    public ProvenanceService(IConfiguration configuration, IFusekiService fusekiService)
+    public ProvenanceService(IConfiguration configuration,
+                             IFusekiService fusekiService,
+                             ILogger<ProvenanceService> logger)
     {
         _configuration = configuration;
         _fusekiService = fusekiService;
+        _logger = logger;
     }
 
     public async Task<Provenance> CreateProvenanceFromTieMessage(TieData tieData)
     {
-        var previousRevision = await GetPreviousRevision(tieData);
+        var previousRevisions = await GetPreviousRevision(tieData);
         var revisionName = GetRevisionName(tieData);
         var revisionDate = GetRevisionDate(tieData);
-     
-        string revisionStatus;
+
+        RevisionStatus revisionStatus;
         int revisionNumber;
 
-        if (previousRevision.RevisionName == revisionName || previousRevision.RevisionDate == revisionDate)
+        var existingRevision = previousRevisions.FirstOrDefault(r => r.RevisionName?.ToLower() == revisionName.ToLower());
+        var latestRevision = previousRevisions.Aggregate((r1, r2) => r1.RevisionNumber > r2.RevisionNumber ? r1 : r2);
+
+        if (existingRevision == null && (latestRevision == null || latestRevision.RevisionDate <= revisionDate))
         {
-            revisionStatus = "UPDATE";
-            revisionNumber = previousRevision.RevisionNumber;
+            revisionStatus = RevisionStatus.New;
+            revisionNumber = latestRevision != null ? latestRevision.RevisionNumber + 1 : 1;
         }
-        else if (previousRevision.RevisionNumber == 0 || previousRevision.RevisionNumber > 0 && previousRevision.RevisionDate < revisionDate)
+        else if (existingRevision == null && (latestRevision.RevisionDate > revisionDate))
         {
-            revisionStatus = "NEW";
-            revisionNumber = previousRevision.RevisionNumber + 1;
+            revisionStatus = RevisionStatus.Unknown;
+            revisionNumber = -1;
+        }
+        else if (existingRevision != null && latestRevision.RevisionDate <= revisionDate)
+        {
+            revisionStatus = RevisionStatus.Update;
+            revisionNumber = latestRevision.RevisionNumber;
+        }
+        else if (existingRevision != null && latestRevision.RevisionDate > revisionDate)
+        {
+            revisionStatus = RevisionStatus.Old;
+            revisionNumber = -1;
         }
         else
         {
             throw new InvalidOperationException("Unable to establish provenance information");
         }
 
-        return new Provenance
-        {
-            FacilityId = GetFacilityIdentifier(tieData).ToLower(),
-            DocumentProjectId = GetDocumentProjectId(tieData).ToLower(),
-            PlantId = GetPlantId().ToLower(),
-            DataCollectionName = GetDataCollectionName(tieData),
-            RevisionName = revisionName.ToLower(),
-            RevisionNumber = revisionNumber,
-            PreviousRevision = previousRevision.FullName,
-            RevisionDate = revisionDate,
-            RevisionStatus = revisionStatus,
-            DataSource = GetDataSource(),
-            DataSourceType = GetDataSourceType(),
-            DataSourceTable = GetDataSourceTable().ToLower(),
-            Contractor = GetContractor(tieData),
-        };
+        _logger.LogInformation("ProvenanceService> - CreateProvenanceFromTieMessage: Generated revision status: '{status}'", revisionStatus);
+
+        var provenance = new Provenance(GetFacilityIdentifier(tieData).ToLower(), GetDataSource());
+
+        provenance.DocumentProjectId = GetDocumentProjectId(tieData).ToLower();
+            provenance.PlantId = GetPlantId().ToLower();
+            provenance.DataCollectionName = GetDataCollectionName(tieData);
+            provenance.RevisionName = revisionName.ToLower();
+            provenance.RevisionNumber = revisionNumber;
+            provenance.PreviousRevision = latestRevision?.FullName;
+            provenance.RevisionDate = revisionDate;
+            provenance.RevisionStatus = revisionStatus;
+            provenance.DataSourceType = GetDataSourceType();
+            provenance.Contractor = GetContractor(tieData);
+
+        return provenance;
     }
 
     private string GetFacilityIdentifier(TieData tieData)
@@ -88,7 +106,7 @@ public class ProvenanceService : IProvenanceService
         return tieData.ObjectData.RevisionNumber ?? throw new ArgumentException("Tie data doesn't contain revision number");
     }
 
-    private async Task<RevisionInfo> GetPreviousRevision(TieData tieData)
+    private async Task<List<RevisionInfo>> GetPreviousRevision(TieData tieData)
     {
         var rdfServerConf = _configuration.GetSection("Servers").Get<List<RdfServer>>();
         var rdfServerName = rdfServerConf[0].Name;
@@ -98,37 +116,60 @@ public class ProvenanceService : IProvenanceService
 
         var response = await _fusekiService.QueryFusekiServer(rdfServerName, query);
 
-        var revisionInfo = new RevisionInfo();
+        List<RevisionInfo> previousRevisions = new List<RevisionInfo>();
 
         if (response.Results.Bindings.Count == 0)
         {
-            revisionInfo.RevisionNumber = 0;
+            return previousRevisions;
         }
 
-        else
+        var revisions = response.Results.Bindings.SelectMany(x => x).ToList();
+        var revisionInfo = new RevisionInfo();
+
+        foreach (var revision in revisions)
         {
-            var triples = response.Results.Bindings.Single();
-
-            Triplet? triple;
-            var tripleExist = triples.TryGetValue("latestRevisionNumber", out triple);
-
-            if (triple != null)
+            switch (revision.Key)
             {
-                var revisionNumber = 0;
-                var revisionExist = Int32.TryParse(triple.Value, out revisionNumber);
-                revisionInfo.RevisionNumber = revisionNumber;
+                case "revision":
+                    {
+                        if (revisionInfo.FullName != null)
+                        {
+                            previousRevisions.Add(revisionInfo);
+                        }
+
+                        revisionInfo = new RevisionInfo();
+                        revisionInfo.FullName = revision.Value?.Value != null ? new Uri(revision.Value.Value) : null;
+                        break;
+                    }
+                case "revisionDate":
+                    {
+                        revisionInfo.RevisionDate = revision.Value?.Value != null ? DateTime.Parse(revision.Value.Value) : null;
+                        break;
+                    }
+                case "revisionName":
+                    {
+                        revisionInfo.RevisionName = revision.Value?.Value ?? null;
+                        break;
+                    }
+                case "revisionNumber":
+                    {
+                        revisionInfo.RevisionNumber = revision.Value?.Value != null ? Int32.Parse(revision.Value.Value) : 0;
+                        break;
+                    }
+                default:
+                    {
+                        _logger.LogWarning("<ProvenanceService> - GetPreviousRevision: Unknown revision property");
+                        break;
+                    }
             }
-
-            tripleExist = triples.TryGetValue("revision", out triple);
-            revisionInfo.FullName = triple != null && triple.Value != null ? new Uri(triple.Value) : null;
-
-            tripleExist = triples.TryGetValue("revisionDate", out triple);
-            revisionInfo.RevisionDate = triple != null && triple.Value != null ? DateTime.Parse(triple.Value) : null;
-
-            tripleExist = triples.TryGetValue("revisionName", out triple);
-            revisionInfo.RevisionName = triple != null ? triple.Value : String.Empty; 
         }
-        return revisionInfo;
+
+        if (revisionInfo.FullName != null)
+        {
+            previousRevisions.Add(revisionInfo);
+        }
+
+        return previousRevisions;
     }
 
     private DateTime GetRevisionDate(TieData tieData)
@@ -153,11 +194,6 @@ public class ProvenanceService : IProvenanceService
         return DataSourceType.File();
     }
 
-    private string GetDataSourceTable()
-    {
-        return "NA";
-    }
-
     private string GetContractor(TieData tieData)
     {
         return tieData.ObjectData.ContractorCode ?? "NA";
@@ -169,28 +205,16 @@ public class ProvenanceService : IProvenanceService
                           prefix facility: <http://rdf.equinor.com/ontology/facility#>
                           prefix prov: <http://www.w3.org/ns/prov#>
 
-                    SELECT ?revision ?latestRevisionNumber ?revisionDate ?revisionName
+                    SELECT ?revision ?revisionDate ?revisionNumber ?revisionName
                     WHERE 
                     {{
-                        {{
-                            SELECT ?DocumentProjectId (MAX(?revisionNumber) AS ?latestRevisionNumber)
-                            WHERE
-                            {{
-                                ?dataset facility:hasDocumentProjectId ?DocumentProjectId  ;
-                                     sor:hasRevisionNumber ?revisionNumber .
-
-                                
-
-                                 FILTER (?DocumentProjectId = facility:{documentProjectId}) 
-                            }}
-                            GROUP BY ?DocumentProjectId
-                        }}
-
-                        ?revision facility:hasDocumentProjectId ?DocumentProjectId  ;
-                            sor:hasRevisionNumber ?latestRevisionNumber ;
+                        ?revision facility:hasDocumentProjectId ?DocumentProjectId ;        
                             prov:generatedAtTime ?revisionDate .
 
+                        OPTIONAL {{?revision sor:hasRevisionNumber ?revisionNumber .}}
                         OPTIONAL {{?revision sor:hasRevisionName ?revisionName .}}
+
+                        FILTER (?DocumentProjectId = facility:{documentProjectId}) 
                     }}";
     }
 

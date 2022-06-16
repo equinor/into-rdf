@@ -20,7 +20,7 @@ public static class SetupServices
         services.AddScoped<IFusekiService, FusekiService>();
         services.AddScoped<ITieMessageService, TieMessageService>();
         services.AddScoped <IProvenanceService, ProvenanceService>(); 
-            services.AddDoc2RdfLibraryServices();
+        services.AddDoc2RdfLibraryServices();
 
         return services;
     }

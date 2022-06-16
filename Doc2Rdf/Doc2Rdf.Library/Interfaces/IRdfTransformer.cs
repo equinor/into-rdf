@@ -1,5 +1,5 @@
 using System.Data;
-using Doc2Rdf.Library.Models;
+using Common.ProvenanceModels;
 
 namespace Doc2Rdf.Library.Interfaces
 {
