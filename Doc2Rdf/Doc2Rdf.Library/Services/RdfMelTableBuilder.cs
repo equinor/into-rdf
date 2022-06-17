@@ -87,8 +87,7 @@ public class RdfMelTableBuilder : IRdfTableBuilder
 
     private void AddProvenanceRow(Uri dataCollectionUri, Provenance provenance)
     {
-        var projectUriSegment = $"{provenance.FacilityId}/{provenance.DocumentProjectId}";
-
+        var projectUriSegment = $"{provenance.FacilityId}/{provenance.DocumentProjectId?.ToLower()}";
         var previousRevision = provenance.PreviousRevision 
                                 ?? (provenance.PreviousRevisionNumber != string.Empty 
                                         ? new Uri(RdfPrefixes.Prefix2Uri["equinor"] + projectUriSegment + "/mel/" + provenance.PreviousRevisionNumber) 

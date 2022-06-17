@@ -35,7 +35,7 @@ namespace Api.Controllers
         {
             if (postedFile is null) return BadRequest("No file");
             var turtle = await _rdfService.ConvertDocToRdf(postedFile);
-            var result = await _rdfService.PostToFuseki(server, turtle);
+            var result = await _rdfService.PostToFusekiAsUser(server, turtle);
             return result.IsSuccessStatusCode ? Ok(turtle) : BadRequest(result);
         }
 
@@ -54,7 +54,7 @@ namespace Api.Controllers
             if (formFile is null) return BadRequest("No file");
             using var streamReader = new StreamReader(formFile.OpenReadStream(), Encoding.UTF8);
             var content = await streamReader.ReadToEndAsync();
-            var result = await _rdfService.PostToFuseki(server, content ?? string.Empty);
+            var result = await _rdfService.PostToFusekiAsUser(server, content ?? string.Empty);
             return result.IsSuccessStatusCode ? Ok(content) : BadRequest(result);
         }
     }

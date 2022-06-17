@@ -29,7 +29,7 @@ namespace Api.Controllers
         [HttpPost("{server}/sparql")]
         public async Task<IActionResult> Query(string server, [FromBody] SparqlQuery sparql)
         {
-            return Ok(await _rdfService.QueryFuseki(server, sparql.Query));
+            return Ok(await _rdfService.QueryFusekiAsUser(server, sparql.Query));
         }
     }
 

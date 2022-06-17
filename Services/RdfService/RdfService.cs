@@ -77,8 +77,8 @@ namespace Services.RdfService
 
             //TODO - Push transformed data to Fuseki
             //Task created 73432 - Push transformed data to correct Fuseki instance
-            /*var server = "dugtrio";
-            var response = await PostToFuseki(server, rdfGraphData);
+            var server = "dugtrio";
+            var response = await PostToFusekiAsApp(server, rdfGraphData);
 
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
@@ -87,17 +87,22 @@ namespace Services.RdfService
             else
             {
                 _logger.LogError("<RdfService> - HandleStorageFiles: Upload to Fuseki server {name} failed", server);
-            }*/
+            }
         }
 
-        public async Task<HttpResponseMessage> PostToFuseki(string server, string data)
+        public async Task<HttpResponseMessage> PostToFusekiAsApp(string server, string data)
         {
-            return await _fusekiService.Post(server, data);
+            return await _fusekiService.PostAsApp(server, data);
         }
 
-        public async Task<string> QueryFuseki(string server, string query)
+        public async Task<HttpResponseMessage> PostToFusekiAsUser(string server, string data)
         {
-            return await _fusekiService.Query(server, query);
+            return await _fusekiService.PostAsUser(server, data);
+        }
+
+        public async Task<string> QueryFusekiAsUser(string server, string query)
+        {
+            return await _fusekiService.QueryAsUser(server, query);
         }
     }
 }

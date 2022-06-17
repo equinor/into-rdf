@@ -7,8 +7,8 @@ namespace Services.RdfService
     public interface IRdfService
     {
         Task<string> ConvertDocToRdf(IFormFile formFile);
-        Task<HttpResponseMessage> PostToFuseki(string server, string data);
-        Task<string> QueryFuseki(string server, string query);
+        Task<HttpResponseMessage> PostToFusekiAsUser(string server, string data);
+        Task<string> QueryFusekiAsUser(string server, string query);
         Task HandleStorageFiles(List<BlobDownloadResult> blobData);
     }
 }

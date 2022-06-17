@@ -14,35 +14,55 @@ namespace Services.FusekiService
             _downstreamWebApi = downstreamWebApi;
         }
 
-        public async Task<HttpResponseMessage> Post(string server, string turtle)
+        public async Task<HttpResponseMessage> PostAsApp(string server, string turtle)
         {
-            var contentType = "text/turtle";
-            return await _downstreamWebApi.CallWebApiForUserAsync(server.ToLower(), options =>
-            {
-                options.HttpMethod = HttpMethod.Post;
-                options.RelativePath = "ds/data";
-                options.CustomizeHttpRequestMessage = message =>
-                {
-                    message.Headers.Add("Accept", contentType);
-                    message.Content = new StringContent(turtle);
-                    message.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
-                };
-            });
+            return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForData(options, turtle));
         }
 
-        public async Task<string> Query(string server, string sparql)
+        public async Task<HttpResponseMessage> PostAsUser(string server, string turtle)
         {
-            var response = await ExecuteSparql(server, sparql, "application/json");
+            return await _downstreamWebApi.CallWebApiForUserAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForData(options, turtle));
+        }
+
+        public async Task<string> QueryAsApp(string server, string sparql)
+        {
+            var response = await ExecuteSparqlAsApp(server, sparql, "application/json");
+
+            return await SerializeResponse(response);
+        }
+
+        public async Task<string> QueryAsUser(string server, string sparql)
+        {
+            var response = await ExecuteSparqlAsUser(server, sparql, "application/json");
+
+            return await SerializeResponse(response);
+        }
+
+        public async Task<FusekiResponse> QueryFusekiResponseAsApp(string server, string sparql)
+        {
+            var result = await QueryAsApp(server, sparql);
+
+            return DeserializeToFusekiResponse(result);
+        }
+
+        public async Task<FusekiResponse> QueryFusekiResponseAsUser(string server, string sparql)
+        {
+            var result = await QueryAsUser(server, sparql);
+            
+            return DeserializeToFusekiResponse(result);
+        }
+
+        private async Task<string> SerializeResponse(HttpResponseMessage response)
+        {
             var content = await response.Content.ReadAsStringAsync();
 
             if (content.StartsWith("Parse error")) throw new FusekiException(content);
-            
+
             return content;
         }
 
-        public async Task<FusekiResponse> QueryFusekiServer(string server, string sparql)
+        private FusekiResponse DeserializeToFusekiResponse(string result)
         {
-            var result = await Query(server, sparql);
             var fusekiResponse = JsonConvert.DeserializeObject<FusekiResponse>(result);
 
             if (fusekiResponse == null)
@@ -53,10 +73,18 @@ namespace Services.FusekiService
             return fusekiResponse;
         }
 
-        private async Task<HttpResponseMessage> ExecuteSparql(string server, string sparql, string contentType)
+        private async Task<HttpResponseMessage> ExecuteSparqlAsApp(string server, string sparql, string contentType)
         {
-            return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options =>
-            {
+            return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForQuery(options, sparql, contentType));
+        }
+
+        private async Task<HttpResponseMessage> ExecuteSparqlAsUser(string server, string sparql, string contentType)
+        {
+            return  await _downstreamWebApi.CallWebApiForUserAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForQuery(options, sparql, contentType));
+        }
+
+        private DownstreamWebApiOptions GetDownStreamWebApiOptionsForQuery(DownstreamWebApiOptions options, string sparql, string contentType)
+        {
                 options.HttpMethod = HttpMethod.Post;
                 options.RelativePath = "ds/query";
                 options.CustomizeHttpRequestMessage = message =>
@@ -67,7 +95,24 @@ namespace Services.FusekiService
                         new("query", sparql)
                     });
                 };
-            });
+
+            return options;
+        }
+
+        private DownstreamWebApiOptions GetDownStreamWebApiOptionsForData(DownstreamWebApiOptions options, string turtle)
+        {
+            var contentType = "text/turtle";
+
+            options.HttpMethod = HttpMethod.Post;
+            options.RelativePath = "ds/data";
+            options.CustomizeHttpRequestMessage = message =>
+            {
+                message.Headers.Add("Accept", contentType);
+                message.Content = new StringContent(turtle);
+                message.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+            };
+
+            return options;
         }
     }
 }

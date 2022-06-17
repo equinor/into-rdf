@@ -25,31 +25,33 @@ public class ProvenanceService : IProvenanceService
     public async Task<Provenance> CreateProvenanceFromTieMessage(TieData tieData)
     {
         var previousRevisions = await GetPreviousRevision(tieData);
+        _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromTieMessage: Retrieved {count} previous versions", previousRevisions.Count);
+        
         var revisionName = GetRevisionName(tieData);
         var revisionDate = GetRevisionDate(tieData);
 
         RevisionStatus revisionStatus;
         int revisionNumber;
 
-        var existingRevision = previousRevisions.FirstOrDefault(r => r.RevisionName?.ToLower() == revisionName.ToLower());
-        var latestRevision = previousRevisions.Aggregate((r1, r2) => r1.RevisionNumber > r2.RevisionNumber ? r1 : r2);
+        var existingRevision = previousRevisions.Count > 0 ? previousRevisions.FirstOrDefault(r => r.RevisionName?.ToLower() == revisionName.ToLower()) : null;
+        var latestRevision = previousRevisions.Count > 0 ? previousRevisions.Aggregate((r1, r2) => r1.RevisionNumber > r2.RevisionNumber ? r1 : r2) : null;
 
         if (existingRevision == null && (latestRevision == null || latestRevision.RevisionDate <= revisionDate))
         {
             revisionStatus = RevisionStatus.New;
             revisionNumber = latestRevision != null ? latestRevision.RevisionNumber + 1 : 1;
         }
-        else if (existingRevision == null && (latestRevision.RevisionDate > revisionDate))
+        else if (existingRevision == null && latestRevision != null && latestRevision.RevisionDate > revisionDate)
         {
             revisionStatus = RevisionStatus.Unknown;
             revisionNumber = -1;
         }
-        else if (existingRevision != null && latestRevision.RevisionDate <= revisionDate)
+        else if (existingRevision != null && latestRevision != null && latestRevision.RevisionDate <= revisionDate)
         {
             revisionStatus = RevisionStatus.Update;
             revisionNumber = latestRevision.RevisionNumber;
         }
-        else if (existingRevision != null && latestRevision.RevisionDate > revisionDate)
+        else if (existingRevision != null && latestRevision != null && latestRevision.RevisionDate > revisionDate)
         {
             revisionStatus = RevisionStatus.Old;
             revisionNumber = -1;
@@ -59,7 +61,7 @@ public class ProvenanceService : IProvenanceService
             throw new InvalidOperationException("Unable to establish provenance information");
         }
 
-        _logger.LogInformation("ProvenanceService> - CreateProvenanceFromTieMessage: Generated revision status: '{status}'", revisionStatus);
+        _logger.LogInformation("<ProvenanceService> - CreateProvenanceFromTieMessage: Generated revision status: '{status}'", revisionStatus);
 
         var provenance = new Provenance(GetFacilityIdentifier(tieData).ToLower(), GetDataSource());
 
@@ -68,7 +70,7 @@ public class ProvenanceService : IProvenanceService
             provenance.DataCollectionName = GetDataCollectionName(tieData);
             provenance.RevisionName = revisionName.ToLower();
             provenance.RevisionNumber = revisionNumber;
-            provenance.PreviousRevision = latestRevision?.FullName;
+            provenance.PreviousRevision = latestRevision?.FullName ?? null;
             provenance.RevisionDate = revisionDate;
             provenance.RevisionStatus = revisionStatus;
             provenance.DataSourceType = GetDataSourceType();
@@ -111,10 +113,12 @@ public class ProvenanceService : IProvenanceService
         var rdfServerConf = _configuration.GetSection("Servers").Get<List<RdfServer>>();
         var rdfServerName = rdfServerConf[0].Name;
 
+        _logger.LogDebug("ProvenanceService> - GetPreviousRevision: Retrieving data from {server}", rdfServerName);
+
         string documentProjectId = GetDocumentProjectId(tieData);
         string query = GetRevisionInfoQuery(documentProjectId);
 
-        var response = await _fusekiService.QueryFusekiServer(rdfServerName, query);
+        var response = await _fusekiService.QueryFusekiResponseAsApp(rdfServerName, query);
 
         List<RevisionInfo> previousRevisions = new List<RevisionInfo>();
 
