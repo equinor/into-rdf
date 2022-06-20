@@ -65,10 +65,10 @@ public class ProvenanceService : IProvenanceService
 
         var provenance = new Provenance(GetFacilityIdentifier(tieData).ToLower(), GetDataSource());
 
-        provenance.DocumentProjectId = GetDocumentProjectId(tieData).ToLower();
-            provenance.PlantId = GetPlantId().ToLower();
+        provenance.DocumentProjectId = GetDocumentProjectId(tieData);
+            provenance.PlantId = GetPlantId();
             provenance.DataCollectionName = GetDataCollectionName(tieData);
-            provenance.RevisionName = revisionName.ToLower();
+            provenance.RevisionName = revisionName;
             provenance.RevisionNumber = revisionNumber;
             provenance.PreviousRevision = latestRevision?.FullName ?? null;
             provenance.RevisionDate = revisionDate;
@@ -89,9 +89,9 @@ public class ProvenanceService : IProvenanceService
     private string GetDocumentProjectId(TieData tieData)
     {
         var objectName = tieData.InterfaceData.ObjectName ?? throw new ArgumentException("Tie data doesn't contain document project id");
-        var docProd = tieData.InterfaceData.ObjectName.Substring(0, tieData.InterfaceData.ObjectName.IndexOf("-"));
+        var documentProjectId = tieData.InterfaceData.ObjectName.Substring(0, tieData.InterfaceData.ObjectName.IndexOf("-"));
 
-        return tieData.InterfaceData.ObjectName.Substring(0, tieData.InterfaceData.ObjectName.IndexOf("-"));
+        return documentProjectId ;
     }
 
     private string GetPlantId()
@@ -205,8 +205,8 @@ public class ProvenanceService : IProvenanceService
 
     private string GetRevisionInfoQuery(string documentProjectId)
     {
-        return @$"prefix sor: <http://rdf.equinor.com/ontology/sor#>
-                          prefix facility: <http://rdf.equinor.com/ontology/facility#>
+        return @$"prefix sor: <https://rdf.equinor.com/ontology/sor#>
+                          prefix facility: <https://rdf.equinor.com/ontology/facility#>
                           prefix prov: <http://www.w3.org/ns/prov#>
 
                     SELECT ?revision ?revisionDate ?revisionNumber ?revisionName
