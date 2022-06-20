@@ -8,7 +8,6 @@
       }
     },
     "logLevel": {
-      "default": "Debug",
       "Services.RdfService.RdfService": "Debug",
       "Services.ProvenanceService.ProvenanceService": "Debug",
       "Doc2Rdf.Library.Services.MelTransformer": "Debug",
