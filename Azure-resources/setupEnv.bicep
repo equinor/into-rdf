@@ -82,9 +82,6 @@ resource FuncServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   location: location
   tags: resourceTags
   kind: 'linux'
-  properties: {
-    reserved: true
-  }
   sku: {
     name: 'Y1'
   }
