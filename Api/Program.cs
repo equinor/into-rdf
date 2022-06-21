@@ -3,11 +3,18 @@ using Api.Utils.Cors;
 using Api.Utils.Mvc;
 using Api.Utils.Setups;
 using Api.Utils.Swagger;
-using Common;
+using Common.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, logConfiguration) =>
+{
+    logConfiguration.ConfigureBaseLogging(context);
+    logConfiguration.AddApplicationInsightsLogging(services);
+});
 
 // Add services to the container.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -26,6 +33,7 @@ builder.Services.AddMvc(options => options.Filters.Add<SplinterExceptionActionFi
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSplinterServices();
 builder.Services.SetupAuthorization();
+builder.Services.AddApplicationInsightsTelemetry();
 builder.SetupKeyVault();
 
 var app = builder.Build();
