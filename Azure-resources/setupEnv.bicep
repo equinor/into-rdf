@@ -77,6 +77,19 @@ resource Api 'Microsoft.Web/sites@2021-03-01' = {
   dependsOn: []
 }
 
+resource FuncServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
+  name: '${resourcePrefix}-func-plan'
+  location: location
+  tags: resourceTags
+  kind: 'linux'
+  properties: {
+    reserved: true
+  }
+  sku: {
+    name: 'Y1'
+  }
+}
+
 resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
   name: '${resourcePrefix}-func'
   kind: 'functionapp,linux'
@@ -86,7 +99,7 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
     type: 'SystemAssigned'
   }
   properties: {
-    serverFarmId: AppServicePlan.id
+    serverFarmId: FuncServicePlan.id
     httpsOnly: true
     reserved: true
     siteConfig: {
