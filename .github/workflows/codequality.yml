@@ -5,6 +5,10 @@ on:
         secrets:
             SNYK_TOKEN:
                 required: true
+            AZURE_CLIENT_ID:
+                required: true
+            AZURE_TENANT_ID:
+                required: true
   schedule:
   # Run every monday at 0200UTC
     - cron: "0 2 * * 1"
@@ -52,3 +56,31 @@ jobs:
         run: snyk test --fail-on=all --severity-threshold=high --file=SpineSplinter.sln
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          
+  infrastructure:
+      name: 🏗️ Verify infrastructure
+      runs-on: ubuntu-latest
+      environment: dev
+      permissions:
+        id-token: write
+        contents: read
+      steps:
+        - uses: actions/checkout@v3
+
+        - name: Azure Login
+          uses: Azure/login@v1.4.4
+          with:
+            client-id: ${{ secrets.AZURE_CLIENT_ID }}
+            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+            allow-no-subscriptions: true
+
+        - name: Verify Infrastructure as Code
+          working-directory: Azure-resources
+          run: | 
+            az deployment group what-if \
+            --resource-group 'dev-spinesplinter' \
+            --template-file ./setupEnv.bicep \
+            --parameters \
+            env='dev' \
+            sku='B1' \
+            resourcePrefix='dev-spinesplinter'
