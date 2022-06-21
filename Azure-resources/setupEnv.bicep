@@ -106,7 +106,6 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
       netFrameworkVersion: dotnetVersion
       linuxFxVersion: linuxFxVersion
       http20Enabled: true
-      alwaysOn: true
       appSettings: [
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
