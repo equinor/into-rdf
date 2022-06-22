@@ -60,7 +60,6 @@ jobs:
   infrastructure:
       name: 🏗️ Verify infrastructure
       runs-on: ubuntu-latest
-      environment: dev
       permissions:
         id-token: write
         contents: read
