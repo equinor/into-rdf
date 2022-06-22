@@ -96,6 +96,7 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
     serverFarmId: FuncServicePlan.id
     httpsOnly: true
     reserved: true
+    dailyMemoryTimeQuota: 1000
     siteConfig: {
       netFrameworkVersion: dotnetVersion
       http20Enabled: true
