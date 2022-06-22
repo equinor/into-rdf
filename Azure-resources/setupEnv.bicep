@@ -34,9 +34,6 @@ resource AppServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   location: location
   tags: resourceTags
   kind: 'linux'
-  properties: {
-    reserved: true
-  }
   sku: {
     name: sku
   }
@@ -101,7 +98,6 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
     reserved: true
     siteConfig: {
       netFrameworkVersion: dotnetVersion
-      linuxFxVersion: linuxFxVersion
       http20Enabled: true
       appSettings: [
         {
