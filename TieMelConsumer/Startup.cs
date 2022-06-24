@@ -40,6 +40,7 @@ public class Startup : FunctionsStartup
             .AddInMemoryTokenCaches();
 
         services.AddSplinterServices();
+        services.AddServiceBusClient(configuration);
 
         services.AddAzureClients(opt =>
         {

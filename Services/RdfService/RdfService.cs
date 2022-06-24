@@ -36,7 +36,7 @@ namespace Services.RdfService
             return _melTransformer.Transform(stream, formFile.FileName);
         }
 
-        public async Task HandleStorageFiles(List<BlobDownloadResult> blobData)
+        public async Task<Provenance?> HandleStorageFiles(List<BlobDownloadResult> blobData)
         {
             var tieData = _tieMessageService.ParseXmlMessage(blobData);
             _logger.LogInformation("<RdfService> - HandleStorageFiles: Successfully parsed TIE message for {TieFileData}", tieData.FileData.Name);
@@ -48,7 +48,7 @@ namespace Services.RdfService
                 case RevisionStatus.Old:
                     {
                         _logger.LogError("<RdfService> - HandleStorageFiles: Newer revisions of the submitted TIE data in {TieFileData} exist. Data will not be uploaded", tieData.FileData.Name);
-                        return;
+                        return null;
                     }
                 //TODO - How to handle unknown revisions? Discard or attempt to place them in their proper place in the revision chain.
                 //Task created 73431 - Handling previously "unknown" revisions.
@@ -56,7 +56,7 @@ namespace Services.RdfService
                     {
                         _logger.LogError("<RdfService> - HandleStorageFiles: TIE data in {TieFileData} contains a previously unknown revision that is older than the current latest revision. Data will not be uploaded",
                             tieData.FileData.Name);
-                        return;
+                        return null;
                     }
                 default:
                     break;
@@ -88,6 +88,8 @@ namespace Services.RdfService
             {
                 _logger.LogError("<RdfService> - HandleStorageFiles: Upload to Fuseki server {name} failed", server);
             }
+
+            return provenance;
         }
 
         public async Task<HttpResponseMessage> PostToFusekiAsApp(string server, string data)

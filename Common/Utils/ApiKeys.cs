@@ -3,5 +3,6 @@
     public static class ApiKeys
     {
         public const string Servers = "Servers";
+        public const string ServiceBus = "ServiceBus";
     }
 }

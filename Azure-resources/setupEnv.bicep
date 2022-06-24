@@ -14,6 +14,17 @@ var resourceTags = {
   Env: env
 }
 
+var activeServiceBusEnvironments = [
+  'dev'
+]
+
+var serviceBusEnv = (contains(activeServiceBusEnvironments, env)) ? env : 'dev'
+
+resource ServiceBusNamespace 'Microsoft.ServiceBus/namespaces@2021-11-01' existing = {
+  name: '${serviceBusEnv}-spine'
+  scope: resourceGroup('${serviceBusEnv}-spine-servicebus')
+}
+
 resource StorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
   name: 'prodmeladapterstorageacc'
   scope: resourceGroup('prod-tie-mel-adapter')
@@ -84,6 +95,8 @@ resource FuncServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   }
 }
 
+var serviceBusEndpoint = '${ServiceBusNamespace.id}/AuthorizationRules/RootManageSharedAccessKey'
+
 resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
   name: '${resourcePrefix}-func'
   kind: 'functionapp,linux'
@@ -116,6 +129,10 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: ApplicationInsights.properties.InstrumentationKey
+        }
+        {
+          name: 'ConnectionStrings__ServiceBus'
+          value: listKeys(serviceBusEndpoint, ServiceBusNamespace.apiVersion).primaryConnectionString
         }
       ]
     }
