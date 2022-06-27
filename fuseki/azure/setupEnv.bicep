@@ -2,15 +2,16 @@ param fusekiType string
 param env string
 param clientId string
 param appSvcSku string = 'P1v2'
-param appSvcSkuTier string = 'PremiumV2'
 param tenantId string = '3aa4a235-b6e2-48d5-9195-7fcf05b459b0'
 param location string = resourceGroup().location
 
-var resourcePrefix = '${env}-${fusekiType}'
+var resourcePrefix = '${env}-${fusekiType}-fuseki'
 var webAppName = resourcePrefix
 var fileShareName = 'fusekifileshare'
 var resourceTags = {
   Product: 'Dugtrio Fuseki'
+  Team: 'Dugtrio'
+  Env: 'Experimental'
 }
 
 resource AcrPullIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
@@ -45,7 +46,6 @@ resource FusekiPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   }
   sku: {
     name: appSvcSku
-    tier: appSvcSkuTier
   }
 }
 
