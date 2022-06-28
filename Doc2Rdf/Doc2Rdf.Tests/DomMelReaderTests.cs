@@ -36,8 +36,8 @@ namespace Doc2Rdf.Tests
             RdfTestUtils.AssertTripleAsserted(
                 graph,
                 new Uri("https://rdf.equinor.com/kra/c232/mel/01"),
-                new Uri("https://rdf.equinor.com/ontology/facility#hasDocumentProjectId"),
-                new Uri("https://rdf.equinor.com/ontology/facility#C232")
+                new Uri("https://rdf.equinor.com/ontology/facility-identification/v1#hasDocumentProjectId"),
+                new Uri("https://rdf.equinor.com/data/facility-identification/C232")
             );
             RdfTestUtils.AssertTripleAsserted(
                 graph,

@@ -24,6 +24,7 @@ public static class ShipWeightDBReader
             string query = $"SELECT TOP 1 {plantIdColumn} FROM om.ITEM WHERE ProjectID = '{facilityName}'";
 
             SqlCommand command = new SqlCommand(query, connection);
+            command.CommandTimeout = 120;
             connection.Open();
             
             plantId = (string)command.ExecuteScalar();
@@ -109,7 +110,8 @@ public static class ShipWeightDBReader
 
         using (SqlConnection connection = new SqlConnection(connectionString))
         {
-            string query = $"SELECT ProjectID, FilterID, Time FROM om.ITEM_FILTER WHERE ProjectId = '{facilityName}' AND FilterID LIKE '%Built%'";
+            //The As-Build filters are normally "as-built" for platforms and "krengeprøve" for floaters
+            string query = $"SELECT ProjectID, FilterID, Time FROM om.ITEM_FILTER WHERE ProjectId = '{facilityName}' AND FilterID LIKE '%Built%' OR FilterID LIKE '%krenge%'";
 
             connection.Open();
             SqlCommand command = new SqlCommand(query, connection);

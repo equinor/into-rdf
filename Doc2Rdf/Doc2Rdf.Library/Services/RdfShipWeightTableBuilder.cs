@@ -89,7 +89,7 @@ public class RdfShipWeightTableBuilder : IRdfTableBuilder
         _dataTable.Rows.Add(
             dataCollectionUri,
             provenance.RevisionDate,
-            new Uri(RdfPrefixes.Prefix2Uri["facility"] + provenance.PlantId),
+            new Uri(RdfPrefixes.Prefix2Uri["identifier"] + provenance.PlantId),
             provenance.RevisionNumber,
             provenance.RevisionName,
             provenance.DataCollectionName,

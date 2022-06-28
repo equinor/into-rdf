@@ -28,7 +28,7 @@ namespace Doc2Rdf.Tests
 
             Assert.True(transformedData.Tables.Count == 4, $"Wrong number of rdf-preprocessed tables: {transformedData.Tables.Count}");
 
-            Assert.Equal(new Uri("https://rdf.equinor.com/ontology/facility#1234"), transformedData.Tables["Provenance"].Rows[0]["https://rdf.equinor.com/ontology/facility#hasPlantId"]);
+            Assert.Equal(new Uri("https://rdf.equinor.com/data/facility-identification/1234"), transformedData.Tables["Provenance"].Rows[0]["https://rdf.equinor.com/ontology/facility-identification/v1#hasPlantId"]);
 
             Assert.True(transformedData.Tables["Transformation"] != Enumerable.Empty<DataTable>(), "Failed to create transformation table");
 

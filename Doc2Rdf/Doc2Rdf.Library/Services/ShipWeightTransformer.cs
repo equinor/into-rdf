@@ -62,6 +62,26 @@ public class ShipWeightTransformer : IShipWeightTransformer
                 return "kra";
             case "1138":
                 return "val";
+            case "1175":
+                return "kris";
+            case "1190":
+                return "asga";
+            case "1191":
+                return "asgb";
+            case "1776":
+                return "troc";
+            case "1212":
+                return "snb";
+            case "1221":
+                return "vis";
+            case "1180":
+                return "nor";
+            case "1767":
+                return "ose";
+            case "1774":
+                return "osd";
+            case "1766":
+                return "oss";
             default:
                 throw new ArgumentException("Unknown plantId");
         }

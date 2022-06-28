@@ -6,9 +6,9 @@ namespace Doc2Rdf.Library.Models;
 public static class RdfCommonColumns
 {
     public static DataColumn CreateIdColumn() => new DataColumn("id", typeof(Uri));
-    public static DataColumn CreateHasFacilityId() => new DataColumn(RdfPrefixes.Prefix2Uri["facility"] + "hasFacilityId", typeof(Uri));
-    public static DataColumn CreateHasDocumentProjectId() => new DataColumn(RdfPrefixes.Prefix2Uri["facility"] + "hasDocumentProjectId", typeof(Uri));
-    public static DataColumn CreateHasPlantId() => new DataColumn(RdfPrefixes.Prefix2Uri["facility"] + "hasPlantId", typeof(Uri));
+    public static DataColumn CreateHasFacilityId() => new DataColumn(RdfPrefixes.Prefix2Uri["identification"] + "hasFacilityId", typeof(Uri));
+    public static DataColumn CreateHasDocumentProjectId() => new DataColumn(RdfPrefixes.Prefix2Uri["identification"] + "hasDocumentProjectId", typeof(Uri));
+    public static DataColumn CreateHasPlantId() => new DataColumn(RdfPrefixes.Prefix2Uri["identification"] + "hasPlantId", typeof(Uri));
     public static DataColumn CreateGeneratedAtTime() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "generatedAtTime", typeof(DateTime));
     public static DataColumn CreateUsed() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "used", typeof(Uri));
     public static DataColumn CreateHadMember() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "hadMember", typeof(Uri));

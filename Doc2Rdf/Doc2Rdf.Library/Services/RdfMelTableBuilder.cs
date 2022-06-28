@@ -97,7 +97,7 @@ public class RdfMelTableBuilder : IRdfTableBuilder
             dataCollectionUri,
             RdfCommonTypes.CreateCollectionType(),
             provenance.RevisionDate,
-            new Uri(RdfPrefixes.Prefix2Uri["facility"] + provenance.DocumentProjectId),
+            new Uri(RdfPrefixes.Prefix2Uri["identifier"] + provenance.DocumentProjectId),
             provenance.RevisionNumber,
             provenance.RevisionName,
             provenance.DataCollectionName,
