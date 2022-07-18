@@ -13,7 +13,7 @@ jobs:
         uses: google-github-actions/release-please-action@v3
         with:
           release-type: simple
-          package-name: spinealarm
+          package-name: spinesplinter
           changelog-types: >
             [{"type":"feat","section":"Features","hidden":false},
             {"type":"fix","section":"Bug Fixes","hidden":false},
@@ -30,7 +30,7 @@ jobs:
     name: '🛠️ Build'
     if: ${{ needs.release_please.outputs.release_created }}
     needs: [release_please]
-    uses: equinor/SpineAlarmApi/.github/workflows/build.yml@main
+    uses: equinor/spine-splinter/.github/workflows/build.yml@main
     
   deploy-prod:
     name: "🚀 Prod"
@@ -38,7 +38,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    uses: equinor/SpineAlarmApi/.github/workflows/deploy.yml@main
+    uses: equinor/spine-splinter/.github/workflows/deploy.yml@main
     with:
       ENV: prod
       ARTIFACT: ${{ needs.build.outputs.artifact-name }}
