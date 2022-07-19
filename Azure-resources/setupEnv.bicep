@@ -15,7 +15,7 @@ var resourceTags = {
 }
 
 resource ServiceBusNamespace 'Microsoft.ServiceBus/namespaces@2021-11-01' existing = {
-  name: '$spine-hub'
+  name: 'spine-sbus'
   scope: resourceGroup('spine-servicebus')
 }
 
