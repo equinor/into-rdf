@@ -5,4 +5,9 @@
         public const string Servers = "Servers";
         public const string ServiceBus = "ServiceBus";
     }
+
+    public static class ServerKeys
+    {
+        public const string Dugtrio = "Dugtrio";
+    }
 }

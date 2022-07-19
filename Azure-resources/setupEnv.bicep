@@ -14,15 +14,9 @@ var resourceTags = {
   Env: env
 }
 
-var activeServiceBusEnvironments = [
-  'dev'
-]
-
-var serviceBusEnv = (contains(activeServiceBusEnvironments, env)) ? env : 'dev'
-
 resource ServiceBusNamespace 'Microsoft.ServiceBus/namespaces@2021-11-01' existing = {
-  name: '${serviceBusEnv}-spine'
-  scope: resourceGroup('${serviceBusEnv}-spine-servicebus')
+  name: '$spine-hub'
+  scope: resourceGroup('spine-servicebus')
 }
 
 resource StorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
@@ -45,6 +39,9 @@ resource AppServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   location: location
   tags: resourceTags
   kind: 'linux'
+  properties: {
+    reserved: true
+  }
   sku: {
     name: sku
   }
@@ -72,6 +69,10 @@ resource Api 'Microsoft.Web/sites@2021-03-01' = {
           name: 'ApplicationInsights__ConnectionString'
           value: ApplicationInsights.properties.ConnectionString
         }
+        {
+          name: 'Servers__Dugtrio__BaseUrl'
+          value: 'https://${resourcePrefix}-mel-fuseki.azurewebsites.net'
+        }
       ]
       connectionStrings: [
         {
@@ -90,6 +91,9 @@ resource FuncServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   location: location
   tags: resourceTags
   kind: 'linux'
+  properties: {
+    reserved: true
+  }
   sku: {
     name: 'Y1'
   }

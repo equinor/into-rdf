@@ -1,6 +1,7 @@
 using Common.AppsettingsModels;
 using Common.ProvenanceModels;
 using Common.TieModels;
+using Common.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Services.FusekiService;
@@ -110,8 +111,7 @@ public class ProvenanceService : IProvenanceService
 
     private async Task<List<RevisionInfo>> GetPreviousRevision(TieData tieData)
     {
-        var rdfServerConf = _configuration.GetSection("Servers").Get<List<RdfServer>>();
-        var rdfServerName = rdfServerConf[0].Name;
+        var rdfServerName = ServerKeys.Dugtrio;
 
         _logger.LogDebug("ProvenanceService> - GetPreviousRevision: Retrieving data from {server}", rdfServerName);
 
