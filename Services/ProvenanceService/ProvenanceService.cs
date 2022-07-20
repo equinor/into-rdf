@@ -37,6 +37,8 @@ public class ProvenanceService : IProvenanceService
         var existingRevision = previousRevisions.Count > 0 ? previousRevisions.FirstOrDefault(r => r.RevisionName?.ToLower() == revisionName.ToLower()) : null;
         var latestRevision = previousRevisions.Count > 0 ? previousRevisions.Aggregate((r1, r2) => r1.RevisionNumber > r2.RevisionNumber ? r1 : r2) : null;
 
+        _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromTieMessage: Latest revision number is {number}", latestRevision?.RevisionNumber);
+
         if (existingRevision == null && (latestRevision == null || latestRevision.RevisionDate <= revisionDate))
         {
             revisionStatus = RevisionStatus.New;
@@ -113,9 +115,11 @@ public class ProvenanceService : IProvenanceService
     {
         var rdfServerName = ServerKeys.Dugtrio;
 
-        _logger.LogDebug("ProvenanceService> - GetPreviousRevision: Retrieving data from {server}", rdfServerName);
+        _logger.LogDebug("<ProvenanceService> - GetPreviousRevision: Retrieving data from {server}", rdfServerName);
 
         string documentProjectId = GetDocumentProjectId(tieData);
+        _logger.LogDebug(">ProvenanceService> - GetPreviousRevision: Current document project id {id}", documentProjectId);
+
         string query = GetRevisionInfoQuery(documentProjectId);
 
         var response = await _fusekiService.QueryFusekiResponseAsApp(rdfServerName, query);
@@ -205,20 +209,22 @@ public class ProvenanceService : IProvenanceService
 
     private string GetRevisionInfoQuery(string documentProjectId)
     {
-        return @$"prefix sor: <https://rdf.equinor.com/ontology/sor#>
-                          prefix facility: <https://rdf.equinor.com/ontology/facility#>
-                          prefix prov: <http://www.w3.org/ns/prov#>
+        return @$"
+            prefix sor: <https://rdf.equinor.com/ontology/sor#>
+            prefix identification: <https://rdf.equinor.com/ontology/facility-identification/v1#>
+            prefix identifier: <https://rdf.equinor.com/data/facility-identification/>
+            prefix prov: <http://www.w3.org/ns/prov#>
 
                     SELECT ?revision ?revisionDate ?revisionNumber ?revisionName
                     WHERE 
                     {{
-                        ?revision facility:hasDocumentProjectId ?DocumentProjectId ;        
+                        ?revision identification:hasDocumentProjectId ?DocumentProjectId ;        
                             prov:generatedAtTime ?revisionDate .
 
                         OPTIONAL {{?revision sor:hasRevisionNumber ?revisionNumber .}}
                         OPTIONAL {{?revision sor:hasRevisionName ?revisionName .}}
 
-                        FILTER (?DocumentProjectId = facility:{documentProjectId}) 
+                        FILTER (?DocumentProjectId = identifier:{documentProjectId}) 
                     }}";
     }
 

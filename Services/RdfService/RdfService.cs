@@ -47,14 +47,20 @@ namespace Services.RdfService
             {
                 case RevisionStatus.Old:
                     {
-                        _logger.LogError("<RdfService> - HandleStorageFiles: Newer revisions of the submitted TIE data in {TieFileData} exist. Data will not be uploaded", tieData.FileData.Name);
+                        _logger.LogError("<RdfService> - HandleStorageFiles: Newer revisions of the submitted TIE data from {TieFileData} exist. The submitted data will not be uploaded", tieData.FileData.Name);
                         return null;
                     }
                 //TODO - How to handle unknown revisions? Discard or attempt to place them in their proper place in the revision chain.
                 //Task created 73431 - Handling previously "unknown" revisions.
                 case RevisionStatus.Unknown:
                     {
-                        _logger.LogError("<RdfService> - HandleStorageFiles: TIE data in {TieFileData} contains a previously unknown revision that is older than the current latest revision. Data will not be uploaded",
+                        _logger.LogError("<RdfService> - HandleStorageFiles: TIE data from {TieFileData} contains a previously unknown revision that is older than the current latest revision. The submitted data will not be uploaded",
+                            tieData.FileData.Name);
+                        return null;
+                    }
+                case RevisionStatus.Update:
+                    {
+                        _logger.LogWarning("<RdfService> - HandleStorageFiles: The submitted TIE data from {TieFileData} appears to be an update to an existing revision. A new revision should be created. The submitted data will not be uploaded",
                             tieData.FileData.Name);
                         return null;
                     }
