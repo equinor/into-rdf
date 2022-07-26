@@ -3,7 +3,6 @@ using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using System;
 using TieMelConsumer;
-using Doc2Rdf.Library.Extensions.DependencyInjection;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Web;
@@ -39,7 +38,7 @@ public class Startup : FunctionsStartup
             .AddFusekiApis(configuration)
             .AddInMemoryTokenCaches();
 
-        services.AddSplinterServices();
+        services.AddServices();
         services.AddServiceBusClient(configuration);
 
         services.AddAzureClients(opt =>

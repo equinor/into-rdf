@@ -1,9 +1,5 @@
 ﻿using Common.AppsettingsModels;
-using Services.FusekiService;
-using Services.ProvenanceService;
-using Services.RdfService;
-using Services.TieMessageService;
-using Doc2Rdf.Library.Extensions.DependencyInjection;
+using Services.DependencyInjection;
 using Microsoft.Identity.Web;
 using Common.Utils;
 
@@ -11,15 +7,9 @@ namespace Api
 {
     public static class SetupServices
     {
-        public static IServiceCollection AddSplinterServices(this IServiceCollection services)
+        public static IServiceCollection AddServices(this IServiceCollection services)
         {
-            services.AddScoped<IRdfService, RdfService>();
-            services.AddScoped<IFusekiService, FusekiService>();
-            services.AddScoped<ITieMessageService, TieMessageService>();
-            services.AddScoped<IProvenanceService, ProvenanceService>();
-            services.AddDoc2RdfLibraryServices();
-
-            return services;
+            return services.AddSplinterServices();
         }
 
         public static MicrosoftIdentityAppCallsWebApiAuthenticationBuilder AddFusekiApis(this MicrosoftIdentityAppCallsWebApiAuthenticationBuilder builder, IConfiguration configuration)

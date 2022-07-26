@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Services.RdfService;
+using Services.RdfServices;
 using System.Text;
 using Api.Authorization;
 

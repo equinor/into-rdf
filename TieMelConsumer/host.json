@@ -8,12 +8,12 @@
       }
     },
     "logLevel": {
-      "Services.RdfService.RdfService": "Debug",
-      "Services.ProvenanceService.ProvenanceService": "Debug",
-      "Doc2Rdf.Library.Services.MelTransformer": "Debug",
-      "Doc2Rdf.Library.IO.DomMelReader": "Debug",
-      "Doc2Rdf.Library.Services.RdfPreprocessor" : "Debug",
-      "Doc2Rdf.Library.Services.RdfTransformer" : "Debug"
+      "Services.RdfServices.RdfService": "Debug",
+      "Services.ProvenanceServices.ProvenanceService": "Debug",
+      "Services.TransformationServices.SpreadsheetTransformationServices.MelTransformationService": "Debug",
+      "Services.DomReaderServices.MelDomReaderServices.MelDomReaderService": "Debug",
+      "Services.TransformationServices.RdfPreprocessingServices.RdfPreprocessingService" : "Debug",
+      "Services.TransformationServices.RdfTransformationServices.RdfTransformationService" : "Debug"
     }
   }
 }

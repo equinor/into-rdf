@@ -1,14 +1,14 @@
-﻿using Doc2Rdf.Library.Extensions.DependencyInjection;
-using Doc2Rdf.Library.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Services.DependencyInjection;
+using Services.TransformationServices.DatabaseTransformationServices;
 using ShipWeight.Database;
 using System.Data;
 
 using IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
         {
-            services.AddDoc2RdfLibraryServices();
+            services.AddSplinterServices();
         }
     ).Build();
 
@@ -36,7 +36,7 @@ try
     IServiceScope serviceScope = host.Services.CreateScope();
     IServiceProvider provider = serviceScope.ServiceProvider;
 
-    var shipWeightTransformer = provider.GetRequiredService<IShipWeightTransformer>();
+    var shipweightTransformationService = provider.GetRequiredService<IDatabaseTransformationService>();
 
     var plantId = ShipWeightDBReader.GetPlantId(facilityName);
 
@@ -44,7 +44,7 @@ try
                  ShipWeightDBReader.GetAsBuiltData(facilityName) :
                  ShipWeightDBReader.GetData(facilityName, tableName);
 
-    TransformData(shipWeightTransformer, inputData, facilityName, plantId, tableName);
+    TransformData(shipweightTransformationService, inputData, facilityName, plantId, tableName);
 }
 
 catch (Exception ex)
@@ -54,9 +54,9 @@ catch (Exception ex)
 
 return 0;
 
-static void TransformData(IShipWeightTransformer shipWeightTransformer, DataTable inputData, string facilityName, string plantId, string tableName)
+static void TransformData(IDatabaseTransformationService shipweightTransformationService, DataTable inputData, string facilityName, string plantId, string tableName)
 {
-    var ttl = shipWeightTransformer.Transform(facilityName, plantId, inputData);
+    var ttl = shipweightTransformationService.Transform(facilityName, plantId, inputData);
 
     var outputFile = $"output/shipweight-{facilityName}-{tableName}-{DateTime.Now.ToString("yy-MM-dd")}.ttl";
     File.WriteAllText(outputFile, ttl);

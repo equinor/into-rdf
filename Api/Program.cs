@@ -31,7 +31,7 @@ builder.Services.AddControllers();
 builder.Services.AddMvc(options => options.Filters.Add<SplinterExceptionActionFilter>());
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSplinterServices();
+builder.Services.AddServices();
 builder.Services.SetupAuthorization();
 builder.Services.AddApplicationInsightsTelemetry();
 builder.SetupKeyVault();

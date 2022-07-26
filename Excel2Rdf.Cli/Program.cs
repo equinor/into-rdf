@@ -1,10 +1,11 @@
-﻿using System;
-using System.IO;
-using Doc2Rdf.Library.Extensions.DependencyInjection;
-using Doc2Rdf.Library.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
+using System.Linq;
+using Services.DependencyInjection;
+using Services.TransformationServices.SpreadsheetTransformationServices;
 
 namespace Excel2Rdf.Cli;
 
@@ -16,36 +17,42 @@ class Program
             .ConfigureServices((context, services) =>
                 {
                     services.AddLogging(options => options.AddConfiguration(context.Configuration));
-                    services.AddDoc2RdfLibraryServices();
+                    services.AddSplinterServices();
                 })
             .Build();
 
         try
         {
-            string outputDir = "output";
-            string fileOrDir = args[0];
-            if (args.Length != 1)
+            //TODO - Add input arguments, DocumentProject, RevisionName, RevisionDate
+            if (args.Length != 2)
             {
-                Console.WriteLine("Wrong number of input args. Please enter File or Directory");
+                Console.WriteLine("Wrong number of input args. Please enter datasource (mel, linelist, stream) and File or Directory");
                 return 0;
             }
+
+            string outputDir = "output";
+            string dataSource = args[0];
+            string fileOrDir = args[1];
 
             CreateOutputDirectory(outputDir);
 
             IServiceScope serviceScope = host.Services.CreateScope();
             IServiceProvider provider = serviceScope.ServiceProvider;
 
-            var melService = provider.GetRequiredService<IMelTransformer>();
+            var services = provider.GetServices<ISpreadsheetTransformationService>();
+            var service = services.FirstOrDefault(x => x.GetDataSource() == dataSource) ?? 
+                                        throw new ArgumentException($"Transformer of type {dataSource} not available");
 
             if (Path.HasExtension(fileOrDir))
             {
-                TransformFile(melService, fileOrDir);
+                
+                TransformFile(service, fileOrDir);
             }
             else
             {
                 foreach (var fileName in Directory.EnumerateFiles(fileOrDir))
                 {
-                    TransformFile(melService, fileName);
+                    TransformFile(service, fileName);
                 }
             }
         }
@@ -58,14 +65,14 @@ class Program
         return 0;
     }
 
-    private static void TransformFile(IMelTransformer melTransformer, string fileName)
+    private static void TransformFile(ISpreadsheetTransformationService transformer, string fileName)
     {
         Console.WriteLine($"Transforming: {fileName}");
         var ttl = string.Empty;
 
         using (var stream = File.Open(fileName, FileMode.Open, FileAccess.Read))
         {
-            ttl = melTransformer.Transform(stream, fileName);
+            ttl = transformer.Transform(stream, fileName);
         }
 
         var outputFile = $"output/{Path.GetFileNameWithoutExtension(fileName)}.ttl";

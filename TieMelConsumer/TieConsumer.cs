@@ -10,8 +10,8 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Services.RdfService;
-using Services.SpineNotificationService;
+using Services.RdfServices;
+using Services.SpineNotificationServices;
 
 namespace TieMelConsumer;
 
@@ -19,10 +19,10 @@ public class TieConsumer
 {
     private readonly BlobServiceClient _blobServiceClient;
     private readonly IRdfService _rdfService;
-    private readonly ISpineNotificationService _spineNotificationService;
+    private readonly ISpineNotificationServices _spineNotificationService;
     private const string container = "prodmeladapterfiles";
 
-    public TieConsumer(BlobServiceClient blobServiceClient, IRdfService rdfService, ISpineNotificationService spineNotificationService)
+    public TieConsumer(BlobServiceClient blobServiceClient, IRdfService rdfService, ISpineNotificationServices spineNotificationService)
     {
         _blobServiceClient = blobServiceClient;
         _rdfService = rdfService;

@@ -1,7 +1,7 @@
 ﻿using Api.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Services.RdfService;
+using Services.RdfServices;
 
 namespace Api.Controllers
 {
