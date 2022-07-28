@@ -12,8 +12,8 @@ namespace Common.ProvenanceModels
         }
 
         public string FacilityId { get; }
-        public string? DocumentProjectId { get; set; }
-        public string? PlantId { get; set; }
+        public string DocumentProjectId { get; set; } = "N/A";
+        public string PlantId { get; set; } = "N/A";
         public string? DataCollectionName { get; set; }
         public string? RevisionName { get; set; }
         public int RevisionNumber { get; set; }

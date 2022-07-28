@@ -1,8 +1,10 @@
-using Common.TieModels;
 using Common.ProvenanceModels;
+using Common.SpreadsheetModels;
+using Common.TieModels;
 
 namespace Services.ProvenanceServices;
 public interface IProvenanceService
 {
-    public Task<Provenance> CreateProvenanceFromTieMessage(TieData tieData);
+    Task<Provenance> CreateProvenanceFromTieMessage(string datasource, TieData tieData);
+    Task<Provenance> CreateProvenanceFromSpreadsheetInfo(SpreadsheetInfo info);
 }

@@ -1,6 +1,8 @@
 ﻿using Common.Exceptions;
+using Common.FusekiModels;
 using Microsoft.Identity.Web;
 using Newtonsoft.Json;
+using Services.FusekiMappers;
 
 namespace Services.FusekiServices;
 
@@ -42,6 +44,13 @@ public class FusekiService : IFusekiService
         var result = await QueryAsApp(server, sparql);
 
         return DeserializeToFusekiResponse(result);
+    }
+
+    public async Task<List<T>> QueryFusekiResponseAsApp<T>(string server, string sparql) where T : new()
+    {
+        var result = FusekiResponseToPropsMapper.MapResponse<T>(await QueryFusekiResponseAsApp(server, sparql));
+
+        return result;
     }
 
     public async Task<FusekiResponse> QueryFusekiResponseAsUser(string server, string sparql)
@@ -113,28 +122,4 @@ public class FusekiService : IFusekiService
 
         return options;
     }
-}
-
-
-public class FusekiResponse
-{
-    public FusekiHead Head { get; set; } = new();
-    public FusekiResult Results { get; set; } = new();
-}
-
-public class FusekiHead
-{
-    public List<string> Vars { get; set; } = new();
-}
-
-public class FusekiResult
-{
-    public List<Dictionary<string, Triplet>> Bindings { get; set; } = new();
-}
-
-public class Triplet
-{
-    public string? Type { get; set; }
-    public string? Datatype { get; set; }
-    public string? Value { get; set; }
 }

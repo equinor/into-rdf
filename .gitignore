@@ -405,7 +405,7 @@ data/
 #Rdf data (used in Excel2Rdf.Cli and ShipWeight2Rdf.Cli)
 output/
 *.ttl
-TieMelConsumer/local.settings.json
+*/local.settings.json
 __azurite*
 __blob*
 __queue*

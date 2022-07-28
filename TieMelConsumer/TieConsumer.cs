@@ -1,4 +1,4 @@
-using System;
+using Common.ProvenanceModels;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,19 +32,20 @@ public class TieConsumer
     public async Task Run([BlobTrigger("prodmeladapterfiles/{name}")] Stream? myBlob, string name, ILogger log)
     {
         log.LogInformation("C# Blob trigger function Processed blob\n Name:{Name} \n Size: {Size}", name, myBlob?.Length);
+
         var blobs = await GetBlobsInSameDirectory(name);
         if (blobs.Count <= 1) return;
 
-        var provenance = await _rdfService.HandleStorageFiles(await GetData(blobs));
+        var provenance = await _rdfService.HandleTieRequest(DataSource.Mel(), await GetData(blobs));
 
         if (provenance is null) return;
         if (string.IsNullOrEmpty(provenance.FacilityId) || string.IsNullOrEmpty(provenance.DocumentProjectId)) return;
 
         await _spineNotificationService
-            .PostToTopic(
-                "new-mel-processed", 
-                new NewMelProcessedPayload(provenance.FacilityId, provenance.DocumentProjectId)
-            );
+           .PostToTopic(
+               "new-mel-processed",
+               new NewMelProcessedPayload(provenance.FacilityId, provenance.DocumentProjectId)
+           );
     }
 
     private async Task<List<BlobItem>> GetBlobsInSameDirectory(string name)

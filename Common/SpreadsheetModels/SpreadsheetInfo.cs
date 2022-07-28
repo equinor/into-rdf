@@ -1,9 +1,12 @@
+using Common.ProvenanceModels;
+
 namespace Common.SpreadsheetModels;
 
 public class SpreadsheetInfo
 {
-    public string? ProjectCode { get; set; }
+    public string? DocumentProjectId { get; set; }
     public int Revision { get; set; }
+    public string? RevisionName { get; set; }
     public bool IsTransposed { get; set; }
     public DateTime RevisionDate { get; set; }
     public string? Contractor { get; set; }
@@ -30,5 +33,63 @@ public class SpreadsheetInfo
             this.DataEndRow,
             this.EndColumn,
             this.IsTransposed);
+    }
+
+    public RevisionRequirement GetRevisionRequirements()
+    {
+        if (DocumentProjectId == null || RevisionName == null || RevisionDate == DateTime.MinValue)
+        {
+            throw new InvalidOperationException("Not sufficient spreadsheet info to create revision requirements");
+        }
+
+        return new RevisionRequirement(DocumentProjectId, RevisionName, RevisionDate);
+    }
+
+    public bool TryValidate(out InvalidOperationException exception)
+    {
+
+        if (FileName == null)
+        {
+            exception =  new InvalidOperationException("Spreadsheet details are missing. Start by including 'FileName' in request body");
+            return false;
+        }
+
+        if (DocumentProjectId == null)
+        {
+            exception = new InvalidOperationException(DetailsErrorMessage(nameof(DocumentProjectId)));
+            return false;
+        }
+
+        if (DataSource == null)
+        {
+            exception = new InvalidOperationException(DetailsErrorMessage(nameof(DataSource)));
+            return false;
+        }
+
+        if (SheetName == null)
+        {
+            exception = new InvalidOperationException(DetailsErrorMessage(nameof(SheetName)));
+            return false;
+        }
+
+        if (RevisionName == null)
+        {
+            exception = new InvalidOperationException(DetailsErrorMessage(nameof(SheetName)));
+            return false;
+        }
+
+        if (RevisionDate == DateTime.MinValue)
+        {
+            exception = new InvalidOperationException(DetailsErrorMessage(nameof(RevisionDate)));
+            return false;
+        }
+
+        exception = new InvalidOperationException();
+        return true;
+    }
+    
+        private string DetailsErrorMessage(string missingParam)
+    {
+        return $"{missingParam} is missing from spreadsheet details";
     }
 }
