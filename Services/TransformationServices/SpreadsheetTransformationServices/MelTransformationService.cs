@@ -61,15 +61,15 @@ public class MelTransformationService : ISpreadsheetTransformationService
 
     private Provenance CreateProvenance(SpreadsheetInfo details)
     {
-        var facilityId = details.ProjectCode != null ?
-            GetFacilityId(details.ProjectCode) :
+        var facilityId = details.DocumentProjectId != null ?
+            GetFacilityId(details.DocumentProjectId) :
             throw new ArgumentNullException("Spreadsheet information does not contain facility Id");
 
         var previousRevision = details.Revision > 1 ? $"{(details.Revision - 1).ToString("D2")}" : string.Empty;
 
         var provenance = new Provenance(facilityId, DataSource.Mel());
 
-        provenance.DocumentProjectId = details.ProjectCode;
+        provenance.DocumentProjectId = details.DocumentProjectId;
         provenance.PlantId = "na";
         provenance.DataCollectionName = details.FileName;
         provenance.RevisionName = details.Revision.ToString("D2");
@@ -96,6 +96,7 @@ public class MelTransformationService : ISpreadsheetTransformationService
     //Hack to add facilityIds to namespace URIs
     //TODO - Remove when task Feature 65986 - Review - Enrich with Facility Data is implemented
     //https://dev.azure.com/EquinorASA/Spine/_backlogs/backlog/Loudred/Epics/?showParents=true&workitem=65986
+    //NOTE - After moving Excel2Rdf.Cli to LocalFunctions only the Splinter API relies on this.
     private string GetFacilityId(string projectId)
     {
         switch (projectId.ToLower())

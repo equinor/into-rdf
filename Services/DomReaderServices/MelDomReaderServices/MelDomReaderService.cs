@@ -44,7 +44,7 @@ public class MelDomReaderService : IMelDomReaderService
             Contractor = rows["Contractor"],
             DataSource = rows.TryGetValue("DataType", out string? dataType) ? dataType : DataSourceType.Unknown(),
             IsTransposed = bool.Parse(rows.TryGetValue("IsTransposed", out string? isTransposed) ? isTransposed : "false"),
-            ProjectCode = rows["ProjectCode"],
+            DocumentProjectId = rows["ProjectCode"],
             Revision = int.Parse(rows["Revision"].TrimStart('0')),
             RevisionDate = DateTime.Parse(rows["RevisionDate"]),
             SheetName = rows["SheetName"],
