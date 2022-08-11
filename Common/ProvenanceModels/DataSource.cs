@@ -8,4 +8,5 @@ public static class DataSource
     public static string STID() => "stid";
     public static string PimsQem() => "pimsqem";
     public static string Unknown() => "unknown";
+    public static string AML() => "aml";
 }
