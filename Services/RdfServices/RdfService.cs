@@ -7,6 +7,7 @@ using Services.FusekiServices;
 using Services.ProvenanceServices;
 using Services.TieMessageServices;
 using Services.TransformationServices.SpreadsheetTransformationServices;
+using Services.TransformationServices.XMLTransformationServices;
 
 namespace Services.RdfServices
 {
@@ -14,22 +15,25 @@ namespace Services.RdfServices
     {
         private readonly IFusekiService _fusekiService;
         private readonly IEnumerable<ISpreadsheetTransformationService> _spreadsheetTransformationService;
+        private readonly IEnumerable<IXMLTransformationService> _xmlTransformationService;
         private readonly IProvenanceService _provenanceService;
         private readonly ITieMessageService _tieMessageService;
         private readonly ILogger<RdfService> _logger;
         public RdfService(IFusekiService fusekiService,
                           IEnumerable<ISpreadsheetTransformationService> spreadsheetTransformationService,
+                          IEnumerable<IXMLTransformationService> xmlTransformationService,
                           IProvenanceService provenanceService,
                           ITieMessageService tieMessageService,
                           ILogger<RdfService> logger)
         {
             _fusekiService = fusekiService;
             _spreadsheetTransformationService = spreadsheetTransformationService;
+            _xmlTransformationService = xmlTransformationService;
             _provenanceService = provenanceService;
             _tieMessageService = tieMessageService;
             _logger = logger;
         }
-        
+
         //TODO - The method is used to upload an Excel file to a Fuseki.
         //However it is hardcoded to only accept a "MEL", which will, among other things, result in a mel-namespace for the resulting turtle.
         //Follow up in task https://dev.azure.com/EquinorASA/Spine/_workitems/edit/75590/
@@ -57,7 +61,7 @@ namespace Services.RdfServices
                         _logger.LogError("<RdfService> - HandleTieRequest: Newer revisions of the submitted TIE data from {TieFileData} exist. The submitted data will not be uploaded", tieData.GetDataCollectionName());
                         return null;
                     }
-                    
+
                 //TODO - How to handle unknown revisions? Discard or attempt to place them in their proper place in the revision chain.
                 //FOllow up in task: https://dev.azure.com/EquinorASA/Spine/_workitems/edit/73431
                 case RevisionStatus.Unknown:
@@ -94,12 +98,12 @@ namespace Services.RdfServices
             //TODO - Push transformed data to Fuseki
             //https://dev.azure.com/EquinorASA/Spine/_workitems/edit/73432
             var server = "dugtrio";
-            var response = await PostToFusekiAsApp(server, rdfGraphData);
+            var response = await PostToFusekiAsApp(server, rdfGraphData, "text/turtle");
 
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 _logger.LogInformation("<RdfService> - HandleTieRequest: Successfully uploaded to Fuseki server {name}", server);
-            } 
+            }
             else
             {
                 _logger.LogError("<RdfService> - HandleTieRequest: Upload to Fuseki server {name} failed", server);
@@ -120,14 +124,14 @@ namespace Services.RdfServices
             return rdfGraphData;
         }
 
-        public async Task<HttpResponseMessage> PostToFusekiAsApp(string server, string data)
+        public async Task<HttpResponseMessage> PostToFusekiAsApp(string server, string data, string contentType)
         {
-            return await _fusekiService.PostAsApp(server, data);
+            return await _fusekiService.PostAsApp(server, data, contentType);
         }
 
-        public async Task<HttpResponseMessage> PostToFusekiAsUser(string server, string data)
+        public async Task<HttpResponseMessage> PostToFusekiAsUser(string server, string data, string contentType)
         {
-            return await _fusekiService.PostAsUser(server, data);
+            return await _fusekiService.PostAsUser(server, data, contentType);
         }
 
         public async Task<string> QueryFusekiAsUser(string server, string query)
@@ -140,5 +144,6 @@ namespace Services.RdfServices
             return _spreadsheetTransformationService.FirstOrDefault(transformer => transformer.GetDataSource() == datasource) ??
                 throw new ArgumentException($"A transformer of type {datasource} is not available to RdfService");
         }
+
     }
 }

@@ -15,14 +15,14 @@ public class FusekiService : IFusekiService
         _downstreamWebApi = downstreamWebApi;
     }
 
-    public async Task<HttpResponseMessage> PostAsApp(string server, string turtle)
+    public async Task<HttpResponseMessage> PostAsApp(string server, string turtle, string contentType = "text/turtle")
     {
-        return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForData(options, turtle));
+        return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForData(options, turtle, contentType));
     }
 
-    public async Task<HttpResponseMessage> PostAsUser(string server, string turtle)
+    public async Task<HttpResponseMessage> PostAsUser(string server, string turtle, string contentType = "text/turtle")
     {
-        return await _downstreamWebApi.CallWebApiForUserAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForData(options, turtle));
+        return await _downstreamWebApi.CallWebApiForUserAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForData(options, turtle, contentType));
     }
 
     public async Task<string> QueryAsApp(string server, string sparql)
@@ -107,9 +107,8 @@ public class FusekiService : IFusekiService
         return options;
     }
 
-    private DownstreamWebApiOptions GetDownStreamWebApiOptionsForData(DownstreamWebApiOptions options, string turtle)
+    private DownstreamWebApiOptions GetDownStreamWebApiOptionsForData(DownstreamWebApiOptions options, string turtle, string contentType)
     {
-        var contentType = "text/turtle";
 
         options.HttpMethod = HttpMethod.Post;
         options.RelativePath = "ds/data";

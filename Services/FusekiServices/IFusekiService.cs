@@ -9,7 +9,7 @@ namespace Services.FusekiServices
         Task<FusekiResponse> QueryFusekiResponseAsUser(string server, string sparql);
         Task<string> QueryAsApp(string server, string sparql);
         Task<string> QueryAsUser(string server, string sparql);
-        Task<HttpResponseMessage> PostAsApp(string server, string turtle);
-        Task<HttpResponseMessage> PostAsUser(string server, string turtle);
+        Task<HttpResponseMessage> PostAsApp(string server, string turtle, string contentType = "text/turtle");
+        Task<HttpResponseMessage> PostAsUser(string server, string turtle, string contentType = "text/turtle");
     }
 }
