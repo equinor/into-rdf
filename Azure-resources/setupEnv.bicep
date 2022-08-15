@@ -71,7 +71,7 @@ resource Api 'Microsoft.Web/sites@2021-03-01' = {
         }
         {
           name: 'Servers__Dugtrio__BaseUrl'
-          value: 'https://${resourcePrefix}-mel-fuseki.azurewebsites.net'
+          value: 'https://${env}-mel-fuseki.azurewebsites.net'
         }
       ]
       connectionStrings: [
