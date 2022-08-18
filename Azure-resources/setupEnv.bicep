@@ -47,6 +47,11 @@ resource AppServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   }
 }
 
+var melFusekiSetting = {
+  name: 'Servers__Dugtrio__BaseUrl'
+  value: 'https://${env}-mel-fuseki.azurewebsites.net'
+}
+
 resource Api 'Microsoft.Web/sites@2021-03-01' = {
   name: '${resourcePrefix}-api'
   kind: 'app'
@@ -69,10 +74,7 @@ resource Api 'Microsoft.Web/sites@2021-03-01' = {
           name: 'ApplicationInsights__ConnectionString'
           value: ApplicationInsights.properties.ConnectionString
         }
-        {
-          name: 'Servers__Dugtrio__BaseUrl'
-          value: 'https://${env}-mel-fuseki.azurewebsites.net'
-        }
+        melFusekiSetting
       ]
       connectionStrings: [
         {
@@ -138,6 +140,7 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
           name: 'ConnectionStrings__ServiceBus'
           value: listKeys(serviceBusEndpoint, ServiceBusNamespace.apiVersion).primaryConnectionString
         }
+        melFusekiSetting
       ]
     }
   }
