@@ -129,6 +129,7 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
     dailyMemoryTimeQuota: 1000
     siteConfig: {
       netFrameworkVersion: dotnetVersion
+      linuxFxVersion: linuxFxVersion
       http20Enabled: true
       appSettings: [
         {
