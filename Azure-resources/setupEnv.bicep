@@ -62,11 +62,6 @@ resource AppServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   }
 }
 
-var melFusekiSetting = {
-  name: 'Servers__Dugtrio__BaseUrl'
-  value: 'https://${env}-mel-fuseki.azurewebsites.net'
-}
-
 var tieMelAdadpterConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${TieMelAdapterStorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(TieMelAdapterStorageAccount.id, TieMelAdapterStorageAccount.apiVersion).keys[0].value}'
 
 resource Api 'Microsoft.Web/sites@2021-03-01' = {
@@ -91,7 +86,6 @@ resource Api 'Microsoft.Web/sites@2021-03-01' = {
           name: 'ApplicationInsights__ConnectionString'
           value: ApplicationInsights.properties.ConnectionString
         }
-        melFusekiSetting
       ]
       connectionStrings: [
         {
@@ -161,7 +155,6 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
           name: 'ConnectionStrings__ServiceBus'
           value: listKeys(serviceBusEndpoint, ServiceBusNamespace.apiVersion).primaryConnectionString
         }
-        melFusekiSetting
       ]
     }
   }
