@@ -14,12 +14,27 @@ var resourceTags = {
   Env: env
 }
 
+resource StorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
+  name: '${env}spinesplinterstorage'
+  location: location
+  tags: resourceTags
+  kind: 'StorageV2'
+  sku: {
+    name: 'Standard_LRS'
+  }
+  properties: {
+    supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
+    accessTier: 'Hot'
+  }
+}
+
 resource ServiceBusNamespace 'Microsoft.ServiceBus/namespaces@2021-11-01' existing = {
   name: 'spine-sbus'
   scope: resourceGroup('spine-servicebus')
 }
 
-resource StorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
+resource TieMelAdapterStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
   name: 'prodmeladapterstorageacc'
   scope: resourceGroup('prod-tie-mel-adapter')
 }
@@ -52,6 +67,8 @@ var melFusekiSetting = {
   value: 'https://${env}-mel-fuseki.azurewebsites.net'
 }
 
+var tieMelAdadpterConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${TieMelAdapterStorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(TieMelAdapterStorageAccount.id, TieMelAdapterStorageAccount.apiVersion).keys[0].value}'
+
 resource Api 'Microsoft.Web/sites@2021-03-01' = {
   name: '${resourcePrefix}-api'
   kind: 'app'
@@ -80,7 +97,7 @@ resource Api 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'SpineReviewStorage'
           type: 'Custom'
-          connectionString: 'DefaultEndpointsProtocol=https;AccountName=${StorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(StorageAccount.id, StorageAccount.apiVersion).keys[0].value}'
+          connectionString: tieMelAdadpterConnectionString
         }
       ]
     }
@@ -131,6 +148,10 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'AzureWebJobsStorage'
           value: 'DefaultEndpointsProtocol=https;AccountName=${StorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(StorageAccount.id, StorageAccount.apiVersion).keys[0].value}'
+        }
+        {
+          name: 'TieMelAdapterStorage'
+          value: tieMelAdadpterConnectionString
         }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'

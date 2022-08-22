@@ -43,7 +43,7 @@ public class Startup : FunctionsStartup
 
         services.AddAzureClients(opt =>
         {
-            opt.AddBlobServiceClient(configuration["AzureWebJobsStorage"]);
+            opt.AddBlobServiceClient(configuration["TieMelAdapterStorage"]);
         });
     }
 
