@@ -4,7 +4,6 @@ param location string = resourceGroup().location
 param env string
 
 var dotnetVersion = 'v6.0'
-var linuxFxVersion = 'DOTNETCORE|6.0'
 var dugtrioGroupId = '5cb080af-069d-47db-8675-67efa584f59c'
 var loudredGroupId = 'bdf2d33e-44a0-4774-9a11-204301b8e502'
 
@@ -14,12 +13,27 @@ var resourceTags = {
   Env: env
 }
 
+resource StorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
+  name: '${env}spinesplinterstorage'
+  location: location
+  tags: resourceTags
+  kind: 'StorageV2'
+  sku: {
+    name: 'Standard_LRS'
+  }
+  properties: {
+    supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
+    accessTier: 'Hot'
+  }
+}
+
 resource ServiceBusNamespace 'Microsoft.ServiceBus/namespaces@2021-11-01' existing = {
   name: 'spine-sbus'
   scope: resourceGroup('spine-servicebus')
 }
 
-resource StorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
+resource TieMelAdapterStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
   name: 'prodmeladapterstorageacc'
   scope: resourceGroup('prod-tie-mel-adapter')
 }
@@ -47,6 +61,8 @@ resource AppServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   }
 }
 
+var tieMelAdadpterConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${TieMelAdapterStorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(TieMelAdapterStorageAccount.id, TieMelAdapterStorageAccount.apiVersion).keys[0].value}'
+
 resource Api 'Microsoft.Web/sites@2021-03-01' = {
   name: '${resourcePrefix}-api'
   kind: 'app'
@@ -62,23 +78,19 @@ resource Api 'Microsoft.Web/sites@2021-03-01' = {
     siteConfig: {
       alwaysOn: false
       netFrameworkVersion: dotnetVersion
-      linuxFxVersion: linuxFxVersion
+      linuxFxVersion: 'DOTNETCORE|6.0'
       http20Enabled: true
       appSettings: [
         {
           name: 'ApplicationInsights__ConnectionString'
           value: ApplicationInsights.properties.ConnectionString
         }
-        {
-          name: 'Servers__Dugtrio__BaseUrl'
-          value: 'https://${env}-mel-fuseki.azurewebsites.net'
-        }
       ]
       connectionStrings: [
         {
           name: 'SpineReviewStorage'
           type: 'Custom'
-          connectionString: 'DefaultEndpointsProtocol=https;AccountName=${StorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(StorageAccount.id, StorageAccount.apiVersion).keys[0].value}'
+          connectionString: tieMelAdadpterConnectionString
         }
       ]
     }
@@ -93,9 +105,11 @@ resource FuncServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   kind: 'linux'
   properties: {
     reserved: true
+    computeMode: 'Dynamic'
   }
   sku: {
     name: 'Y1'
+    tier: 'Dynamic'
   }
 }
 
@@ -116,6 +130,7 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
     dailyMemoryTimeQuota: 1000
     siteConfig: {
       netFrameworkVersion: dotnetVersion
+      linuxFxVersion: 'dotnet|6'
       http20Enabled: true
       appSettings: [
         {
@@ -129,6 +144,10 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'AzureWebJobsStorage'
           value: 'DefaultEndpointsProtocol=https;AccountName=${StorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(StorageAccount.id, StorageAccount.apiVersion).keys[0].value}'
+        }
+        {
+          name: 'TieMelAdapterStorage'
+          value: tieMelAdadpterConnectionString
         }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'

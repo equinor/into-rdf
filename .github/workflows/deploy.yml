@@ -54,6 +54,7 @@
             env:
               AzureAd.ClientId: ${{ secrets.API_CLIENT_ID }}
               KeyVaultName: "${{ env.ENV }}-spinesplinter-vault"
+              Servers.Dugtrio.BaseUrl: "https://${{ env.ENV }}-mel-fuseki.azurewebsites.net"
               ENV: ${{ env.ENV }} # Env is cleared when adding env like this, copy it
 
 
@@ -64,7 +65,7 @@
               package: api/
 
           - name: Deploy Functions
-            uses: Azure/functions-action@v1.4.6
+            uses: Azure/functions-action@v1.4.7
             with:
               app-name: '${{ env.ENV }}-spinesplinter-func'
               package: functions/

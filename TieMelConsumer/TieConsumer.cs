@@ -29,6 +29,7 @@ public class TieConsumer
         _spineNotificationService = spineNotificationService;
     }
     [FunctionName(nameof(TieConsumer))]
+    [StorageAccount("TieMelAdapterStorage")]
     public async Task Run([BlobTrigger("prodmeladapterfiles/{name}")] Stream? myBlob, string name, ILogger log)
     {
         log.LogInformation("C# Blob trigger function Processed blob\n Name:{Name} \n Size: {Size}", name, myBlob?.Length);
