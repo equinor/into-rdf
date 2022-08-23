@@ -21,7 +21,9 @@ public static class RdfSharpNQuadSerializer
     {
         if (triple.Object is RDFTypedLiteral)
         {
+            RDFTypedLiteral typedObj = (RDFTypedLiteral)triple.Object;
             return $"<{triple.Subject.ToString()}> <{triple.Predicate.ToString()}> \"{typedObj.ToString().Replace(Environment.NewLine, " ").Replace("^^", "\"^^<")}> <{namedGraph}> .";
+
         }
         else if (triple.Object is RDFLiteral)
         {
