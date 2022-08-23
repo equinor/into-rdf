@@ -19,10 +19,14 @@ public static class RdfSharpNQuadSerializer
 
     private static string QuadPattern(Uri namedGraph, RDFTriple triple)
     {
-        if (triple.Object is RDFLiteral)
+        if (triple.Object is RDFTypedLiteral)
         {
-            return $"<{triple.Subject.ToString()}> <{triple.Predicate.ToString()}> \"{triple.Object.ToString()}\" <{namedGraph}> .";
+            return $"<{triple.Subject.ToString()}> <{triple.Predicate.ToString()}> \"{typedObj.ToString().Replace(Environment.NewLine, " ").Replace("^^", "\"^^<")}> <{namedGraph}> .";
         }
-        return $"<{triple.Subject.ToString()}> <{triple.Predicate.ToString()}> <{triple.Object.ToString()}> <{namedGraph}> .";
+        else if (triple.Object is RDFLiteral)
+        {
+            return $"<{triple.Subject.ToString()}> <{triple.Predicate.ToString()}> \"{triple.Object.ToString().Replace(Environment.NewLine, " ")}\" <{namedGraph}> .";
+        }
+        return $"<{triple.Subject.ToString()}> <{triple.Predicate.ToString()}> <{triple.Object.ToString().Replace(Environment.NewLine, " ")}> <{namedGraph}> .";
     }
 }
