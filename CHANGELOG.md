@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/equinor/spine-splinter/compare/v1.1.0...v1.1.1) (2022-08-23)
+
+
+### Bug Fixes
+
+* to eager doing cleanup. Readded a line of code ([2bcff24](https://github.com/equinor/spine-splinter/commit/2bcff24c3607fd2d3ba87b9631de9ce820ef2faa))
+* trigger release ([b57f9d5](https://github.com/equinor/spine-splinter/commit/b57f9d5e08da1be6bc9789db852ded3c7774e921))
+
 ## [1.1.0](https://github.com/equinor/spine-splinter/compare/v1.0.0...v1.1.0) (2022-08-23)
 
 
