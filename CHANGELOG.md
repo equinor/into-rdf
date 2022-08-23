@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.1.0](https://github.com/equinor/spine-splinter/compare/v1.0.0...v1.1.0) (2022-08-23)
+
+
+### Features
+
+* 75640 update excel2 rdf to generate provenance from fuseki ([#70](https://github.com/equinor/spine-splinter/issues/70)) ([b55fa00](https://github.com/equinor/spine-splinter/commit/b55fa00c0a1afb99c337a49b991f0346403e0a64))
+* AML Ingest ([#74](https://github.com/equinor/spine-splinter/issues/74)) ([331e7e1](https://github.com/equinor/spine-splinter/commit/331e7e1a29670e42b6f1097891f587ab78ed4583))
+
+
+### Bug Fixes
+
+* 🐛 Add missing linuxFxVersion ([82098dc](https://github.com/equinor/spine-splinter/commit/82098dcf7288754766cd723aa5fca589e98cdb7c))
+* 🐛 different linuxFxVersion for webapp and functionapp ([#85](https://github.com/equinor/spine-splinter/issues/85)) ([6d80c46](https://github.com/equinor/spine-splinter/commit/6d80c4692455fc3cfcd112ac932014e5237f6af7))
+* 🐛 Move substitution of baseUrl from bicep to action ([#84](https://github.com/equinor/spine-splinter/issues/84)) ([7637687](https://github.com/equinor/spine-splinter/commit/7637687ef7bc01f42ae63e3d318b56f80efa0f66))
+* Fixed bug with getting previous revisions from the Fuseki ([#64](https://github.com/equinor/spine-splinter/issues/64)) ([abc80b9](https://github.com/equinor/spine-splinter/commit/abc80b9ca31559e66f5b257a17bb126cf60e5033))
+
+
+### Other
+
+* 🤖 update packages ([#77](https://github.com/equinor/spine-splinter/issues/77)) ([4dedde3](https://github.com/equinor/spine-splinter/commit/4dedde3caae4e5c8aaf0db47eb54f33a9fc12d5b))
+* 75634 generalizing splinter transformations ([#69](https://github.com/equinor/spine-splinter/issues/69)) ([0d2013b](https://github.com/equinor/spine-splinter/commit/0d2013b92f189ba443d3928d9af0f40457d5770f))
+* Added readme for running the various Azure functions locally ([#79](https://github.com/equinor/spine-splinter/issues/79)) ([5193f1f](https://github.com/equinor/spine-splinter/commit/5193f1fd4dd741cdcbcfd2cb99c462ffa998eed1))
+* **deps:** bump Azure/functions-action from 1.4.6 to 1.4.7 ([#83](https://github.com/equinor/spine-splinter/issues/83)) ([bffe371](https://github.com/equinor/spine-splinter/commit/bffe371fa6fd5674c98bcb36c1c5ec6d2bf54696))
+* **deps:** bump Microsoft.ApplicationInsights.AspNetCore ([#68](https://github.com/equinor/spine-splinter/issues/68)) ([19072d4](https://github.com/equinor/spine-splinter/commit/19072d48e18fd27a84bc25126dc07b6e6f75f435))
+* **deps:** bump Serilog.AspNetCore from 6.0.0 to 6.0.1 ([#65](https://github.com/equinor/spine-splinter/issues/65)) ([942f6b4](https://github.com/equinor/spine-splinter/commit/942f6b41bce2c1a37dd1755930de38dd00fe3641))
+* **deps:** bump Swashbuckle.AspNetCore from 6.3.2 to 6.4.0 ([#66](https://github.com/equinor/spine-splinter/issues/66)) ([8164e18](https://github.com/equinor/spine-splinter/commit/8164e188729ecc65a0490978e75ced7552484850))
+
+
+### CI/CD
+
+* 🎡 create own storage account for az function ([#82](https://github.com/equinor/spine-splinter/issues/82)) ([cb70eb2](https://github.com/equinor/spine-splinter/commit/cb70eb2a7da03a893948a0214580cbc6b1f7b2da))
+* 🎡 setup mel fuseki in az function bicep ([#81](https://github.com/equinor/spine-splinter/issues/81)) ([eebaa46](https://github.com/equinor/spine-splinter/commit/eebaa464f4dec0d368cd2b26801a4e895817ea50))
+
 ## 1.0.0 (2022-07-19)
 
 
