@@ -1,4 +1,5 @@
-﻿using Common.Exceptions;
+﻿using System.Net.Http.Headers;
+using Common.Exceptions;
 using Common.FusekiModels;
 using Microsoft.Identity.Web;
 using Newtonsoft.Json;
@@ -27,16 +28,14 @@ public class FusekiService : IFusekiService
 
     public async Task<string> QueryAsApp(string server, string sparql)
     {
-        var response = await ExecuteSparqlAsApp(server, sparql, "application/json");
+        var response = await ExecuteSparqlAsApp(server, sparql, new List<string> { "text/turtle", "application/sparql-results+json" });
 
         return await SerializeResponse(response);
     }
 
-    public async Task<string> QueryAsUser(string server, string sparql)
+    public async Task<HttpResponseMessage> QueryAsUser(string server, string sparql)
     {
-        var response = await ExecuteSparqlAsUser(server, sparql, "application/json");
-
-        return await SerializeResponse(response);
+        return await ExecuteSparqlAsUser(server, sparql, new List<string> { "text/turtle", "application/sparql-results+json" });
     }
 
     public async Task<FusekiResponse> QueryFusekiResponseAsApp(string server, string sparql)
@@ -51,13 +50,6 @@ public class FusekiService : IFusekiService
         var result = FusekiResponseToPropsMapper.MapResponse<T>(await QueryFusekiResponseAsApp(server, sparql));
 
         return result;
-    }
-
-    public async Task<FusekiResponse> QueryFusekiResponseAsUser(string server, string sparql)
-    {
-        var result = await QueryAsUser(server, sparql);
-
-        return DeserializeToFusekiResponse(result);
     }
 
     private async Task<string> SerializeResponse(HttpResponseMessage response)
@@ -81,26 +73,26 @@ public class FusekiService : IFusekiService
         return fusekiResponse;
     }
 
-    private async Task<HttpResponseMessage> ExecuteSparqlAsApp(string server, string sparql, string contentType)
+    private async Task<HttpResponseMessage> ExecuteSparqlAsApp(string server, string sparql, List<string> accepts)
     {
-        return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForQuery(options, sparql, contentType));
+        return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForQuery(options, sparql, accepts));
     }
 
-    private async Task<HttpResponseMessage> ExecuteSparqlAsUser(string server, string sparql, string contentType)
+    private async Task<HttpResponseMessage> ExecuteSparqlAsUser(string server, string sparql, List<string> accepts)
     {
-        return await _downstreamWebApi.CallWebApiForUserAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForQuery(options, sparql, contentType));
+        return await _downstreamWebApi.CallWebApiForUserAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForQuery(options, sparql, accepts));
     }
 
-    private DownstreamWebApiOptions GetDownStreamWebApiOptionsForQuery(DownstreamWebApiOptions options, string sparql, string contentType)
+    private DownstreamWebApiOptions GetDownStreamWebApiOptionsForQuery(DownstreamWebApiOptions options, string sparql, List<string> accepts)
     {
         options.HttpMethod = HttpMethod.Post;
         options.RelativePath = "ds/query";
         options.CustomizeHttpRequestMessage = message =>
         {
-            message.Headers.Add("Accept", contentType);
+            message.Headers.Add("Accept", accepts);
             message.Content = new FormUrlEncodedContent(new KeyValuePair<string, string>[]
             {
-                        new("query", sparql)
+                new("query", sparql)
             });
         };
 
@@ -116,7 +108,7 @@ public class FusekiService : IFusekiService
         {
             message.Headers.Add("Accept", contentType);
             message.Content = new StringContent(turtle);
-            message.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+            message.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
         };
 
         return options;

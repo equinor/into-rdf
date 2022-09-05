@@ -4,6 +4,7 @@ using Services.RdfServices;
 using System.Text;
 using Api.Authorization;
 using Services.RdfServices.XmlServives;
+using System.IO;
 
 namespace Api.Controllers
 {
@@ -76,7 +77,7 @@ namespace Api.Controllers
         {
             if (formFile is null) return BadRequest("No Content");
             var rdf = await _xmlRdfService.ConvertAMLToRdf(formFile.OpenReadStream());
-            var result = await _rdfService.PostToFusekiAsUser(server, rdf, "application/n-quads"); 
+            var result = await _rdfService.PostToFusekiAsUser(server, rdf, "application/n-quads");
             return result.IsSuccessStatusCode ? Ok(rdf) : BadRequest(result);
         }
     }

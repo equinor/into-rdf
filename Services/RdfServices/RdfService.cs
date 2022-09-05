@@ -1,4 +1,5 @@
-﻿using Azure.Storage.Blobs.Models;
+﻿using System.Net.Http.Headers;
+using Azure.Storage.Blobs.Models;
 using Common.ProvenanceModels;
 using Common.SpreadsheetModels;
 using Microsoft.AspNetCore.Http;
@@ -134,7 +135,7 @@ namespace Services.RdfServices
             return await _fusekiService.PostAsUser(server, data, contentType);
         }
 
-        public async Task<string> QueryFusekiAsUser(string server, string query)
+        public async Task<HttpResponseMessage> QueryFusekiAsUser(string server, string query)
         {
             return await _fusekiService.QueryAsUser(server, query);
         }
