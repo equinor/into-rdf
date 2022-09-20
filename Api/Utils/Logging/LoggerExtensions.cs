@@ -1,10 +1,9 @@
 ﻿using System.Reflection;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
+
 namespace Common.Utils
 {
     public static class LoggerExtensions
@@ -18,6 +17,12 @@ namespace Common.Utils
             
             var entryAssemblyName = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
             var asmTypeName = Assembly.GetEntryAssembly()?.GetName().Name;
+
+            if (entryAssemblyName == null || asmTypeName == null)
+            {
+                throw new Exception("Fatal: Unable to get assembly info when configuring logging");
+            }
+
             loggerConfiguration
                 .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft", logLevel)
