@@ -70,7 +70,7 @@ resource Fuseki 'Microsoft.Web/sites@2021-03-01' = {
       http20Enabled: true
       acrUseManagedIdentityCreds: true
       acrUserManagedIdentityID: AcrPullIdentity.properties.clientId
-      appCommandLine: '--conf /fuseki/config/mel_persisted_reasoning_config.ttl'
+      appCommandLine: '--conf /fuseki/config/mel_persisted_rdfs_reasoning_config.ttl'
       azureStorageAccounts: {
         '${fileShareName}': {
           type: 'AzureFiles'

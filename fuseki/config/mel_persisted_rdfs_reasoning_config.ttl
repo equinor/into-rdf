@@ -53,7 +53,7 @@
 
 :model_inf a ja:InfModel;
     ja:baseModel :graph;
-    ja:reasoner [ja:reasonerURL <http://jena.hpl.hp.com/2003/OWLFBRuleReasoner>]
+    ja:reasoner [ja:reasonerURL <http://jena.hpl.hp.com/2003/RDFSExptRuleReasoner>]
 .
 
 :graph a tdb2:GraphTDB ;

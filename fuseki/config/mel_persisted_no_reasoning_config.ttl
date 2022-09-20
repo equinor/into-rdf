@@ -24,7 +24,7 @@
     fuseki:endpoint [
         fuseki:operation fuseki:query ;
         fuseki:name "sparql"
-    ];
+    ] ;
     fuseki:endpoint [
         fuseki:operation fuseki:query ;
         fuseki:name "query"
@@ -45,21 +45,9 @@
         fuseki:operation fuseki:upload ;
         fuseki:name "upload"
     ] ;
-    fuseki:dataset :infDataset ;
+    fuseki:dataset :dataset_tdb2
     .
 
-:infDataset a ja:RDFDataset;
-    ja:defaultGraph :model_inf.
-
-:model_inf a ja:InfModel;
-    ja:baseModel :graph;
-    ja:reasoner [ja:reasonerURL <http://jena.hpl.hp.com/2003/OWLFBRuleReasoner>]
-.
-
-:graph a tdb2:GraphTDB ;
-    tdb2:dataset :datasetTDB2 .
-
-:datasetTDB2 a tdb2:DatasetTDB2 ;
-    tdb2:location  "/meltdb2" .
-
- 
+:dataset_tdb2 a tdb2:DatasetTDB2 ;
+    tdb2:location  "/meltdb2" ;
+    .
