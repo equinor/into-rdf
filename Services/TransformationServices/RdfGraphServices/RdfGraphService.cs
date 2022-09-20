@@ -1,4 +1,5 @@
 using Common.RdfModels;
+using Services.TransformationServices.SourceToOntologyConversionService;
 using System.Data;
 using System.Text;
 using VDS.RDF;
@@ -10,18 +11,46 @@ namespace Services.TransformationServices.RdfGraphServices;
 public class RdfGraphService : IRdfGraphService
 {
     private Graph _graph;
+    private readonly ISourceToOntologyConversionService _sourceVocabularyConversionService;
 
-    public RdfGraphService()
+    public RdfGraphService(ISourceToOntologyConversionService sourceVocabularyConversionService)
     {
-        _graph = new Graph();
+        _sourceVocabularyConversionService = sourceVocabularyConversionService;
+        _graph = InitializeGraph();
+    }
+
+    private Graph InitializeGraph()
+    {
+        var graph = new Graph();
+
         foreach (var pair in RdfPrefixes.Prefix2Uri)
         {
-            _graph.NamespaceMap.AddNamespace(pair.Key, pair.Value);
+            graph.NamespaceMap.AddNamespace(pair.Key, pair.Value);
+        }
+
+        return graph;
+    }
+
+    public void AssertDataTable(DataTable dataTable, Graph ontologyGraph)
+    {
+        _graph.Merge(AssertRawData(dataTable));
+        if (dataTable.TableName == "InputData")
+        {
+            _graph.Merge(AssertOntologyConvertedData(dataTable, ontologyGraph));
         }
     }
 
-    public void AssertDataTable(DataTable dataTable)
+    public string WriteGraphToString()
     {
+        using MemoryStream outputStream = new MemoryStream();
+        
+        _graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new CompressingTurtleWriter());
+        return Encoding.UTF8.GetString(outputStream.ToArray());
+    }
+
+    private Graph AssertRawData(DataTable dataTable)
+    {
+        Graph graph = InitializeGraph();
         foreach (DataRow row in dataTable.Rows)
         {
             var rdfSubject = CreateUriNode((Uri)row["id"]);
@@ -36,17 +65,22 @@ public class RdfGraphService : IRdfGraphService
                 var rdfPredicate = CreateUriNode(new Uri(header.ColumnName));
                 var rdfObject = CreateNode(row[header]);
 
-                _graph.Assert(new Triple(rdfSubject, rdfPredicate, rdfObject));
+                graph.Assert(new Triple(rdfSubject, rdfPredicate, rdfObject));
             }
         }
+        return graph;
     }
 
-    public string WriteGraphToString()
-    {
-        using MemoryStream outputStream = new MemoryStream();
-        
-        _graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new CompressingTurtleWriter());
-        return Encoding.UTF8.GetString(outputStream.ToArray());
+    private Graph AssertOntologyConvertedData(DataTable dataTable, Graph ontologyGraph)
+    {        
+        Graph graph = new Graph();
+        if (!ontologyGraph.IsEmpty)
+        {
+            _sourceVocabularyConversionService.ConvertSourceToOntology(dataTable, ontologyGraph);
+            graph = _sourceVocabularyConversionService.GetGraph();
+        }
+
+        return graph;
     }
 
     private bool IsNull(object value)

@@ -1,18 +1,19 @@
 using Common.ProvenanceModels;
 using Common.RdfModels;
 using System.Data;
+using System.Linq;
 
 namespace Services.TransformationServices.RdfTableBuilderServices;
 
-public class MelRdfTableBuilderService : IRdfTableBuilderService
+public class ExcelRdfTableBuilderService : IRdfTableBuilderService
 {
     private string _builderType;
     private DataTable _dataTable;
 
-    public MelRdfTableBuilderService()
+    public ExcelRdfTableBuilderService()
     {
         _dataTable = new DataTable();
-        _builderType = "mel";
+        _builderType = "spreadsheet";
     }
 
     public string GetBuilderType() => _builderType;
@@ -22,9 +23,19 @@ public class MelRdfTableBuilderService : IRdfTableBuilderService
         _dataTable = new DataTable(); 
         
         AddTableName("Provenance");
-        CreateProvenanceSchema();
-        AddProvenanceRow(dataCollectionUri, provenance);
-        
+
+        //Temporary solution so that the old MEL transformation works until it is migrated to named graph provenance.
+        if (provenance.DataSource == DataSource.LineList)
+        {
+            CreateProvenanceForNamedGraphSchema();
+            AddProvenanceForNamedGraphRow(provenance);
+        }
+        else
+        {
+            CreateProvenanceSchema();
+            AddProvenanceRow(dataCollectionUri, provenance);
+        }
+
         return _dataTable;
     }
 
@@ -53,10 +64,9 @@ public class MelRdfTableBuilderService : IRdfTableBuilderService
     public DataTable GetInputDataTable(Uri dataCollectionUri, Uri transformationUri, Provenance provenance, DataTable inputData)
     {
         _dataTable = new DataTable();
-        
-        AddTableName(inputData.TableName);
+        AddTableName("InputData");
         CreateInputDataSchema(provenance, inputData.Columns);
-        AddInputDataRows(dataCollectionUri, transformationUri, inputData);
+        AddInputDataRows(dataCollectionUri, transformationUri, provenance, inputData);
 
         return _dataTable;
     }
@@ -83,24 +93,64 @@ public class MelRdfTableBuilderService : IRdfTableBuilderService
         _dataTable.Columns.Add(RdfCommonColumns.CreateWasRevisionOf());
     }
 
-    private void AddProvenanceRow(Uri dataCollectionUri, Provenance provenance)
+    private void CreateProvenanceForNamedGraphSchema()
     {
-        var projectUriSegment = $"{provenance.FacilityId}/{provenance.DocumentProjectId?.ToLower()}";
+        var idColumn = RdfCommonColumns.CreateIdColumn();
+        _dataTable.Columns.Add(idColumn);
+        _dataTable.PrimaryKey = new DataColumn[] { idColumn };
+
+        _dataTable.Columns.Add(RdfCommonColumns.CreateType());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateGeneratedAtTime());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasDocumentProjectId());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasRevisionNumber());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasRevisionName());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateWasDerivedFrom());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasSource());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateWasRevisionOf());
+    }
+    private void AddProvenanceForNamedGraphRow(Provenance provenance)
+    {
+        var projectUriSegment = $"{provenance.FacilityId.ToLower()}/{provenance.DocumentProjectId?.ToLower()}";
+        
+        var currentRevision = new Uri($"{RdfPrefixes.Prefix2Uri["equinor"].ToString()}graph/{projectUriSegment}/{provenance.DataSource}/{provenance.RevisionNumber}"); 
+        
         var previousRevision = provenance.PreviousRevision 
-                                ?? (provenance.PreviousRevisionNumber != string.Empty 
-                                        ? new Uri(RdfPrefixes.Prefix2Uri["equinor"] + projectUriSegment + "/mel/" + provenance.PreviousRevisionNumber) 
+                                ?? (String.IsNullOrWhiteSpace(provenance.PreviousRevisionNumber) == false 
+                                        ? new Uri($"{RdfPrefixes.Prefix2Uri["equinor"].ToString()}{projectUriSegment}/{provenance.DataSource}/{provenance.PreviousRevisionNumber}") 
                                         : null);
         
         _dataTable.Rows.Add(
-            dataCollectionUri,
-            RdfCommonClasses.CreateCollectionClass(),
+            currentRevision,
+            RdfCommonClasses.CreateNamedGraphClass(),
             provenance.RevisionDate,
             new Uri(RdfPrefixes.Prefix2Uri["identifier"] + provenance.DocumentProjectId),
             provenance.RevisionNumber,
             provenance.RevisionName,
             provenance.DataCollectionName,
-            new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSource?.ToString() ?? DataSource.Unknown()),
-            new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSourceType?.ToString() ?? DataSourceType.Unknown()),
+            new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSource ?? DataSource.Unknown),
+            previousRevision
+            );
+    }
+
+
+    private void AddProvenanceRow(Uri dataCollectionUri, Provenance provenance)
+    {
+        var projectUriSegment = $"{provenance.FacilityId}/{provenance.DocumentProjectId?.ToLower()}";
+        var previousRevision = provenance.PreviousRevision 
+                                ?? (String.IsNullOrWhiteSpace(provenance.PreviousRevisionNumber) == false 
+                                        ? new Uri($"{RdfPrefixes.Prefix2Uri["equinor"].ToString()}{projectUriSegment}/{provenance.DataSource}/{provenance.PreviousRevisionNumber}") 
+                                        : null);
+        
+        _dataTable.Rows.Add(
+            dataCollectionUri,
+            RdfCommonClasses.CreateNamedGraphClass(),
+            provenance.RevisionDate,
+            new Uri(RdfPrefixes.Prefix2Uri["identifier"] + provenance.DocumentProjectId),
+            provenance.RevisionNumber,
+            provenance.RevisionName,
+            provenance.DataCollectionName,
+            new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSource ?? DataSource.Unknown),
+            new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSourceType ?? DataSourceType.Unknown()),
             previousRevision
             );
     }
@@ -171,13 +221,21 @@ public class MelRdfTableBuilderService : IRdfTableBuilderService
 
 
 
-    private void AddInputDataRows(Uri dataCollectionUri, Uri transformationUri, DataTable inputData)
+    private void AddInputDataRows(Uri dataCollectionUri, Uri transformationUri, Provenance provenance, DataTable inputData)
     {
         const int NumberOfFixedColumns = 2;
 
+        GetItemIdentification(dataCollectionUri, inputData.Columns, provenance.DataSource, out var idColumn, out var identificationUri);
+
         foreach (DataRow row in inputData.Rows)
         {
-            var itemUri = new Uri($"{dataCollectionUri.AbsoluteUri}#row={row["id"]}");
+            var itemUri = new Uri($"{identificationUri.AbsoluteUri}{row[idColumn]}");
+            var existingId = _dataTable.AsEnumerable().Any(row => itemUri.ToString() == row.Field<Uri>("id")?.ToString());
+
+            if (existingId)
+            {
+                itemUri = new Uri($"{itemUri.AbsoluteUri}_row={row["id"]}");
+            }
 
             var dataRow = _dataTable.NewRow();
             dataRow[0] = itemUri;
@@ -189,7 +247,35 @@ public class MelRdfTableBuilderService : IRdfTableBuilderService
             {
                 dataRow[columnIndex - 1 + NumberOfFixedColumns] = row[columnIndex];
             }
+
             _dataTable.Rows.Add(dataRow);
         }
+    }
+
+    private void GetItemIdentification(Uri dataCollectionUri, DataColumnCollection columns, string source, out string idColumn, out Uri identificationUri)
+    {
+        switch (source) 
+        {
+            case DataSource.LineList:
+            {
+                GetLineListItemIdentification(dataCollectionUri, columns, out idColumn, out identificationUri);
+                break;
+            }
+            default:
+            {
+                idColumn = "id";
+                identificationUri = new Uri($"{dataCollectionUri.AbsoluteUri}#row=");
+                break;
+            }
+        }
+    }
+
+    private void GetLineListItemIdentification(Uri dataCollectionUri, DataColumnCollection columns, out string idColumn, out Uri identificationUri)
+    {
+        idColumn = columns.Contains("Line Tag") ? "Line Tag" : 
+                        columns.Contains("Line number") ? "Line number" : "id";
+
+        identificationUri = dataCollectionUri;
+
     }
 }

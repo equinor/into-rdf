@@ -1,7 +1,7 @@
 using Common.ProvenanceModels;
 using Services.TransformationServices.RdfTransformationServices;
 using System.Data;
-
+using VDS.RDF;
 
 namespace Services.TransformationServices.DatabaseTransformationServices;
 
@@ -15,15 +15,18 @@ public class ShipweightTransformationService : IDatabaseTransformationService
     public string Transform(string facilityName, string plantId, DataTable inputData)
     {
         var provenance = CreateProvenance(facilityName, inputData.TableName, plantId);
+        
+        //TODO - Update when new (PCA aligned) Shipweight vocabulary/ontology is available 
+        var ontology = new Graph();
 
-        return _rdfTransformationService.Transform(provenance, inputData);
+        return _rdfTransformationService.Transform(provenance, ontology, inputData);
     }
 
     private Provenance CreateProvenance(string facilityName, string tableName, string plantId)
     {
         var facilityId = GetFacilityId(plantId);
 
-        var provenance = new Provenance(facilityId, DataSource.Shipweight());
+        var provenance = new Provenance(facilityId, DataSource.Shipweight);
         provenance.DocumentProjectId = "na";
         provenance.PlantId = plantId;
         provenance.DataCollectionName = facilityName;

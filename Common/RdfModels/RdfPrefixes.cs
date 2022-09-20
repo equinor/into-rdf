@@ -14,7 +14,9 @@ public static class RdfPrefixes
         {"transformation", new Uri("https://rdf.equinor.com/ontology/transformation#")},
         {"identification", new Uri("https://rdf.equinor.com/ontology/facility-identification/v1#")},
         {"identifier", new Uri("https://rdf.equinor.com/data/facility-identification/")},
-        {"sor", new Uri("https://rdf.equinor.com/ontology/sor#")}
+        {"sor", new Uri("https://rdf.equinor.com/ontology/sor#")},
+        {"pca", new Uri("https://rdf.equinor.com/ontology/pca#")},
+        {"physical", new Uri("https://rdf.equinor.com/ontology/physical/v1#")} 
     };
 
     public static Dictionary<Uri, string> Uri2Prefix => Prefix2Uri.ToDictionary(

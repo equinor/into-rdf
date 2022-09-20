@@ -13,7 +13,8 @@ public static class RdfCommonColumns
     public static DataColumn CreateHadMember() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "hadMember", typeof(Uri));
     public static DataColumn CreateWasGeneratedBy() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "wasGeneratedBy", typeof(Uri));
     public static DataColumn CreateWasRevisionOf() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "wasRevisionOf", typeof(Uri));
-    public static DataColumn CreateType() => new DataColumn(RdfPrefixes.Prefix2Uri["rdf"] + "type", typeof(Uri));
+    public static DataColumn CreateWasDerivedFrom() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "wasDerivedFrom", typeof(string));
+    public static DataColumn CreateType() => new DataColumn(RdfCommonProperties.CreateType().AbsoluteUri, typeof(Uri));
     public static DataColumn CreateFromDataCollection() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "fromDataCollection", typeof(string));
     public static DataColumn CreateHasSource() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasSource", typeof(Uri));
     public static DataColumn CreateHasSourceType() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasSourceType", typeof(Uri));

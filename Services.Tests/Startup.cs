@@ -7,7 +7,7 @@ namespace Services.Tests;
 public class Startup
 {
     public void ConfigureServices(IServiceCollection services, HostBuilderContext context)
-    {  
+    {
         services.AddSplinterServices();
     }
 }

@@ -25,12 +25,16 @@ namespace Services.Tests
         public void TestDomParsing()
         {
             var testFile = "TestData/test.xlsx";
+            var rdfTestUtils = new RdfTestUtils(DataSource.Mel);
             var stream = File.Open(testFile, FileMode.Open, FileAccess.Read);
 
-            var melTransformationService = _transformationServices.FirstOrDefault(service => service.GetDataSource() == DataSource.Mel()) ?? 
-                                                throw new ArgumentException($"Transformer of type {DataSource.Mel()} not available");
+            var melTransformationService = _transformationServices.FirstOrDefault(service => service.GetDataSource() == DataSource.Mel) ?? 
+                                                throw new ArgumentException($"Transformer of type {DataSource.Mel} not available");
 
-            var data = melTransformationService.Transform(stream, testFile);
+            //Empty ontology as it is not tested here.
+            var ontology = new Graph();
+
+            var data = melTransformationService.Transform(stream, ontology, testFile);
 
             Assert.NotNull(data);
 
@@ -39,19 +43,19 @@ namespace Services.Tests
             parser.Load(graph, new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(data))));
 
             //Provenance
-            RdfTestUtils.AssertTripleAsserted(
+            rdfTestUtils.AssertTripleAsserted(
                 graph,
                 new Uri("https://rdf.equinor.com/kra/c232/mel/01"),
                 new Uri("https://rdf.equinor.com/ontology/facility-identification/v1#hasDocumentProjectId"),
                 new Uri("https://rdf.equinor.com/data/facility-identification/C232")
             );
-            RdfTestUtils.AssertTripleAsserted(
+            rdfTestUtils.AssertTripleAsserted(
                 graph,
                 new Uri("https://rdf.equinor.com/kra/c232/mel/01"),
                 new Uri("https://rdf.equinor.com/ontology/sor#fromDataCollection"),
                 "test.xlsx"
             );
-            RdfTestUtils.AssertTripleAsserted(
+            rdfTestUtils.AssertTripleAsserted(
                 graph,
                 new Uri("https://rdf.equinor.com/kra/c232/mel/01"),
                 new Uri("http://www.w3.org/ns/prov#hadMember"),
@@ -59,35 +63,35 @@ namespace Services.Tests
             );
 
             //Actual Data
-            RdfTestUtils.AssertTripleAsserted(
+            rdfTestUtils.AssertTripleAsserted(
                 graph,
                 new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=2"),
                 new Uri("https://rdf.equinor.com/source/mel#Header3"),
                 "1729"
             );
 
-            RdfTestUtils.AssertTripleAsserted(
+            rdfTestUtils.AssertTripleAsserted(
                 graph,
                 new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=2"),
                 new Uri("https://rdf.equinor.com/source/mel#Header4"),
                 "3300.375"
             );
 
-            RdfTestUtils.AssertTripleAsserted(
+            rdfTestUtils.AssertTripleAsserted(
                 graph,
                 new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=499"),
                 new Uri("https://rdf.equinor.com/source/mel#Header55"),
                 "BC500"
             );
 
-            RdfTestUtils.AssertTripleAsserted(
+            rdfTestUtils.AssertTripleAsserted(
                 graph,
                 new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=498"),
                 new Uri("https://rdf.equinor.com/source/mel#Header55"),
                 "BC499"
             );
 
-            RdfTestUtils.AssertTripleAsserted(
+            rdfTestUtils.AssertTripleAsserted(
                 graph,
                 new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=497"),
                 new Uri("https://rdf.equinor.com/source/mel#Header53"),

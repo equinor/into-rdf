@@ -9,5 +9,6 @@
     public static class ServerKeys
     {
         public const string Dugtrio = "Dugtrio";
+        public const string SplinterConfig = "SplinterConfig";
     }
 }
