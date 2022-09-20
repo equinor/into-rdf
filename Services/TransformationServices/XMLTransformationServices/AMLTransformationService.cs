@@ -16,7 +16,7 @@ public class AmlTransformationService : IXMLTransformationService
     }
     public string GetDataSource()
     {
-        return DataSource.AML();
+        return DataSource.AML;
     }
 
     public string Transform(AMlProvenance provenance, BlobDownloadResult blob)

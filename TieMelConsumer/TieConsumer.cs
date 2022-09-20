@@ -37,7 +37,7 @@ public class TieConsumer
         var blobs = await GetBlobsInSameDirectory(name);
         if (blobs.Count <= 1) return;
 
-        var provenance = await _rdfService.HandleTieRequest(DataSource.Mel(), await GetData(blobs));
+        var provenance = await _rdfService.HandleTieRequest(DataSource.Mel, await GetData(blobs));
 
         if (provenance is null) return;
         if (string.IsNullOrEmpty(provenance.FacilityId) || string.IsNullOrEmpty(provenance.DocumentProjectId)) return;

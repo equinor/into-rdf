@@ -30,6 +30,8 @@ After the function has started a request containing the minimum required
 
 ```
  curl --request POST http://localhost:7071/api/Excel2Rdf --data '{"FileName": "C232-AI-R-LA-00001_01_R_20210208.xlsx", "DocumentProjectId":"C232", "DataSource": "mel", "SheetName": "mel", "RevisionName": "01", "RevisionDate": "2021-02-08"}'
+
+ curl --request POST http://localhost:7071/api/Excel2Rdf --data '{"FileName": "C277-AS-L-RA-00016_F01_01.xlsx", "DocumentProjectId":"C277", "DataSource": "linelist", "SheetName": "line", "RevisionName": "01", "RevisionDate": "2022-06-08"}'
 ```
 
 View the result in [transformed-data](https://portal.azure.com/#view/Microsoft_Azure_Storage/ContainerMenuBlade/~/overview/storageAccountId/%2Fsubscriptions%2Fd2daf888-a9d5-486b-86d7-ce46f07d9de9%2FresourceGroups%2FDugtrio-Experimental%2Fproviders%2FMicrosoft.Storage%2FstorageAccounts%2Fdugtrioexperimental/path/transformed-data/etag/%220x8DA6FD40400D742%22/defaultEncryptionScope/%24account-encryption-key/denyEncryptionScopeOverride~/false/defaultId//publicAccessVal/None)

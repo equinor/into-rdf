@@ -41,7 +41,7 @@ namespace Services.Tests
         private Provenance GetProvenance()
         {
             var facilityId = "Test";
-            var provenance = new Provenance(facilityId, DataSource.Shipweight());
+            var provenance = new Provenance(facilityId, DataSource.Shipweight);
             provenance.DocumentProjectId = "na";
             provenance.PlantId = "1234";
             provenance.DataCollectionName = "MyFacility";

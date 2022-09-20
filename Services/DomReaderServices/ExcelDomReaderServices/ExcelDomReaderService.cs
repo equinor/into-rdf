@@ -6,13 +6,13 @@ using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Text.RegularExpressions;
 
-namespace Services.DomReaderServices.MelDomReaderServices;
+namespace Services.DomReaderServices.ExcelDomReaderServices;
 
-public class MelDomReaderService : IMelDomReaderService
+public class ExcelDomReaderService : IExcelDomReaderService
 {
-    private readonly ILogger<MelDomReaderService> _logger;
+    private readonly ILogger<ExcelDomReaderService> _logger;
 
-    public MelDomReaderService(ILogger<MelDomReaderService> logger)
+    public ExcelDomReaderService(ILogger<ExcelDomReaderService> logger)
     {
         _logger = logger;
     }
@@ -55,21 +55,20 @@ public class MelDomReaderService : IMelDomReaderService
     public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails details)
     {
         var doc = SpreadsheetDocument.Open(excelFile, false);
-
         var workbookPart = doc.WorkbookPart ?? throw new ArgumentNullException("The file does not contain a workbook");
         var worksheetPart = GetWorksheetPart(doc, details.SheetName);
 
         var headerRow = GetHeaderRow(worksheetPart, workbookPart, details);
 
-        _logger.LogDebug("<DomMelReader> - GetSpreadsheetData: - Created header row with {nbOfColumns} columns", headerRow.Count);
+        _logger.LogDebug("<ExcelDomReaderService> - GetSpreadsheetData: - Created header row with {nbOfColumns} columns", headerRow.Count);
 
         var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, details);
 
-        _logger.LogDebug("<DomMelReader> - GetSpreadsheetData: - Created dataset with {nbOfRows} rows", dataRows.Count);
+        _logger.LogDebug("<ExcelDomReaderService> - GetSpreadsheetData: - Created dataset with {nbOfRows} rows", dataRows.Count);
 
         var data = CreateDataTable(details.DataStartRow, headerRow, dataRows, details.SheetName);
 
-        _logger.LogDebug("<DomMelReader> - GetSpreadsheetData: - Created table with {nbOfRows} rows", data.Rows.Count);
+        _logger.LogDebug("<ExcelDomReaderService> - GetSpreadsheetData: - Created table with {nbOfRows} rows", data.Rows.Count);
         return data;
     }
 
@@ -100,8 +99,6 @@ public class MelDomReaderService : IMelDomReaderService
         var rowSkip = details.DataStartRow - 1;
         var rowTake = details.DataEndRow - rowSkip;
 
-        var tagNumberIndex = headerRow.FindIndex(x => x == "Tag Number");
-
         var completeDataRows = worksheetPart
             .Worksheet
             .Descendants<Row>()
@@ -110,23 +107,30 @@ public class MelDomReaderService : IMelDomReaderService
         var trimmedDataRows = rowTake > 0 ? completeDataRows.Take(rowTake) : completeDataRows;
 
         return trimmedDataRows
-            .Where(row => ValidRow(row, tagNumberIndex))
+            .Where(row => ValidRow(row, headerRow, details.SheetName))
             .Select(row => GetCompleteRow(workbookPart, row, details.StartColumn, headerRow.Count).ToList())
             .ToList();
     }
 
-    private bool ValidRow(Row row, int tagNumberIndex)
+    private bool ValidRow(Row row, List<string> headerRow, string dataSource)
     {
         var descendants = row.Descendants<Cell>();
 
-        if (descendants.Count() < tagNumberIndex)
+        if (dataSource.ToLower() == DataSource.Mel)
         {
-            return false;
+            var tagNumberIndex = headerRow.FindIndex(x => x == "Tag Number");
+
+            if (descendants.Count() < tagNumberIndex)
+            {
+                return false;
+            }
+
+            var cell = descendants.ElementAt(tagNumberIndex);
+
+            return cell.CellValue != null;
         }
 
-        var cell = descendants.ElementAt(tagNumberIndex);
-
-        return cell.CellValue != null;
+        return descendants.Count() > 0;
     }
 
     private IEnumerable<string> GetCompleteRow(WorkbookPart wbPart, Row row, int startColumn, int endColumn)

@@ -11,7 +11,8 @@
             "Services.RdfServices.RdfService": "Debug",
             "Services.ProvenanceServices.ProvenanceService": "Debug",
             "Services.TransformationServices.SpreadsheetTransformationServices.MelTransformationService": "Debug",
-            "Services.DomReaderServices.MelDomReaderServices.MelDomReaderService": "Debug",
+            "Services.TransformationServices.SpreadsheetTransformationServices.LineListTransformationService": "Debug",
+            "Services.DomReaderServices.ExcelDomReaderServices.ExcelDomReaderService": "Debug",
             "Services.TransformationServices.RdfPreprocessingServices.RdfPreprocessingService" : "Debug",
             "Services.TransformationServices.RdfTransformationServices.RdfTransformationService" : "Debug"
           }

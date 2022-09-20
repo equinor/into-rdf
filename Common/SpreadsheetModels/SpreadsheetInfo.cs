@@ -21,18 +21,29 @@ public class SpreadsheetInfo
 
     public SpreadsheetDetails GetSpreadSheetDetails()
     {
-        if (SheetName == null || (HeaderRow == 0 && DataStartRow == 0))
+        if (SheetName != null && HeaderRow < DataStartRow)
         {
-            throw new InvalidDataException("Spreadsheet info does not contain sufficient details");
+            return new SpreadsheetDetails(
+                this.SheetName,
+                this.HeaderRow,
+                this.DataStartRow,
+                this.StartColumn,
+                this.DataEndRow,
+                this.EndColumn,
+                this.IsTransposed);
         }
-        return new SpreadsheetDetails(
-            this.SheetName,
-            this.HeaderRow,
-            this.DataStartRow,
-            this.StartColumn,
-            this.DataEndRow,
-            this.EndColumn,
-            this.IsTransposed);
+
+        if (DataSource == Common.ProvenanceModels.DataSource.Mel)
+        {
+            return GetDefaultSpreadsheetDetailsForMel();
+        }
+
+        if (DataSource == Common.ProvenanceModels.DataSource.LineList)
+        {
+            return GetDefaultSpreadsheetDetailsForLineList();
+        }
+
+        throw new InvalidDataException("Spreadsheet info does not contain sufficient details");
     }
 
     public RevisionRequirement GetRevisionRequirements()
@@ -91,5 +102,25 @@ public class SpreadsheetInfo
         private string DetailsErrorMessage(string missingParam)
     {
         return $"{missingParam} is missing from spreadsheet details";
+    }
+
+    private SpreadsheetDetails GetDefaultSpreadsheetDetailsForMel()
+    {
+        const string sheetName = "MEL";
+        const int headerRow = 6;
+        const int dataStartRow = 8;
+        const int startColumn = 1;
+
+        return new SpreadsheetDetails(sheetName, headerRow, dataStartRow, startColumn);
+    }
+
+    private SpreadsheetDetails GetDefaultSpreadsheetDetailsForLineList()
+    {
+        const string sheetName = "Line";
+        const int headerRow = 1;
+        const int dataStartRow = 3;
+        const int startColumn = 1;
+
+        return new SpreadsheetDetails(sheetName, headerRow, dataStartRow, startColumn);
     }
 }

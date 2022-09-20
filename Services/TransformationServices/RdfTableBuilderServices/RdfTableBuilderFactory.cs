@@ -1,3 +1,4 @@
+using Common.ProvenanceModels;
 
 namespace Services.TransformationServices.RdfTableBuilderServices;
 
@@ -12,7 +13,8 @@ public class RdfTableBuilderFactory : IRdfTableBuilderFactory
 
     public IRdfTableBuilderService GetRdfTableBuilder(string dataSource)
     {
-        var builder = _rdfTableBuilderServices.FirstOrDefault(x => x.GetBuilderType() == dataSource) ?? throw new ArgumentException($"Builder of type {dataSource} not available");
+        var source =  (dataSource == DataSource.Mel || dataSource == DataSource.LineList) ? DataSource.Spreadsheet : dataSource;
+        var builder = _rdfTableBuilderServices.FirstOrDefault(x => x.GetBuilderType() == source) ?? throw new ArgumentException($"Builder of type {source} not available");
 
         return builder;
     }

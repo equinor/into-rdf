@@ -91,7 +91,7 @@ public class ShipweightRdfTableBuilderService : IRdfTableBuilderService
             provenance.RevisionNumber,
             provenance.RevisionName,
             provenance.DataCollectionName,
-            new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSource?.ToString() ?? DataSource.Unknown()),
+            new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSource?.ToString() ?? DataSource.Unknown),
             new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSourceType?.ToString() ?? DataSourceType.Unknown())
             );
     }

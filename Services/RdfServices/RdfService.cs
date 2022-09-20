@@ -5,6 +5,7 @@ using Common.SpreadsheetModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Services.FusekiServices;
+using Services.OntologyServices.OntologyService;
 using Services.ProvenanceServices;
 using Services.TieMessageServices;
 using Services.TransformationServices.SpreadsheetTransformationServices;
@@ -17,12 +18,14 @@ namespace Services.RdfServices
         private readonly IFusekiService _fusekiService;
         private readonly IEnumerable<ISpreadsheetTransformationService> _spreadsheetTransformationService;
         private readonly IEnumerable<IXMLTransformationService> _xmlTransformationService;
+        private readonly IOntologyService _ontologyService; 
         private readonly IProvenanceService _provenanceService;
         private readonly ITieMessageService _tieMessageService;
         private readonly ILogger<RdfService> _logger;
         public RdfService(IFusekiService fusekiService,
                           IEnumerable<ISpreadsheetTransformationService> spreadsheetTransformationService,
                           IEnumerable<IXMLTransformationService> xmlTransformationService,
+                          IOntologyService ontologyService,
                           IProvenanceService provenanceService,
                           ITieMessageService tieMessageService,
                           ILogger<RdfService> logger)
@@ -30,6 +33,7 @@ namespace Services.RdfServices
             _fusekiService = fusekiService;
             _spreadsheetTransformationService = spreadsheetTransformationService;
             _xmlTransformationService = xmlTransformationService;
+            _ontologyService = ontologyService;
             _provenanceService = provenanceService;
             _tieMessageService = tieMessageService;
             _logger = logger;
@@ -42,10 +46,12 @@ namespace Services.RdfServices
         {
             using var stream = new MemoryStream();
             await formFile.CopyToAsync(stream);
-            var transformer = _spreadsheetTransformationService.FirstOrDefault(transformer => transformer.GetDataSource() == DataSource.Mel()) ??
-                                    throw new ArgumentException($"A transformer of type {DataSource.Mel()} is not available to RdfService");
+            var ontology = await _ontologyService.GetSourceOntologies(DataSource.Mel);
 
-            return transformer.Transform(stream, formFile.FileName);
+            var transformer = _spreadsheetTransformationService.FirstOrDefault(transformer => transformer.GetDataSource() == DataSource.Mel) ??
+                                    throw new ArgumentException($"A transformer of type {DataSource.Mel} is not available to RdfService");
+
+            return transformer.Transform(stream, ontology, formFile.FileName);
         }
 
         public async Task<Provenance?> HandleTieRequest(string datasource, List<BlobDownloadResult> blobData)
@@ -53,6 +59,7 @@ namespace Services.RdfServices
             var tieData = _tieMessageService.ParseXmlMessage(blobData);
             _logger.LogInformation("<RdfService> - HandleTieRequest: Successfully parsed TIE message for {TieFileData}", tieData.GetDataCollectionName());
 
+            var ontology = await _ontologyService.GetSourceOntologies(datasource);
             var provenance = await _provenanceService.CreateProvenanceFromTieMessage(datasource, tieData);
 
             switch (provenance.RevisionStatus)
@@ -93,7 +100,10 @@ namespace Services.RdfServices
 
             var transformationService = GetTransformationService(datasource);
 
-            string rdfGraphData = transformationService.Transform(provenance, xlsxBlob);
+            var spreadsheetInfo = new SpreadsheetInfo();
+            spreadsheetInfo.DataSource = provenance.DataSource;
+
+            string rdfGraphData = transformationService.Transform(provenance, ontology, xlsxBlob, spreadsheetInfo.GetSpreadSheetDetails());
             _logger.LogInformation("<RdfService> - HandleTieRequest: {TieFileName} Successfully transformed to rdf", tieData.GetDataCollectionName());
 
             //TODO - Push transformed data to Fuseki
@@ -116,13 +126,14 @@ namespace Services.RdfServices
         public async Task<string> HandleSpreadsheetRequest(SpreadsheetInfo info, BlobDownloadResult blobData)
         {
             var provenance = await _provenanceService.CreateProvenanceFromSpreadsheetInfo(info);
+            var ontology = await _ontologyService.GetSourceOntologies(provenance.DataSource);
 
             var datasource = info.DataSource ?? throw new InvalidOperationException("Spreadsheet info doesn't contain datasource");
 
             var transformationService = GetTransformationService(datasource);
-            string rdfGraphData = transformationService.Transform(provenance, blobData);
+            _logger.LogDebug("RdfService> - HandleSpreadsheetRequest: Using transformation service: {name}", transformationService.GetDataSource());
 
-            return rdfGraphData;
+            return transformationService.Transform(provenance, ontology, blobData, info.GetSpreadSheetDetails());
         }
 
         public async Task<HttpResponseMessage> PostToFusekiAsApp(string server, string data, string contentType)
@@ -145,6 +156,5 @@ namespace Services.RdfServices
             return _spreadsheetTransformationService.FirstOrDefault(transformer => transformer.GetDataSource() == datasource) ??
                 throw new ArgumentException($"A transformer of type {datasource} is not available to RdfService");
         }
-
     }
 }

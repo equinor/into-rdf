@@ -2,11 +2,12 @@ namespace Common.ProvenanceModels;
 
 public static class DataSource
 {
-    public static string Mel() => "mel";
-    public static string LineList() => "linelist";
-    public static string Shipweight() => "shipweight";
-    public static string STID() => "stid";
-    public static string PimsQem() => "pimsqem";
-    public static string Unknown() => "unknown";
-    public static string AML() => "aml";
+    public const string Mel = "mel";
+    public const string LineList = "linelist";
+    public const string Shipweight = "shipweight";
+    public const string STID = "stid";
+    public const string PimsQem = "pimsqem";
+    public const string Unknown = "unknown";
+    public const string AML = "aml";
+    public const string Spreadsheet = "spreadsheet";
 }

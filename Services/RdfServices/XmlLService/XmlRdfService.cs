@@ -14,8 +14,8 @@ public class XmlRdfService : IXmlRdfService
     {
         await Task.Delay(0);
         stream.Position = 0;
-        var transformer = _xmlTransformationService.FirstOrDefault(t => t.GetDataSource() == DataSource.AML()) ??
-        throw new ArgumentException($"A transformer of type {DataSource.AML()} is not available to RdfService");
+        var transformer = _xmlTransformationService.FirstOrDefault(t => t.GetDataSource() == DataSource.AML) ??
+        throw new ArgumentException($"A transformer of type {DataSource.AML} is not available to RdfService");
         return transformer.Transform(stream);
     }
 }

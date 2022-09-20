@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Services.TransformationServices.RdfGraphServices;
 using Services.TransformationServices.RdfPreprocessingServices;
 using System.Data;
+using VDS.RDF;
 
 namespace Services.TransformationServices.RdfTransformationServices;
 
@@ -20,7 +21,7 @@ public class RdfTransformationService : IRdfTransformationService
         _logger = logger;
     }
 
-    public string Transform(Provenance provenance, DataTable inputData)
+    public string Transform(Provenance provenance, Graph ontologyGraph, DataTable inputData)
     {
         var rdfDataSet = _rdfPreprocessor.CreateRdfTables(provenance, inputData);
         _logger.LogInformation("<RdfTransformer> - Transform: Dataset with {nbOfTables} tables created", rdfDataSet.Tables.Count);
@@ -28,7 +29,7 @@ public class RdfTransformationService : IRdfTransformationService
         foreach (DataTable table in rdfDataSet.Tables)
         {
             _logger.LogDebug("<RdfTransformer> - Transform: Asserting data from table: {tableName}", table.TableName);
-            _rdfGraphService.AssertDataTable(table);
+            _rdfGraphService.AssertDataTable(table, ontologyGraph);
             _logger.LogDebug("<RdfTransformer> - Transform: Asserted data from table: {tableName}", table.TableName);
         }
 

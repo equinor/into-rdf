@@ -9,45 +9,52 @@ namespace Services.TransformationServices.RdfPreprocessingServices;
 public class RdfPreprocessingService : IRdfPreprocessingService
 {
     IRdfTableBuilderFactory _rdfTableBuilderFactory;
-    ILogger<IRdfPreprocessingService> _logger;
+    ILogger<RdfPreprocessingService> _logger;
 
-    public RdfPreprocessingService(IRdfTableBuilderFactory rdfTableBuilderFactory, ILogger<IRdfPreprocessingService> logger)
+    public RdfPreprocessingService(IRdfTableBuilderFactory rdfTableBuilderFactory, ILogger<RdfPreprocessingService> logger)
     {
         _rdfTableBuilderFactory = rdfTableBuilderFactory;
         _logger = logger;
     }
- 
+
     public DataSet CreateRdfTables(Provenance provenance, DataTable inputData)
     {
         if (provenance.DataSource == null)
         {
             throw new ArgumentException("Provenance does not contain datasource");
         }
-        
+
         var dataCollectionUri = CreateDataCollectionUri(provenance);
+
         _logger.LogDebug("<RdfPreprocessor> - CreateRdfTables: Data collection uri {dataCollectionUri} created", dataCollectionUri.ToString());
         var transformationUri = CreateTransformationUri(provenance);
         _logger.LogDebug("<RdfPreprocessor> - CreateRdfTables: Transformation uri {transformationUri} created", transformationUri.ToString());
 
         var rdfDataSet = new DataSet();
         rdfDataSet.Tables.Add(CreateProvenanceTable(dataCollectionUri, provenance));
-        _logger.LogDebug(rdfDataSet.Tables.Count == 1 ? 
+        _logger.LogDebug(rdfDataSet.Tables.Count == 1 ?
                         "<RdfPreprocessor> - CreateRdfTables: Provenance successfully added" :
                         "<RdfPreprocessor> - CreateRdfTables: Failed to create provenance");
 
         rdfDataSet.Tables.Add(CreateTransformationTable(dataCollectionUri, provenance, transformationUri));
-        _logger.LogDebug(rdfDataSet.Tables.Count == 2 ? 
+        _logger.LogDebug(rdfDataSet.Tables.Count == 2 ?
                         "<RdfPreprocessor> - CreateRdfTables: Transformation successfully added" :
                         "<RdfPreprocessor> - CreateRdfTables: Failed to create transformation");
 
-        rdfDataSet.Tables.Add(CreateDataCollectionTable(dataCollectionUri, provenance, inputData));
-        _logger.LogDebug(rdfDataSet.Tables.Count == 3 ? 
-                        "<RdfPreprocessor> - CreateRdfTables: Collection successfully added" : 
-                        "<RdfPreprocessor> - CreateRdfTables: Failed to create collection");
+        //Temporary solution to ensure that current MEL transformation works until it can be migrated onto named graphs.
+        if (provenance.DataSource != DataSource.LineList)
+        {
+            rdfDataSet.Tables.Add(CreateDataCollectionTable(dataCollectionUri, provenance, inputData));
+            _logger.LogDebug(rdfDataSet.Tables.Count == 3 ?
+                            "<RdfPreprocessor> - CreateRdfTables: Collection successfully added" :
+                            "<RdfPreprocessor> - CreateRdfTables: Failed to create collection");
+        }
 
-        rdfDataSet.Tables.Add(CreateInputTable(dataCollectionUri, provenance, transformationUri, inputData));
-        _logger.LogDebug(rdfDataSet.Tables.Count == 4 ? 
-                        "<RdfPreprocessor> - CreateRdfTables: Input data successfully added" : 
+        var dataTable = CreateInputTable(dataCollectionUri, provenance, transformationUri, inputData);
+        rdfDataSet.Tables.Add(dataTable);
+
+        _logger.LogDebug(dataTable != null ?
+                        "<RdfPreprocessor> - CreateRdfTables: Input data successfully added" :
                         "<RdfPreprocessor> - CreateRdfTables: Failed to create input data");
 
         return rdfDataSet;
@@ -83,9 +90,15 @@ public class RdfPreprocessingService : IRdfPreprocessingService
                                     provenance.DocumentProjectId :
                                     provenance.PlantId)).ToLower();
 
-        var dataCollectionUri = provenance.DataSourceTable != null ?
-                    new Uri($"{RdfPrefixes.Prefix2Uri["equinor"]}{facilityIdentifier}/{provenance.DataSource}/{provenance.DataSourceTable}/{provenance.RevisionName}") :
-                    new Uri($"{RdfPrefixes.Prefix2Uri["equinor"]}{facilityIdentifier}/{provenance.DataSource}/{provenance.RevisionName}");
+        //Temporary solution to keep the current mel-transformation while updating line list
+        var dataCollectionUri = new Uri($"{RdfPrefixes.Prefix2Uri["equinor"]}{facilityIdentifier}/");
+
+        if (provenance.DataSource != DataSource.LineList)
+        {
+            dataCollectionUri = provenance.DataSourceTable != null ?
+                    new Uri($"{dataCollectionUri.AbsoluteUri}{provenance.DataSource}/{provenance.DataSourceTable}/{provenance.RevisionName}") :
+                    new Uri($"{dataCollectionUri.AbsoluteUri}{provenance.DataSource}/{provenance.RevisionName}");
+        }
         return dataCollectionUri;
     }
 

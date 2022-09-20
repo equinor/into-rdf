@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Common.ProvenanceModels;
+using Common.RdfModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using VDS.RDF;
@@ -11,7 +13,14 @@ namespace Services.Tests
 {
     internal class RdfTestUtils
     {
-        public static void AssertTripleAsserted(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject)
+        private string _dataSource;
+
+        public RdfTestUtils(string source)
+        {
+            _dataSource = source;
+        }
+
+        public void AssertTripleAsserted(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject)
         {
             var ok = Ask(graph, rdfSubject, rdfPredicate, rdfObject);
             if (ok)
@@ -44,7 +53,7 @@ namespace Services.Tests
             Assert.True(ok, errorMsg);
         }
 
-        private static bool Ask(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject)
+        private bool Ask(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject)
         {
             var tripplePattern = new TriplePattern(
                 CreatePattern(graph, rdfSubject),
@@ -60,7 +69,7 @@ namespace Services.Tests
             return ((SparqlResultSet)graph.ExecuteQuery(query)).Result;
         }
 
-        private static List<string> Select(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject, int limit)
+        private List<string> Select(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject, int limit)
         {
 
             var (subjectSelect, subjectPattern) = CreateSelectAndPattern(graph, rdfSubject, "subject");
@@ -92,18 +101,20 @@ namespace Services.Tests
             return mergedValues.ToList();
         }
 
-        private static List<string> FillInNewValues(List<object> existingValues, List<string> newValues)
+        private List<string> FillInNewValues(List<object> existingValues, List<string> newValues)
         {
             var mergedValues = new List<string>();
             var j = 0;
 
 
-            for (int i=0; i<existingValues.Count; i++) {
+            for (int i = 0; i < existingValues.Count; i++)
+            {
                 if (existingValues[i] == null)
                 {
                     mergedValues.Add(newValues[j]);
                     j++;
-                } else
+                }
+                else
                 {
                     mergedValues.Add(existingValues[i].ToString());
                 }
@@ -111,26 +122,45 @@ namespace Services.Tests
             return mergedValues;
         }
 
-        private static (string, PatternItem) CreateSelectAndPattern(Graph graph, object uriOrLiteral, string triplePossition)
+        private (string, PatternItem) CreateSelectAndPattern(Graph graph, object uriOrLiteral, string triplePosition)
         {
             return uriOrLiteral == null ?
-                ($"?{triplePossition}", CreateVariablePattern(triplePossition)) :
+                ($"?{triplePosition}", CreateVariablePattern(triplePosition)) :
                 ($"<{uriOrLiteral}>", CreatePattern(graph, uriOrLiteral));
         }
 
+
         private static int counter = 1;
-        private static PatternItem CreatePattern(Graph graph, object value)
+        private PatternItem CreatePattern(Graph graph, object value)
         {
+            //Old MEL transformations and tests use undefined literals rather than string literal
+            //This check is a fix to ensure that both old and new tests work in a transition phase.
+            if (_dataSource == DataSource.Mel)
+            {
+                return value switch
+                {
+                    string undefinedLiteral => CreateLiteralPattern(graph, undefinedLiteral),
+                    double doubleLiteral => CreateDoubleLiteralPattern(graph, doubleLiteral),
+                    int intLiteral => CreateIntLiteralPattern(graph, intLiteral),
+                    Uri uri => CreateUriPattern(graph, uri),
+                    null => CreateVariablePattern("var" + counter++),
+                    _ => throw new Exception()
+                };
+            }
+
             return value switch
             {
-                string udefinedLiteral => CreateLiteralPattern(graph, udefinedLiteral),
+                string stringLiteral => CreateStringLiteralPattern(graph, stringLiteral),
+                double doubleLiteral => CreateDoubleLiteralPattern(graph, doubleLiteral),
+                int intLiteral => CreateIntLiteralPattern(graph, intLiteral),
                 Uri uri => CreateUriPattern(graph, uri),
                 null => CreateVariablePattern("var" + counter++),
                 _ => throw new Exception()
             };
+
         }
 
-        public static VariablePattern CreateVariablePattern(string variableName)
+        private static VariablePattern CreateVariablePattern(string variableName)
         {
             return new VariablePattern(variableName);
         }
@@ -142,7 +172,22 @@ namespace Services.Tests
 
         private static NodeMatchPattern CreateLiteralPattern(Graph graph, string literal)
         {
-            return new NodeMatchPattern(graph.CreateLiteralNode(literal));
+            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString()));
+        }
+
+        private static NodeMatchPattern CreateStringLiteralPattern(Graph graph, string literal)
+        {
+            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(RdfPrefixes.Prefix2Uri["xsd"].ToString() + "string")));
+        }
+
+        private static NodeMatchPattern CreateDoubleLiteralPattern(Graph graph, double literal)
+        {
+            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(RdfPrefixes.Prefix2Uri["xsd"].ToString() + "double")));
+        }
+
+        private static NodeMatchPattern CreateIntLiteralPattern(Graph graph, int literal)
+        {
+            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(RdfPrefixes.Prefix2Uri["xsd"].ToString() + "int")));
         }
     }
 }

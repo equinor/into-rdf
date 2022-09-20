@@ -46,7 +46,7 @@ public class ProvenanceService : IProvenanceService
 
         var revisionRequirement = info.GetRevisionRequirements();
 
-        _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromTSpreadsheetInfo: Creating provenance for project {pdi} with revision name {rn} dated {rd}", 
+        _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromSpreadsheetInfo: Creating provenance for project {pdi} with revision name {rn} dated {rd}", 
             revisionRequirement.DocumentProjectId, revisionRequirement.RevisionName, revisionRequirement.RevisionDate);
 
         var provenance = await CreateProvenance(info.FileName, info.DataSource.ToLower(), revisionRequirement);
@@ -57,6 +57,8 @@ public class ProvenanceService : IProvenanceService
     private async Task<Provenance> CreateProvenance(string filename, string datasource, RevisionRequirement revisionRequirement)
     {
         var facility = await GetFacilityId(revisionRequirement.DocumentProjectId);
+        var facilityId = facility.Label ?? throw new InvalidOperationException("Failed to retrieve facilityId when generating provenance");
+
         _logger.LogDebug("<ProvenanceService> - CreateProvenance: Prepare to retrieve previous revisions for facilityId {facilityId}", facility.Label);
 
         var previousRevisions = await GetPreviousRevision(revisionRequirement.DocumentProjectId);
@@ -67,10 +69,8 @@ public class ProvenanceService : IProvenanceService
 
         GetRevisionStatus(existingRevision, latestRevision, revisionRequirement.RevisionDate, out var revisionStatus, out var revisionNumber);
 
-        _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromTieMessage: Latest revision number is {number}", latestRevision?.RevisionNumber);
-        _logger.LogInformation("<ProvenanceService> - CreateProvenanceFromTieMessage: Generated revision status: '{status}'", revisionStatus);
-
-        var facilityId = facility.Label ?? throw new InvalidOperationException("Failed to retrieve facilityId when generating provenance");
+        _logger.LogDebug("<ProvenanceService> - CreateProvenance: Latest revision number is {number}", latestRevision?.RevisionNumber);
+        _logger.LogInformation("<ProvenanceService> - CreateProvenance: Generated revision status: '{status}'", revisionStatus);
 
         var provenance = new Provenance(facilityId, datasource);
         provenance.DocumentProjectId = revisionRequirement.DocumentProjectId;
@@ -87,7 +87,7 @@ public class ProvenanceService : IProvenanceService
 
     private async Task<FacilityId> GetFacilityId(string documentProjectId)
     {
-        var rdfServerName = ServerKeys.Dugtrio;
+        var rdfServerName = ServerKeys.SplinterConfig;
 
         string query = GetFacilityIdQuery(documentProjectId);
         var response = await _fusekiService.QueryFusekiResponseAsApp<FacilityId>(rdfServerName, query);
@@ -164,12 +164,16 @@ public class ProvenanceService : IProvenanceService
             prefix identifier: <https://rdf.equinor.com/data/facility-identification/>
 
                     SELECT ?{nameof(FacilityId.Label)}
+                    FROM NAMED <https://rdf.equinor.com/graph/data/identifiers>
                     WHERE 
                     {{
-                        ?facility identification:hasDocumentProjectId identifier:{documentProjectId} ;        
+                        GRAPH ?g
+                        {{
+                            ?facility identification:hasDocumentProjectId identifier:{documentProjectId} ;        
                             identification:hasFacilityId ?FacilityId .
 
-                        ?FacilityId rdfs:label ?{nameof(FacilityId.Label)} .
+                            ?FacilityId rdfs:label ?{nameof(FacilityId.Label)} .
+                        }}
                     }}";
     }
 }
