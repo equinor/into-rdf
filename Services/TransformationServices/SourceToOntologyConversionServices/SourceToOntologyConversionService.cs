@@ -58,7 +58,7 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
 
                 foreach (var superPredicate in superPredicates)
                 {
-                    TraversePredicate(ontologyGraph, rowIndividual, superPredicate, cellValue);
+                    TraversePredicate(ontologyGraph, rowIndividual, rowIndividual, superPredicate, cellValue);
                 }
             }
         }
@@ -69,16 +69,16 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
         return _graph;
     }
 
-    private void TraversePredicate(Graph ontologyGraph, INode subjectIndividual, INode predicate, string cellValue)
+    private void TraversePredicate(Graph ontologyGraph, INode baseSubjectIndividual, INode subjectIndividual, INode predicate, string cellValue)
     {
         if (HasSuperPredicate(ontologyGraph, predicate, RdfCommonProperties.CreateHasPhysicalQuantity()))
         {
             var rangesOfPredicate = GetRangesFromPredicate(ontologyGraph, predicate);
             foreach (var rangeOfPredicate in rangesOfPredicate)
             {
-                AssertRangesAsCustomProperty(ontologyGraph, subjectIndividual, rangeOfPredicate, _graph.CreateUriNode(RdfCommonProperties.CreateHasPhysicalQuantity()));
+                AssertRangesAsCustomProperty(baseSubjectIndividual, subjectIndividual, rangeOfPredicate, _graph.CreateUriNode(RdfCommonProperties.CreateHasPhysicalQuantity()));
 
-                TraversePredicatesWithDomain(ontologyGraph, subjectIndividual, rangeOfPredicate, cellValue);
+                TraversePredicatesWithDomain(ontologyGraph, baseSubjectIndividual, subjectIndividual, rangeOfPredicate, cellValue);
             }
         }
         else if (HasSuperPredicate(ontologyGraph, predicate, RdfCommonProperties.CreateQuantityQualifiedAs()))
@@ -86,9 +86,9 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
             var rangesOfPredicate = GetRangesFromPredicate(ontologyGraph, predicate);
             foreach (var rangeOfPredicate in rangesOfPredicate)
             {
-                AssertRangesAsCustomProperty(ontologyGraph, subjectIndividual, rangeOfPredicate, _graph.CreateUriNode(RdfCommonProperties.CreateQuantityQualifiedAs()));
+                AssertRangesAsCustomProperty(baseSubjectIndividual, subjectIndividual, rangeOfPredicate, _graph.CreateUriNode(RdfCommonProperties.CreateQuantityQualifiedAs()));
 
-                TraversePredicatesWithDomain(ontologyGraph, subjectIndividual, rangeOfPredicate, cellValue);
+                TraversePredicatesWithDomain(ontologyGraph, baseSubjectIndividual, subjectIndividual, rangeOfPredicate, cellValue);
             }
         }
         else if (HasSuperPredicate(ontologyGraph, predicate, RdfCommonProperties.CreateDatumUOM()))
@@ -118,9 +118,8 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
         return rangeTypes;
     }
 
-    private INode CreateIndividualWithTypeSuffix(Graph ontologyGraph, INode individual, INode individualType)
+    private INode CreateIndividualWithTypeSuffix(INode individualBaseUri, INode individualType)
     {
-        var individualBaseUri = GetBaseUri(individual);
         var suffix = GetUriFragment(individualType);
 
         return _graph.CreateUriNode(new Uri($"{individualBaseUri}_{suffix}"));
@@ -163,9 +162,9 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
         return predicatesWithDomain;
     }
 
-    private void TraversePredicatesWithDomain(Graph ontologyGraph, INode subjectIndividual, INode domainObject, string cellValue)
+    private void TraversePredicatesWithDomain(Graph ontologyGraph, INode baseSubjectIndividual, INode subjectIndividual, INode domainObject, string cellValue)
     {
-        var nextSubjectIndividual = CreateIndividualWithTypeSuffix(ontologyGraph, subjectIndividual, domainObject);
+        var nextSubjectIndividual = CreateIndividualWithTypeSuffix(baseSubjectIndividual, domainObject);
 
         // The domainObject, is typically the range of a previously visited predicate, and the domain domain of one or several other predicates.
         // For instance:
@@ -176,16 +175,8 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
 
         foreach (var predicateWithDomain in predicatesWithDomain)
         {
-            TraversePredicate(ontologyGraph, nextSubjectIndividual, predicateWithDomain, cellValue);
+            TraversePredicate(ontologyGraph, baseSubjectIndividual, nextSubjectIndividual, predicateWithDomain, cellValue);
         }
-    }
-
-    //TODO - Fix handling of underscore in uri. The base uri is mainly retrieved from individuals created by us, and these do not contain underscore.
-    //But things tend to change. 
-    private string GetBaseUri(INode node)
-    {
-        var baseIndividualIndex = node.ToString().IndexOf("_") == -1 ? node.ToString().Length : node.ToString().IndexOf("_");
-        return node.ToString().Substring(0, baseIndividualIndex);
     }
 
     private string GetUriFragment(INode node)
@@ -208,13 +199,13 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
         AssertTriple(subjectIndividual, predicate, rangeIndividual);
     }
 
-    private void AssertRangesAsCustomProperty(Graph ontologyGraph, INode subjectIndividual, INode rangeOfPredicate, INode customPredicate)
+    private void AssertRangesAsCustomProperty(INode baseSubjectIndividual, INode subjectIndividual, INode rangeOfPredicate, INode customPredicate)
     {
         // New individuals are created as the ontology is traversed. 
         // The subject individual is the current individual                                         :  <https://rdf.equinor.com/wist/c277/20L00015A_WallThickness>
         // The rangeOfPredicate is a type given by the range relationship of a predicate.           :  <https://rdf.equinor.com/ontology/physical/v1#WallThicknessDatum>
         // The object individual is the individual created as a combination of the previous two     :  <https://rdf.equinor.com/wist/c277/20L00015A_WallThicknessDatum>
-        var objectIndividual = CreateIndividualWithTypeSuffix(ontologyGraph, subjectIndividual, rangeOfPredicate);
+        var objectIndividual = CreateIndividualWithTypeSuffix(baseSubjectIndividual, rangeOfPredicate);
 
         AssertOwlNamedIndividual(objectIndividual);
         AssertOwlClass(objectIndividual, rangeOfPredicate);
