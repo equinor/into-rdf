@@ -107,12 +107,12 @@ public class ExcelDomReaderService : IExcelDomReaderService
         var trimmedDataRows = rowTake > 0 ? completeDataRows.Take(rowTake) : completeDataRows;
 
         return trimmedDataRows
-            .Where(row => ValidRow(row, headerRow, details.SheetName))
+            .Where(row => ValidRow(workbookPart, row, headerRow, details.SheetName))
             .Select(row => GetCompleteRow(workbookPart, row, details.StartColumn, headerRow.Count).ToList())
             .ToList();
     }
 
-    private bool ValidRow(Row row, List<string> headerRow, string dataSource)
+    private bool ValidRow(WorkbookPart workBookPart, Row row, List<string> headerRow, string dataSource)
     {
         var descendants = row.Descendants<Cell>();
 
@@ -127,7 +127,7 @@ public class ExcelDomReaderService : IExcelDomReaderService
 
             var cell = descendants.ElementAt(tagNumberIndex);
 
-            return cell.CellValue != null;
+            return cell.CellValue != null && GetCellValue(cell, workBookPart) != "BOTTOM LINE";
         }
 
         return descendants.Count() > 0;
