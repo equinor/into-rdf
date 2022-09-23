@@ -47,3 +47,4 @@ jobs:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       API_CLIENT_ID: ${{ secrets.API_CLIENT_ID }}
+      FUNC_PUBLISH_PROFILE: ${{ secrets.FUNC_PUBLISH_PROFILE }}
