@@ -18,6 +18,8 @@
                 required: true
             API_CLIENT_ID:
                 required: true
+            FUNC_PUBLISH_PROFILE:
+                required: true
                 
     concurrency: ${{ inputs.env }}
 
@@ -69,3 +71,4 @@
             with:
               app-name: '${{ env.ENV }}-spinesplinter-func'
               package: functions/
+              publish-profile: ${{ secrets.FUNC_PUBLISH_PROFILE }}
