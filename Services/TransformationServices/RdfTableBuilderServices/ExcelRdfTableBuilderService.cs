@@ -143,7 +143,7 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
         
         _dataTable.Rows.Add(
             dataCollectionUri,
-            RdfCommonClasses.CreateNamedGraphClass(),
+            RdfCommonClasses.CreateCollectionClass(),
             provenance.RevisionDate,
             new Uri(RdfPrefixes.Prefix2Uri["identifier"] + provenance.DocumentProjectId),
             provenance.RevisionNumber,
