@@ -57,6 +57,7 @@
               AzureAd.ClientId: ${{ secrets.API_CLIENT_ID }}
               KeyVaultName: "${{ env.ENV }}-spinesplinter-vault"
               Servers.Dugtrio.BaseUrl: "https://${{ env.ENV }}-mel-fuseki.azurewebsites.net"
+              Servers.SplinterConfig.BaseUrl: "https://dev-master-fuseki.azurewebsites.net"
               ENV: ${{ env.ENV }} # Env is cleared when adding env like this, copy it
 
 
