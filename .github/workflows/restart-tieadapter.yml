@@ -28,5 +28,5 @@ jobs:
       - name: Restart QA
         run: | 
           az webapp restart \
-          --resource-group 'qa-tie-mel-adapter' \
+          --resource-group 'qa-mel-tie-adapter' \
           --name 'qa-mel-adapter-app'
