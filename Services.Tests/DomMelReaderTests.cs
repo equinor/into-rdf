@@ -1,4 +1,4 @@
-﻿
+﻿using Common.GraphModels;
 using Common.ProvenanceModels;
 using Services.TransformationServices.SpreadsheetTransformationServices;
 using System;
@@ -34,13 +34,13 @@ namespace Services.Tests
             //Empty ontology as it is not tested here.
             var ontology = new Graph();
 
-            var data = melTransformationService.Transform(stream, ontology, testFile);
+            var resultGraph = melTransformationService.Transform(stream, ontology, testFile);
 
-            Assert.NotNull(data);
+            Assert.NotNull(resultGraph.Content);
 
             var graph = new Graph();
             var parser = new TurtleParser();
-            parser.Load(graph, new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(data))));
+            parser.Load(graph, new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(resultGraph.Content))));
 
             //Provenance
             rdfTestUtils.AssertTripleAsserted(

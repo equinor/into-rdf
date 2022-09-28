@@ -1,4 +1,5 @@
 using Azure.Storage.Blobs.Models;
+using Common.GraphModels;
 using Common.ProvenanceModels;
 using Common.SpreadsheetModels;
 using Microsoft.Extensions.Logging;
@@ -23,7 +24,7 @@ namespace Services.TransformationServices.SpreadsheetTransformationServices;
         _dataSource = DataSource.LineList;
     }
 
-    public string Transform(Provenance provenance, Graph ontology, BlobDownloadResult blob, SpreadsheetDetails details)
+    public ResultGraph Transform(Provenance provenance, Graph ontology, BlobDownloadResult blob, SpreadsheetDetails details)
     {
         using Stream excelStream = blob.Content.ToStream();
         
@@ -36,12 +37,12 @@ namespace Services.TransformationServices.SpreadsheetTransformationServices;
         return _rdfTransformerService.Transform(provenance, ontology, data);
     }
 
-    public string Transform(Stream excelStream, Graph ontology, string fileName)
+    public ResultGraph Transform(Stream excelStream, Graph ontology, string fileName)
     {
         throw new NotImplementedException();
     }
 
-    public string Transform(Stream excelStream, Graph ontology, SpreadsheetInfo details)
+    public ResultGraph Transform(Stream excelStream, Graph ontology, SpreadsheetInfo details)
     {
         throw new NotImplementedException();
     }

@@ -110,14 +110,10 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
     }
     private void AddProvenanceForNamedGraphRow(Provenance provenance)
     {
-        var projectUriSegment = $"{provenance.FacilityId.ToLower()}/{provenance.DocumentProjectId?.ToLower()}";
+        var facilityUriSegment = $"{provenance.FacilityId.ToLower()}";
+        var documentUriSegment = GetDocumentUriSegment(provenance.DataCollectionName ?? provenance.DataSource);
         
-        var currentRevision = new Uri($"{RdfPrefixes.Prefix2Uri["equinor"].ToString()}graph/{projectUriSegment}/{provenance.DataSource}/{provenance.RevisionNumber}"); 
-        
-        var previousRevision = provenance.PreviousRevision 
-                                ?? (String.IsNullOrWhiteSpace(provenance.PreviousRevisionNumber) == false 
-                                        ? new Uri($"{RdfPrefixes.Prefix2Uri["equinor"].ToString()}{projectUriSegment}/{provenance.DataSource}/{provenance.PreviousRevisionNumber}") 
-                                        : null);
+        var currentRevision = new Uri($"{RdfPrefixes.Prefix2Uri["equinor"].ToString()}graph/{facilityUriSegment}/{documentUriSegment}/{provenance.RevisionNumber}"); 
         
         _dataTable.Rows.Add(
             currentRevision,
@@ -128,19 +124,13 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
             provenance.RevisionName,
             provenance.DataCollectionName,
             new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSource ?? DataSource.Unknown),
-            previousRevision
+            provenance.PreviousRevision
             );
     }
 
 
     private void AddProvenanceRow(Uri dataCollectionUri, Provenance provenance)
-    {
-        var projectUriSegment = $"{provenance.FacilityId}/{provenance.DocumentProjectId?.ToLower()}";
-        var previousRevision = provenance.PreviousRevision 
-                                ?? (String.IsNullOrWhiteSpace(provenance.PreviousRevisionNumber) == false 
-                                        ? new Uri($"{RdfPrefixes.Prefix2Uri["equinor"].ToString()}{projectUriSegment}/{provenance.DataSource}/{provenance.PreviousRevisionNumber}") 
-                                        : null);
-        
+    {        
         _dataTable.Rows.Add(
             dataCollectionUri,
             RdfCommonClasses.CreateCollectionClass(),
@@ -151,7 +141,7 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
             provenance.DataCollectionName,
             new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSource ?? DataSource.Unknown),
             new Uri(RdfPrefixes.Prefix2Uri["sor"] + provenance.DataSourceType ?? DataSourceType.Unknown()),
-            previousRevision
+            provenance.PreviousRevision
             );
     }
 
@@ -277,5 +267,16 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
 
         identificationUri = dataCollectionUri;
 
+    }
+
+    private string GetDocumentUriSegment(string dataCollectionName)
+    {
+        var name = dataCollectionName
+            .Split("_")
+            .First()
+            .Split(".")
+            .First();
+
+        return name;
     }
 }
