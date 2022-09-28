@@ -13,7 +13,7 @@
   "KeyVaultName": "dev-spinesplinter-vault",
   "Servers": {
     "Dugtrio": {
-      "BaseUrl": "https://dev-mel-fuseki.azurewebsites.net",
+      "BaseUrl": "https://dugtriofuseki-dev.azurewebsites.net",
       "Scopes": "2ff9de24-0dba-46e0-9dc1-096cc69ef0c6/.default"
     },
     "SplinterConfig": {

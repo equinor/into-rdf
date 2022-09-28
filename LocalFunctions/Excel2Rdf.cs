@@ -44,7 +44,7 @@ public class Excel2Rdf
         
         var turtle = await _rdfService.HandleSpreadsheetRequest(spreadsheetInfo, blobContent);
 
-        if (turtle is null) return;
+        if (turtle == String.Empty) return;
 
         var filename = spreadsheetInfo != null && spreadsheetInfo.FileName != null ? 
                         spreadsheetInfo.FileName[..spreadsheetInfo.FileName.LastIndexOf('.')] + ".ttl" :

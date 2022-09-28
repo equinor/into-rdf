@@ -1,6 +1,8 @@
 ﻿using System.Net.Http.Headers;
+using Common.Constants;
 using Common.Exceptions;
 using Common.FusekiModels;
+using Common.GraphModels;
 using Microsoft.Identity.Web;
 using Newtonsoft.Json;
 using Services.FusekiMappers;
@@ -16,9 +18,9 @@ public class FusekiService : IFusekiService
         _downstreamWebApi = downstreamWebApi;
     }
 
-    public async Task<HttpResponseMessage> PostAsApp(string server, string turtle, string contentType = "text/turtle")
+    public async Task<HttpResponseMessage> PostAsApp(string server, ResultGraph resultGraph, string contentType = "text/turtle")
     {
-        return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForData(options, turtle, contentType));
+        return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForData(options, resultGraph, contentType));
     }
 
     public async Task<HttpResponseMessage> PostAsUser(string server, string turtle, string contentType = "text/turtle")
@@ -101,13 +103,26 @@ public class FusekiService : IFusekiService
 
     private DownstreamWebApiOptions GetDownStreamWebApiOptionsForData(DownstreamWebApiOptions options, string turtle, string contentType)
     {
-
         options.HttpMethod = HttpMethod.Post;
         options.RelativePath = "ds/data";
         options.CustomizeHttpRequestMessage = message =>
         {
             message.Headers.Add("Accept", contentType);
             message.Content = new StringContent(turtle);
+            message.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        };
+
+        return options;
+    }
+
+        private DownstreamWebApiOptions GetDownStreamWebApiOptionsForData(DownstreamWebApiOptions options, ResultGraph resultGraph, string contentType)
+    {
+        options.HttpMethod = HttpMethod.Post;
+        options.RelativePath = resultGraph.Name == GraphConstants.Default ? "ds/data" : $"ds/data?graph={resultGraph.Name}";
+        options.CustomizeHttpRequestMessage = message =>
+        {
+            message.Headers.Add("Accept", contentType);
+            message.Content = new StringContent(resultGraph.Content);
             message.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
         };
 

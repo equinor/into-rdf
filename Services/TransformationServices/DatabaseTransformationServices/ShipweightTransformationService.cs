@@ -18,8 +18,9 @@ public class ShipweightTransformationService : IDatabaseTransformationService
         
         //TODO - Update when new (PCA aligned) Shipweight vocabulary/ontology is available 
         var ontology = new Graph();
+        var resultGraph = _rdfTransformationService.Transform(provenance, ontology, inputData);
 
-        return _rdfTransformationService.Transform(provenance, ontology, inputData);
+        return resultGraph.Content;
     }
 
     private Provenance CreateProvenance(string facilityName, string tableName, string plantId)

@@ -1,3 +1,4 @@
+using Common.GraphModels;
 using Common.ProvenanceModels;
 using Microsoft.Extensions.Logging;
 using Services.TransformationServices.RdfGraphServices;
@@ -21,7 +22,7 @@ public class RdfTransformationService : IRdfTransformationService
         _logger = logger;
     }
 
-    public string Transform(Provenance provenance, Graph ontologyGraph, DataTable inputData)
+    public ResultGraph Transform(Provenance provenance, Graph ontologyGraph, DataTable inputData)
     {
         var rdfDataSet = _rdfPreprocessor.CreateRdfTables(provenance, inputData);
         _logger.LogInformation("<RdfTransformer> - Transform: Dataset with {nbOfTables} tables created", rdfDataSet.Tables.Count);
@@ -33,6 +34,6 @@ public class RdfTransformationService : IRdfTransformationService
             _logger.LogDebug("<RdfTransformer> - Transform: Asserted data from table: {tableName}", table.TableName);
         }
 
-        return _rdfGraphService.WriteGraphToString();
+        return _rdfGraphService.GetResultGraph(provenance.DataSource);
     }
 }

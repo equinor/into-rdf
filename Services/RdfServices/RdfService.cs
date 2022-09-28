@@ -1,7 +1,9 @@
-﻿using System.Net.Http.Headers;
+﻿
 using Azure.Storage.Blobs.Models;
+using Common.GraphModels;
 using Common.ProvenanceModels;
 using Common.SpreadsheetModels;
+using Common.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Services.FusekiServices;
@@ -10,6 +12,7 @@ using Services.ProvenanceServices;
 using Services.TieMessageServices;
 using Services.TransformationServices.SpreadsheetTransformationServices;
 using Services.TransformationServices.XMLTransformationServices;
+using System.Net;
 
 namespace Services.RdfServices
 {
@@ -51,7 +54,9 @@ namespace Services.RdfServices
             var transformer = _spreadsheetTransformationService.FirstOrDefault(transformer => transformer.GetDataSource() == DataSource.Mel) ??
                                     throw new ArgumentException($"A transformer of type {DataSource.Mel} is not available to RdfService");
 
-            return transformer.Transform(stream, ontology, formFile.FileName);
+            var resultGraph =  transformer.Transform(stream, ontology, formFile.FileName);
+
+            return resultGraph.Content;
         }
 
         public async Task<Provenance?> HandleTieRequest(string datasource, List<BlobDownloadResult> blobData)
@@ -62,34 +67,9 @@ namespace Services.RdfServices
             var ontology = await _ontologyService.GetSourceOntologies(datasource);
             var provenance = await _provenanceService.CreateProvenanceFromTieMessage(datasource, tieData);
 
-            switch (provenance.RevisionStatus)
+            if (!IsProvenanceValid(provenance, tieData.GetDataCollectionName()))
             {
-                case RevisionStatus.Old:
-                    {
-                        _logger.LogError("<RdfService> - HandleTieRequest: Newer revisions of the submitted TIE data from {TieFileData} exist. The submitted data will not be uploaded", tieData.GetDataCollectionName());
-                        return null;
-                    }
-
-                //TODO - How to handle unknown revisions? Discard or attempt to place them in their proper place in the revision chain.
-                //FOllow up in task: https://dev.azure.com/EquinorASA/Spine/_workitems/edit/73431
-                case RevisionStatus.Unknown:
-                    {
-                        _logger.LogError("<RdfService> - HandleTieRequest: TIE data from {TieFileData} contains a previously unknown revision that is older than the current latest revision. The submitted data will not be uploaded",
-                            tieData.GetDataCollectionName());
-                        return null;
-                    }
-
-                //TODO - How to handle updated revisions? I.e. the ones that are seemingly unaltered when looking at the XML. At one point the transformed
-                //data should be compared to the data in the Fuseki. What do we do if they differ, add or replace?
-                //https://dev.azure.com/EquinorASA/Spine/_workitems/edit/73433/
-                case RevisionStatus.Update:
-                    {
-                        _logger.LogWarning("<RdfService> - HandleTieRequest: The submitted TIE data from {TieFileData} appears to be an update to an existing revision. A new revision should be created. The submitted data will not be uploaded",
-                            tieData.GetDataCollectionName());
-                        return null;
-                    }
-                default:
-                    break;
+                return null;
             }
 
             _logger.LogInformation("<RdfService> - HandleTieRequest: Successfully created provenance information for facility '{FacilityId}' with revision name '{RevisionName}'",
@@ -103,22 +83,11 @@ namespace Services.RdfServices
             var spreadsheetInfo = new SpreadsheetInfo();
             spreadsheetInfo.DataSource = provenance.DataSource;
 
-            string rdfGraphData = transformationService.Transform(provenance, ontology, xlsxBlob, spreadsheetInfo.GetSpreadSheetDetails());
+            ResultGraph rdfGraphData = transformationService.Transform(provenance, ontology, xlsxBlob, spreadsheetInfo.GetSpreadSheetDetails());
             _logger.LogInformation("<RdfService> - HandleTieRequest: {TieFileName} Successfully transformed to rdf", tieData.GetDataCollectionName());
 
-            //TODO - Push transformed data to Fuseki
-            //https://dev.azure.com/EquinorASA/Spine/_workitems/edit/73432
-            var server = "dugtrio";
-            var response = await PostToFusekiAsApp(server, rdfGraphData, "text/turtle");
-
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                _logger.LogInformation("<RdfService> - HandleTieRequest: Successfully uploaded to Fuseki server {name}", server);
-            }
-            else
-            {
-                _logger.LogError("<RdfService> - HandleTieRequest: Upload to Fuseki server {name} failed", server);
-            }
+            var response = await PostToFusekiAsApp(ServerKeys.Dugtrio, rdfGraphData, "text/turtle");
+            LogResponse(response, ServerKeys.Dugtrio);
 
             return provenance;
         }
@@ -126,19 +95,24 @@ namespace Services.RdfServices
         public async Task<string> HandleSpreadsheetRequest(SpreadsheetInfo info, BlobDownloadResult blobData)
         {
             var provenance = await _provenanceService.CreateProvenanceFromSpreadsheetInfo(info);
-            var ontology = await _ontologyService.GetSourceOntologies(provenance.DataSource);
+            
+            if (!IsProvenanceValid(provenance, info?.FileName ?? "Unknown"))
+            {
+                return String.Empty;
+            }
 
-            var datasource = info.DataSource ?? throw new InvalidOperationException("Spreadsheet info doesn't contain datasource");
+            var ontology = await _ontologyService.GetSourceOntologies(provenance.DataSource);
+            var datasource = info?.DataSource ?? throw new InvalidOperationException("Spreadsheet info doesn't contain datasource");
 
             var transformationService = GetTransformationService(datasource);
             _logger.LogDebug("RdfService> - HandleSpreadsheetRequest: Using transformation service: {name}", transformationService.GetDataSource());
 
-            return transformationService.Transform(provenance, ontology, blobData, info.GetSpreadSheetDetails());
-        }
+            var resultGraph = transformationService.Transform(provenance, ontology, blobData, info.GetSpreadSheetDetails());
 
-        public async Task<HttpResponseMessage> PostToFusekiAsApp(string server, string data, string contentType)
-        {
-            return await _fusekiService.PostAsApp(server, data, contentType);
+            var response = await PostToFusekiAsApp(ServerKeys.Dugtrio, resultGraph, "text/turtle");
+            LogResponse(response, ServerKeys.Dugtrio);
+
+            return resultGraph.Content;
         }
 
         public async Task<HttpResponseMessage> PostToFusekiAsUser(string server, string data, string contentType)
@@ -151,10 +125,60 @@ namespace Services.RdfServices
             return await _fusekiService.QueryAsUser(server, query);
         }
 
+        private async Task<HttpResponseMessage> PostToFusekiAsApp(string server, ResultGraph resultGraph, string contentType)
+        {
+            return await _fusekiService.PostAsApp(server, resultGraph, contentType);
+        }
+
         private ISpreadsheetTransformationService GetTransformationService(string datasource)
         {
             return _spreadsheetTransformationService.FirstOrDefault(transformer => transformer.GetDataSource() == datasource) ??
                 throw new ArgumentException($"A transformer of type {datasource} is not available to RdfService");
+        }
+
+        private bool IsProvenanceValid(Provenance provenance, string fileName)
+        { 
+            switch (provenance.RevisionStatus)
+            {
+                case RevisionStatus.Old:
+                    {
+                        _logger.LogError("<RdfService> - IsProvenanceValid: Newer revisions of the submitted data from {file} exist. The submitted data will not be uploaded", fileName);
+                        return false;
+                    }
+
+                //TODO - How to handle unknown revisions? Discard or attempt to place them in their proper place in the revision chain.
+                //FOllow up in task: https://dev.azure.com/EquinorASA/Spine/_workitems/edit/73431
+                case RevisionStatus.Unknown:
+                    {
+                        _logger.LogError("<RdfService> - IsProvenanceValid: Data from {file} contains a previously unknown revision that is older than the current latest revision. The submitted data will not be uploaded",
+                            fileName);
+                        return false;
+                    }
+
+                //TODO - How to handle updated revisions? I.e. the ones that are seemingly unaltered when looking at the XML. At one point the transformed
+                //data should be compared to the data in the Fuseki. What do we do if they differ, add or replace?
+                //https://dev.azure.com/EquinorASA/Spine/_workitems/edit/73433/
+                case RevisionStatus.Update:
+                    {
+                        _logger.LogWarning("<RdfService> - IsProvenanceValid: The submitted data from {file} appears to be an update to an existing revision. A new revision should be created. The submitted data will not be uploaded",
+                            fileName);
+                        return false;
+                    }
+                default:
+                    return true;
+            }
+        }
+
+        private void LogResponse(HttpResponseMessage responseMessage, string serverName)
+        {
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                _logger.LogInformation("<RdfService> - LogResponse: Successfully uploaded to Fuseki server {name}", serverName);
+            }
+            else
+            {
+                _logger.LogError("<RdfService> - LogResponse: Upload to Fuseki server {name} failed with code {code}", serverName, responseMessage.StatusCode);
+            }
         }
     }
 }

@@ -1,3 +1,6 @@
+using Common.Constants;
+using Common.GraphModels;
+using Common.ProvenanceModels;
 using Common.RdfModels;
 using Services.TransformationServices.SourceToOntologyConversionService;
 using System.Data;
@@ -40,12 +43,38 @@ public class RdfGraphService : IRdfGraphService
         }
     }
 
-    public string WriteGraphToString()
+    public ResultGraph GetResultGraph(string datasource)
+    {   
+        //TODO - The test against datasource is to ensure that MEL is still posted on the default graph.
+        //Update when moving MEL onto named graphs.
+        var name = datasource != DataSource.Mel && GetGraphName() != String.Empty ? GetGraphName() : GraphConstants.Default ;
+        var content = WriteGraphToString();
+
+        return new ResultGraph(name, content);
+    }
+
+    private string WriteGraphToString()
     {
         using MemoryStream outputStream = new MemoryStream();
         
         _graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new CompressingTurtleWriter());
         return Encoding.UTF8.GetString(outputStream.ToArray());
+    }
+
+    private string GetGraphName()
+    {
+        var graphTriples = _graph.GetTriplesWithObject(_graph.CreateUriNode(RdfCommonClasses.CreateNamedGraphClass()));
+
+        if (graphTriples.Count() == 0)
+        {
+            return String.Empty;
+        }
+        if (graphTriples.Count() > 1)
+        {
+            throw new InvalidOperationException($"Multiple named graphs ({graphTriples.Count()} found in dataset. There can be only one!)");
+        }
+
+        return graphTriples.First().Subject.ToString();
     }
 
     private Graph AssertRawData(DataTable dataTable)
