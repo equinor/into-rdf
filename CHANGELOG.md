@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.2.0](https://github.com/equinor/spine-splinter/compare/v1.1.1...v1.2.0) (2022-09-28)
+
+
+### Features
+
+* 75632 line list transformation ([#96](https://github.com/equinor/spine-splinter/issues/96)) ([b560ec5](https://github.com/equinor/spine-splinter/commit/b560ec50fdec88ef3a0b5ac299c61151f9644d40))
+* 79406/create named graph provenance context ([#111](https://github.com/equinor/spine-splinter/issues/111)) ([15fdde4](https://github.com/equinor/spine-splinter/commit/15fdde4639f0a6a5a524ca277fd7636ca2af9fd4))
+* add content type ([#93](https://github.com/equinor/spine-splinter/issues/93)) ([8308062](https://github.com/equinor/spine-splinter/commit/8308062a947ab92e6008cd7dce5159312a59edb7))
+
+
+### Bug Fixes
+
+* Bottom line is removed in MEL transformation ([#103](https://github.com/equinor/spine-splinter/issues/103)) ([39bcbe3](https://github.com/equinor/spine-splinter/commit/39bcbe39b971fc5a855bd783e3d468aaccc836e9))
+* handle underscore ([#104](https://github.com/equinor/spine-splinter/issues/104)) ([64b42d8](https://github.com/equinor/spine-splinter/commit/64b42d83268cd80fa852350556cbf0d7815f7889))
+* Update API config ([#112](https://github.com/equinor/spine-splinter/issues/112)) ([cf726dd](https://github.com/equinor/spine-splinter/commit/cf726ddc43b304f4833be41e97a096ebb8431763))
+* Update TieMelConsumer config ([#108](https://github.com/equinor/spine-splinter/issues/108)) ([ca04e15](https://github.com/equinor/spine-splinter/commit/ca04e1545d96eec5e41ece6e58d92e1f633a601e))
+
+
+### Other
+
+* **deps:** bump actions/checkout from 2 to 3 ([#98](https://github.com/equinor/spine-splinter/issues/98)) ([84f1a22](https://github.com/equinor/spine-splinter/commit/84f1a22beb64e8cb553bf78cd301ff5bcf697824))
+* **deps:** bump Azure/login from 1.4.5 to 1.4.6 ([#97](https://github.com/equinor/spine-splinter/issues/97)) ([ec0f3a0](https://github.com/equinor/spine-splinter/commit/ec0f3a0f47c2e053f4cf130c367d2d0b14dfa7a8))
+* **deps:** bump Microsoft.Identity.Web from 1.25.1 to 1.25.3 ([#100](https://github.com/equinor/spine-splinter/issues/100)) ([5066140](https://github.com/equinor/spine-splinter/commit/506614054336757f1623e3aa40cf80dbf1e6c38d))
+* Minor updates to bicep-setup ([9150239](https://github.com/equinor/spine-splinter/commit/915023997be5f5fb38dbb6241ee50edcc1a2a036))
+* throw exception on null in log config ([#102](https://github.com/equinor/spine-splinter/issues/102)) ([6decdbc](https://github.com/equinor/spine-splinter/commit/6decdbc5a0ae91cc863e88d7bc11c83a77d12b92))
+* update dependencies ([#99](https://github.com/equinor/spine-splinter/issues/99)) ([ac1bb41](https://github.com/equinor/spine-splinter/commit/ac1bb411f4607e2df4b088cdf3e61059e8f7be74))
+
+
+### CI/CD
+
+* add missing secret to release-please ([9fd5a22](https://github.com/equinor/spine-splinter/commit/9fd5a22acb05a3de6e8a22922cf7a2190aaa12d7))
+* Deploy function-app with publish profile ([#106](https://github.com/equinor/spine-splinter/issues/106)) ([1d1621c](https://github.com/equinor/spine-splinter/commit/1d1621cb40f7b5e6e1f9590146d74f57af3ac190))
+* Setup nightly restart of TIE Adapter ([#107](https://github.com/equinor/spine-splinter/issues/107)) ([69f566c](https://github.com/equinor/spine-splinter/commit/69f566ce71d6b68bf4fd847a1934e8d592063fd9))
+
 ## [1.1.1](https://github.com/equinor/spine-splinter/compare/v1.1.0...v1.1.1) (2022-08-23)
 
 
