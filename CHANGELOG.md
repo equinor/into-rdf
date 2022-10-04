@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.3.0](https://github.com/equinor/spine-splinter/compare/v1.2.0...v1.3.0) (2022-10-04)
+
+
+### Features
+
+* 79399 update provenance for tie messages ([#115](https://github.com/equinor/spine-splinter/issues/115)) ([3c5d4a3](https://github.com/equinor/spine-splinter/commit/3c5d4a3f3a7d7bedaac198e8f8b12a1f2ebfb255))
+
+
+### Other
+
+* **deps:** bump actions/setup-dotnet from 2.1.0 to 3.0.0 ([#113](https://github.com/equinor/spine-splinter/issues/113)) ([d76e40c](https://github.com/equinor/spine-splinter/commit/d76e40cb5fec761c5c0aa49bc2d89d9ee110af5c))
+* **deps:** bump Microsoft.NET.Test.Sdk from 17.3.1 to 17.3.2 ([#110](https://github.com/equinor/spine-splinter/issues/110)) ([e26db63](https://github.com/equinor/spine-splinter/commit/e26db63948a9f30b2aadfbfc953198c56f5ed1fb))
+* fix yml in github action ([2a75dc1](https://github.com/equinor/spine-splinter/commit/2a75dc14b142d94461f34a3d2cb231decbb67ce2))
+* Need to create new workflows on main ([28af6dc](https://github.com/equinor/spine-splinter/commit/28af6dc394b4a0b81f340750c89e717ea8a35dc5))
+
 ## [1.2.0](https://github.com/equinor/spine-splinter/compare/v1.1.1...v1.2.0) (2022-09-28)
 
 
