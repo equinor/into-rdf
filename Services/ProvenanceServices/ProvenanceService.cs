@@ -28,11 +28,15 @@ public class ProvenanceService : IProvenanceService
     {
         var revisionRequirement = tieData.GetRevisionRequirements();
 
-        _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromTieMessage: Creating provenance for project {pdi} with revision name {rn} dated {rd}",
-                                revisionRequirement.DocumentProjectId, revisionRequirement.RevisionName, revisionRequirement.RevisionDate);
+        _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromTieMessage: Creating provenance document {doc} for facility {fid} with revision name {rn} dated {rd}",
+                                revisionRequirement.DocumentName, revisionRequirement.FacilityId , revisionRequirement.RevisionName, revisionRequirement.RevisionDate);
 
         var provenance = await CreateProvenance(tieData.GetDataCollectionName(), datasource, revisionRequirement);
+        provenance.DocumentProjectId = tieData.GetDocumentProjectId();
         provenance.Contractor = tieData.GetContractor();
+        provenance.ContractNumber = tieData.GetContractNumber();
+        provenance.ProjectCode = tieData.GetProjectNumber();
+        provenance.DocumentTitle = tieData.GetDocumentTitle();
 
         return provenance;
     }
@@ -46,22 +50,20 @@ public class ProvenanceService : IProvenanceService
 
         var revisionRequirement = info.GetRevisionRequirements();
 
-        _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromSpreadsheetInfo: Creating provenance for project {pdi} with revision name {rn} dated {rd}",
-            revisionRequirement.DocumentProjectId, revisionRequirement.RevisionName, revisionRequirement.RevisionDate);
+        _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromTieMessage: Creating provenance document {doc} for facility {fid} with revision name {rn} dated {rd}",
+                                revisionRequirement.DocumentName, revisionRequirement.FacilityId , revisionRequirement.RevisionName, revisionRequirement.RevisionDate);
 
         var provenance = await CreateProvenance(info.FileName, info.DataSource.ToLower(), revisionRequirement);
+        provenance.DocumentProjectId = info.DocumentProjectId;
 
         return provenance;
     }
 
     private async Task<Provenance> CreateProvenance(string filename, string datasource, RevisionRequirement revisionRequirement)
     {
-        var facility = await GetFacilityId(revisionRequirement.DocumentProjectId);
-        var facilityId = facility.Label ?? throw new InvalidOperationException("Failed to retrieve facilityId when generating provenance");
+        _logger.LogDebug("<ProvenanceService> - CreateProvenance: Prepare to retrieve previous revisions for facilityId {facilityId}", revisionRequirement.FacilityId);
 
-        _logger.LogDebug("<ProvenanceService> - CreateProvenance: Prepare to retrieve previous revisions for facilityId {facilityId}", facility.Label);
-
-        var previousRevisions = await GetPreviousRevision(revisionRequirement.DocumentProjectId, datasource);
+        var previousRevisions = await GetPreviousRevision(revisionRequirement.DocumentName, datasource);
 
         _logger.LogDebug("<ProvenanceService> - CreateProvenance: Retrieved {count} previous versions", previousRevisions.Count);
 
@@ -73,8 +75,8 @@ public class ProvenanceService : IProvenanceService
         _logger.LogDebug("<ProvenanceService> - CreateProvenance: Latest revision number is {number}", latestRevision?.RevisionNumber);
         _logger.LogInformation("<ProvenanceService> - CreateProvenance: Generated revision status: '{status}'", revisionStatus);
 
-        var provenance = new Provenance(facilityId, datasource);
-        provenance.DocumentProjectId = revisionRequirement.DocumentProjectId;
+        var provenance = new Provenance(revisionRequirement.FacilityId, datasource);
+        provenance.DocumentName = revisionRequirement.DocumentName;
         provenance.DataCollectionName = filename;
         provenance.RevisionName = revisionRequirement.RevisionName;
         provenance.RevisionNumber = revisionNumber;
@@ -82,28 +84,17 @@ public class ProvenanceService : IProvenanceService
         provenance.RevisionDate = revisionRequirement.RevisionDate;
         provenance.RevisionStatus = revisionStatus;
         provenance.DataSourceType = DataSourceType.File();
-
         return provenance;
     }
 
-    private async Task<FacilityId> GetFacilityId(string documentProjectId)
-    {
-        var rdfServerName = ServerKeys.SplinterConfig;
-
-        string query = GetFacilityIdQuery(documentProjectId);
-        var response = await _fusekiService.QueryFusekiResponseAsApp<FacilityId>(rdfServerName, query);
-
-        return response.Count == 1 ? response[0] : throw new InvalidOperationException("Wrong number of FacilityIds returned");
-    }
-
-    private async Task<List<RevisionInfo>> GetPreviousRevision(string documentProjectId, string datasource)
+    private async Task<List<RevisionInfo>> GetPreviousRevision(string documentName, string datasource)
     {
         var rdfServerName = ServerKeys.Dugtrio;
 
         _logger.LogDebug("<ProvenanceService> - GetPreviousRevision: Retrieving data from {server}", rdfServerName);
-        _logger.LogDebug("<ProvenanceService> - GetPreviousRevision: Current document project id {id}", documentProjectId);
+        _logger.LogDebug("<ProvenanceService> - GetPreviousRevision: Current document project id {id}", documentName);
 
-        string query = datasource == DataSource.Mel ? GetRevisionInfoQuery(documentProjectId) : GetRevisionInfoFromNamedGraphQuery(documentProjectId);
+        string query = datasource == DataSource.Mel ? GetRevisionInfoQuery(documentName) : GetRevisionInfoFromNamedGraphQuery(documentName);
 
         return await _fusekiService.QueryFusekiResponseAsApp<RevisionInfo>(rdfServerName, query);
     }
@@ -136,7 +127,7 @@ public class ProvenanceService : IProvenanceService
         }
     }
 
-    private string GetRevisionInfoQuery(string documentProjectId)
+    private string GetRevisionInfoQuery(string documentName)
     {
         return @$"
             prefix sor: <https://rdf.equinor.com/ontology/sor#>
@@ -147,17 +138,17 @@ public class ProvenanceService : IProvenanceService
                     SELECT ?{nameof(RevisionInfo.FullName)} ?{nameof(RevisionInfo.RevisionDate)} ?{nameof(RevisionInfo.RevisionNumber)} ?{nameof(RevisionInfo.RevisionName)}
                     WHERE 
                     {{
-                        ?{nameof(RevisionInfo.FullName)} identification:hasDocumentProjectId ?DocumentProjectId ;        
+                        ?{nameof(RevisionInfo.FullName)} sor:hasDocumentName ?DocumentName ;        
                             prov:generatedAtTime ?{nameof(RevisionInfo.RevisionDate)} .
 
                         OPTIONAL {{?{nameof(RevisionInfo.FullName)} sor:hasRevisionNumber ?{nameof(RevisionInfo.RevisionNumber)} .}}
                         OPTIONAL {{?{nameof(RevisionInfo.FullName)} sor:hasRevisionName ?{nameof(RevisionInfo.RevisionName)} .}}
 
-                        FILTER (?DocumentProjectId = identifier:{documentProjectId}) 
+                        FILTER (STR(?DocumentName) = '{documentName}') 
                     }}";
     }
 
-    private string GetRevisionInfoFromNamedGraphQuery(string documentProjectId)
+    private string GetRevisionInfoFromNamedGraphQuery(string documentName)
     {
         return @$"
             prefix sor: <https://rdf.equinor.com/ontology/sor#>
@@ -170,35 +161,14 @@ public class ProvenanceService : IProvenanceService
                     {{
                         Graph ?g 
                         {{
-                            ?{nameof(RevisionInfo.FullName)} identification:hasDocumentProjectId ?DocumentProjectId ;        
+                            ?{nameof(RevisionInfo.FullName)} sor:hasDocumentName ?DocumentName ;        
                             prov:generatedAtTime ?{nameof(RevisionInfo.RevisionDate)} .
 
                         OPTIONAL {{?{nameof(RevisionInfo.FullName)} sor:hasRevisionNumber ?{nameof(RevisionInfo.RevisionNumber)} .}}
                         OPTIONAL {{?{nameof(RevisionInfo.FullName)} sor:hasRevisionName ?{nameof(RevisionInfo.RevisionName)} .}}
 
-                        FILTER (?DocumentProjectId = identifier:{documentProjectId})
+                        FILTER (STR(?DocumentName) = '{documentName}') 
                         }} 
-                    }}";
-    }
-
-    private string GetFacilityIdQuery(string documentProjectId)
-    {
-        return @$"
-            prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-            prefix identification: <https://rdf.equinor.com/ontology/facility-identification/v1#>
-            prefix identifier: <https://rdf.equinor.com/data/facility-identification/>
-
-                    SELECT ?{nameof(FacilityId.Label)}
-                    FROM NAMED <https://rdf.equinor.com/graph/data/identifiers>
-                    WHERE 
-                    {{
-                        GRAPH ?g
-                        {{
-                            ?facility identification:hasDocumentProjectId identifier:{documentProjectId} ;        
-                            identification:hasFacilityId ?FacilityId .
-
-                            ?FacilityId rdfs:label ?{nameof(FacilityId.Label)} .
-                        }}
                     }}";
     }
 }

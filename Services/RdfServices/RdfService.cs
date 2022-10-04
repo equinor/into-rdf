@@ -95,7 +95,7 @@ namespace Services.RdfServices
         public async Task<string> HandleSpreadsheetRequest(SpreadsheetInfo info, BlobDownloadResult blobData)
         {
             var provenance = await _provenanceService.CreateProvenanceFromSpreadsheetInfo(info);
-            
+
             if (!IsProvenanceValid(provenance, info?.FileName ?? "Unknown"))
             {
                 return String.Empty;

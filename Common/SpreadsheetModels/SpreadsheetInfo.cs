@@ -4,12 +4,13 @@ namespace Common.SpreadsheetModels;
 
 public class SpreadsheetInfo
 {
-    public string? DocumentProjectId { get; set; }
+    public string? FacilityId { get; set; }
+    public string DocumentProjectId { get; set; } = String.Empty;
     public int Revision { get; set; }
     public string? RevisionName { get; set; }
     public bool IsTransposed { get; set; }
     public DateTime RevisionDate { get; set; }
-    public string? Contractor { get; set; }
+    public string Contractor { get; set; } = String.Empty;
     public string? DataSource { get; set; }
     public string? SheetName { get; set; }
     public int HeaderRow { get; set; }
@@ -48,12 +49,18 @@ public class SpreadsheetInfo
 
     public RevisionRequirement GetRevisionRequirements()
     {
-        if (DocumentProjectId == null || RevisionName == null || RevisionDate == DateTime.MinValue)
+        if (FacilityId == null || FileName == null || RevisionName == null || RevisionDate == DateTime.MinValue)
         {
             throw new InvalidOperationException("Not sufficient spreadsheet info to create revision requirements");
         }
 
-        return new RevisionRequirement(DocumentProjectId, RevisionName, RevisionDate);
+        var documentName = FileName
+                            .Split("_")
+                            .First()
+                            .Split(".")
+                            .First();
+
+        return new RevisionRequirement(FacilityId, documentName, RevisionName, RevisionDate);
     }
 
     public bool TryValidate(out InvalidOperationException exception)
@@ -65,9 +72,9 @@ public class SpreadsheetInfo
             return false;
         }
 
-        if (DocumentProjectId == null)
+        if (FacilityId == null)
         {
-            exception = new InvalidOperationException(DetailsErrorMessage(nameof(DocumentProjectId)));
+            exception = new InvalidOperationException(DetailsErrorMessage(nameof(FacilityId)));
             return false;
         }
 

@@ -84,7 +84,12 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
 
         _dataTable.Columns.Add(RdfCommonColumns.CreateType());
         _dataTable.Columns.Add(RdfCommonColumns.CreateGeneratedAtTime());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasFacilityId());
         _dataTable.Columns.Add(RdfCommonColumns.CreateHasDocumentProjectId());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasDocumentName());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasContractNumber());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasProjectCode());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasDocumentTitle());
         _dataTable.Columns.Add(RdfCommonColumns.CreateHasRevisionNumber());
         _dataTable.Columns.Add(RdfCommonColumns.CreateHasRevisionName());
         _dataTable.Columns.Add(RdfCommonColumns.CreateFromDataCollection());
@@ -101,7 +106,12 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
 
         _dataTable.Columns.Add(RdfCommonColumns.CreateType());
         _dataTable.Columns.Add(RdfCommonColumns.CreateGeneratedAtTime());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasFacilityId());
         _dataTable.Columns.Add(RdfCommonColumns.CreateHasDocumentProjectId());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasDocumentName());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasContractNumber());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasProjectCode());
+        _dataTable.Columns.Add(RdfCommonColumns.CreateHasDocumentTitle());
         _dataTable.Columns.Add(RdfCommonColumns.CreateHasRevisionNumber());
         _dataTable.Columns.Add(RdfCommonColumns.CreateHasRevisionName());
         _dataTable.Columns.Add(RdfCommonColumns.CreateWasDerivedFrom());
@@ -119,7 +129,12 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
             currentRevision,
             RdfCommonClasses.CreateNamedGraphClass(),
             provenance.RevisionDate,
-            new Uri(RdfPrefixes.Prefix2Uri["identifier"] + provenance.DocumentProjectId),
+            new Uri(RdfPrefixes.Prefix2Uri["identifier"] + provenance.FacilityId),
+            !String.IsNullOrEmpty(provenance.DocumentProjectId) ? new Uri(RdfPrefixes.Prefix2Uri["identifier"] + provenance.DocumentProjectId) : null,
+            provenance.DocumentName,
+            provenance.ContractNumber,
+            provenance.ProjectCode,
+            provenance.DocumentTitle,
             provenance.RevisionNumber,
             provenance.RevisionName,
             provenance.DataCollectionName,
@@ -135,7 +150,12 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
             dataCollectionUri,
             RdfCommonClasses.CreateCollectionClass(),
             provenance.RevisionDate,
-            new Uri(RdfPrefixes.Prefix2Uri["identifier"] + provenance.DocumentProjectId),
+            new Uri(RdfPrefixes.Prefix2Uri["identifier"] + provenance.FacilityId),
+            !String.IsNullOrEmpty(provenance.DocumentProjectId) ? new Uri(RdfPrefixes.Prefix2Uri["identifier"] + provenance.DocumentProjectId) : String.Empty,
+            provenance.DocumentName,
+            provenance.ContractNumber,
+            provenance.ProjectCode,
+            provenance.DocumentTitle,
             provenance.RevisionNumber,
             provenance.RevisionName,
             provenance.DataCollectionName,

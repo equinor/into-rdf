@@ -71,6 +71,7 @@ public class MelTransformationService : ISpreadsheetTransformationService
 
         provenance.DocumentProjectId = details.DocumentProjectId;
         provenance.PlantId = "na";
+        provenance.DocumentName = details.FileName != null ? details.FileName.Split('.').First() : "default";
         provenance.DataCollectionName = details.FileName;
         provenance.RevisionName = details.Revision.ToString("D2");
         provenance.RevisionNumber = details.Revision;

@@ -3,14 +3,16 @@ namespace Common.ProvenanceModels;
 
 public class RevisionRequirement
 {
-    public RevisionRequirement(string documentProjectId, string revisionName, DateTime revisionDate)
+    public RevisionRequirement(string facilityId, string documentName, string revisionName, DateTime revisionDate)
     {
-        DocumentProjectId = documentProjectId;
+        FacilityId = facilityId;
+        DocumentName = documentName;
         RevisionName = revisionName;
         RevisionDate = revisionDate;
     }
 
-    public string DocumentProjectId { get; }
+    public string FacilityId { get; }
+    public string DocumentName { get; }
     public string RevisionName { get; }
     public DateTime RevisionDate { get; }
 }

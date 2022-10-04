@@ -45,55 +45,55 @@ namespace Services.Tests
             //Provenance
             rdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("https://rdf.equinor.com/kra/c232/mel/01"),
-                new Uri("https://rdf.equinor.com/ontology/facility-identification/v1#hasDocumentProjectId"),
-                new Uri("https://rdf.equinor.com/data/facility-identification/C232")
+                new Uri("https://rdf.equinor.com/kra/test/01"),
+                new Uri("https://rdf.equinor.com/ontology/sor#hasDocumentName"),
+                "test"
             );
             rdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("https://rdf.equinor.com/kra/c232/mel/01"),
+                new Uri("https://rdf.equinor.com/kra/test/01"),
                 new Uri("https://rdf.equinor.com/ontology/sor#fromDataCollection"),
                 "test.xlsx"
             );
             rdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("https://rdf.equinor.com/kra/c232/mel/01"),
+                new Uri("https://rdf.equinor.com/kra/test/01"),
                 new Uri("http://www.w3.org/ns/prov#hadMember"),
-                new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=2")          
+                new Uri("https://rdf.equinor.com/kra/test/01#row=2")          
             );
 
             //Actual Data
             rdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=2"),
+                new Uri("https://rdf.equinor.com/kra/test/01#row=2"),
                 new Uri("https://rdf.equinor.com/source/mel#Header3"),
                 "1729"
             );
 
             rdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=2"),
+                new Uri("https://rdf.equinor.com/kra/test/01#row=2"),
                 new Uri("https://rdf.equinor.com/source/mel#Header4"),
                 "3300.375"
             );
 
             rdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=499"),
+                new Uri("https://rdf.equinor.com/kra/test/01#row=499"),
                 new Uri("https://rdf.equinor.com/source/mel#Header55"),
                 "BC500"
             );
 
             rdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=498"),
+                new Uri("https://rdf.equinor.com/kra/test/01#row=498"),
                 new Uri("https://rdf.equinor.com/source/mel#Header55"),
                 "BC499"
             );
 
             rdfTestUtils.AssertTripleAsserted(
                 graph,
-                new Uri("https://rdf.equinor.com/kra/c232/mel/01#row=497"),
+                new Uri("https://rdf.equinor.com/kra/test/01#row=497"),
                 new Uri("https://rdf.equinor.com/source/mel#Header53"),
                 "BA498"
             );

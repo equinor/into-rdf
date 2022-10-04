@@ -22,4 +22,8 @@ public static class RdfCommonColumns
     public static DataColumn CreateHasRevisionName() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasRevisionName", typeof(string));
     public static DataColumn CreateStartedAtTime() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "startedAtTime", typeof(DateTime));
     public static DataColumn CreateTransformedBy() => new DataColumn(RdfPrefixes.Prefix2Uri["transformation"] + "transformedBy", typeof(string));
+    public static DataColumn CreateHasDocumentName() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasDocumentName", typeof(string));
+    public static DataColumn CreateHasContractNumber() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasContractNumber", typeof(string));
+    public static DataColumn CreateHasProjectCode() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasProjectCode", typeof(string));
+    public static DataColumn CreateHasDocumentTitle() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasDocumentTitle", typeof(string));
 }
