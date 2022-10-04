@@ -90,14 +90,19 @@ public class RdfPreprocessingService : IRdfPreprocessingService
                                     provenance.DocumentProjectId :
                                     provenance.PlantId)).ToLower();
 
-        //Temporary solution to keep the current mel-transformation while updating line list
-        var dataCollectionUri = new Uri($"{RdfPrefixes.Prefix2Uri["equinor"]}{facilityIdentifier}/");
+        //TODO - Temporary solution to keep the current mel-transformation while updating line list
+        //Clean up in new flow
+        var dataCollectionUri = new Uri($"{RdfPrefixes.Prefix2Uri["equinor"]}");
 
         if (provenance.DataSource != DataSource.LineList)
         {
             dataCollectionUri = provenance.DataSourceTable != null ?
-                    new Uri($"{dataCollectionUri.AbsoluteUri}{provenance.DataSource}/{provenance.DataSourceTable}/{provenance.RevisionName}") :
-                    new Uri($"{dataCollectionUri.AbsoluteUri}{provenance.DataSource}/{provenance.RevisionName}");
+                    new Uri($"{dataCollectionUri.AbsoluteUri}{facilityIdentifier}/{provenance.DataSource}/{provenance.DataSourceTable}/{provenance.RevisionName}") :
+                    new Uri($"{dataCollectionUri.AbsoluteUri}{provenance.FacilityId.ToLower()}/{provenance.DocumentName}/{provenance.RevisionName}");
+        }
+        else
+        {
+            dataCollectionUri = new Uri($"{dataCollectionUri}{provenance.FacilityId.ToLower()}/");
         }
         return dataCollectionUri;
     }

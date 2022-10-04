@@ -17,7 +17,7 @@ public class TieData
 
     public RevisionRequirement GetRevisionRequirements()
     {
-        return new RevisionRequirement(GetDocumentProjectId(), GetRevisionName(), GetRevisionDate());
+        return new RevisionRequirement(GetFacilityId(), GetDocumentNumber(), GetRevisionName(), GetRevisionDate());
     }
 
     public string GetDataCollectionName()
@@ -27,20 +27,66 @@ public class TieData
 
     public string GetContractor()
     {
-        return _objectData.ContractorCode ?? "NA";
+        return _objectData.ContractorCode == String.Empty ? _objectData.ContractorCode : "NA";
     }
 
-    private string GetDocumentProjectId()
+    public string GetDocumentProjectId()
     {
-        var objectName = _interfaceData.ObjectName ?? throw new ArgumentException("Tie data doesn't contain document project id");
-        var documentProjectId = _interfaceData.ObjectName[.._interfaceData.ObjectName.IndexOf("-", StringComparison.InvariantCulture)];
+        var documentProjectId = !String.IsNullOrEmpty(_interfaceData.ObjectName) ?
+            _interfaceData.ObjectName[.._interfaceData.ObjectName.IndexOf("-", StringComparison.InvariantCulture)] :
+            String.Empty;
 
         return documentProjectId;
     }
 
+    public string GetDocumentTitle()
+    {
+        return _objectData.DocumentTitle;
+    }
+
+    public string GetContractNumber()
+    {
+        return _objectData.ContractNumber;
+    }
+
+    public string GetProjectNumber()
+    {
+        return _objectData.ProjectCode;
+    }
+
+    private string GetFacilityId()
+    {
+        if (_interfaceData.Site != String.Empty)
+        {
+            return _interfaceData.Site;
+        }
+
+        if (_objectData.InstallationCode != String.Empty)
+        {
+            return _objectData.InstallationCode;
+        }
+
+        throw new InvalidOperationException(ErrorMessage(nameof(_objectData.InstallationCode)));
+    }
+
+    private string GetDocumentNumber()
+    {
+        if (!String.IsNullOrEmpty(_interfaceData.ObjectName))
+        {
+            return _interfaceData.ObjectName;
+        }
+
+        if (!String.IsNullOrEmpty(_objectData.DocumentNumber))
+        {
+            return _objectData.DocumentNumber;
+        }
+
+        throw new InvalidOperationException(ErrorMessage(nameof(_objectData.DocumentNumber)));
+    }
+
     private string GetRevisionName()
     {
-        return _objectData.RevisionNumber ?? throw new ArgumentException("Tie data doesn't contain revision number");
+        return _objectData.RevisionNumber ?? throw new ArgumentException(ErrorMessage(nameof(_objectData.RevisionNumber)));
     }
 
     private DateTime GetRevisionDate()
@@ -53,5 +99,10 @@ public class TieData
             throw new ArgumentException("Failed to convert revision date to DateTime");
         }
         return result;
+    }
+
+    private string ErrorMessage(string infoType)
+    {
+        return $"Tie data doesn't contain {infoType}";
     }
 }
