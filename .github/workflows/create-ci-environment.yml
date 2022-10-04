@@ -1,0 +1,16 @@
+name: ⚗️ Create Ci Environment
+on:
+  workflow_dispatch:
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  debug:
+    if: contains(github.event.comment.body, 'byggekjør')
+    steps:
+      name: '🐛 Debug'
+      run: echo 'Magic word was entered'
