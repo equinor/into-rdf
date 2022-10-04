@@ -10,7 +10,8 @@ concurrency:
 
 jobs:
   debug:
-    if: contains(github.event.comment.body, 'byggekjør')
+    runs-on: ubuntu-latest
     steps:
-      name: '🐛 Debug'
-      run: echo 'Magic word was entered'
+      - name: '🐛 Debug'
+        if: contains(github.event.comment.body, 'byggekjør')
+        run: echo 'Magic word was entered'
