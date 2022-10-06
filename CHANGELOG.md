@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/equinor/spine-splinter/compare/v1.3.1...v1.3.2) (2022-10-06)
+
+
+### Bug Fixes
+
+* Change Fuseki resource name ([eaa4817](https://github.com/equinor/spine-splinter/commit/eaa48176eacea7532ab090c7e9f0d0cbfd4ef86f))
+
 ## [1.3.1](https://github.com/equinor/spine-splinter/compare/v1.3.0...v1.3.1) (2022-10-06)
 
 
