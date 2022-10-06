@@ -1,5 +1,6 @@
 name: ➕ Pull Request
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -9,6 +10,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build:
+    name: '🛠️ Build'
+    uses: equinor/spine-splinter/.github/workflows/build.yml@main
+
   build_test:
     name: "💎 Code Quality"
     uses: equinor/spine-splinter/.github/workflows/codequality.yml@main

@@ -97,4 +97,4 @@ cp Dockerfile $FUSEKI_LOCATION -v
 cp -r config $FUSEKI_LOCATION/config -v
 
 #build
-docker build --force-rm --build-arg JENA_VERSION=$FUSEKI_VER -t fuseki $FUSEKI_LOCATION
+docker build --force-rm --build-arg JENA_VERSION=$FUSEKI_VER -t spinefuseki $FUSEKI_LOCATION

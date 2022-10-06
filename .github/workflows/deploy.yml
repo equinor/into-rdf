@@ -8,6 +8,9 @@
           env:
             required: true
             type: string
+          buildid:
+            required: true
+            type: string
           sku:
             required: true
             type: string
@@ -26,8 +29,6 @@
     jobs:
       Deploy:
         environment: ${{ inputs.env }}
-        env:
-          ENV: ${{ inputs.env }}
         runs-on: ubuntu-latest
 
         steps:
@@ -46,8 +47,8 @@
           - name: Setup Azure Resources
             working-directory: azure
             run: | 
-              chmod +x runBicep.sh
-              ./runBicep.sh -e  ${{ env.ENV }} -s ${{ inputs.sku }}
+              chmod +x runMainBicep.sh
+              ./runMainBicep.sh -e  ${{ inputs.env }} -b ${{ inputs.buildid }}
 
           - name: Replace Env-specific settings
             uses: microsoft/variable-substitution@v1
@@ -55,21 +56,18 @@
               files: '**/appsettings.json, **/settings.json'
             env:
               AzureAd.ClientId: ${{ secrets.API_CLIENT_ID }}
-              KeyVaultName: "${{ env.ENV }}-spinesplinter-vault"
-              Servers.Dugtrio.BaseUrl: "https://${{ env.ENV }}-mel-fuseki.azurewebsites.net"
-              Servers.SplinterConfig.BaseUrl: "https://dev-master-fuseki.azurewebsites.net"
-              ENV: ${{ env.ENV }} # Env is cleared when adding env like this, copy it
-
+              KeyVaultName: "${{ inputs.env }}-splinter-vault"
+              ENV: ${{ inputs.env }}
 
           - name: Deploy API
             uses: Azure/webapps-deploy@v2.2.3
             with:
-              app-name: "${{ env.ENV }}-spinesplinter-api"
+              app-name: "${{ inputs.env }}-splinter-api"
               package: api/
 
           - name: Deploy Functions
             uses: Azure/functions-action@v1.4.7
             with:
-              app-name: '${{ env.ENV }}-spinesplinter-func'
+              app-name: '${{ inputs.env }}-splinter-func'
               package: functions/
               publish-profile: ${{ secrets.FUNC_PUBLISH_PROFILE }}

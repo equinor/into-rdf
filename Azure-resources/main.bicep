@@ -1,7 +1,29 @@
-param resourcePrefix string
+param environmentTag string
 param sku string
-param location string = resourceGroup().location
 param env string
+param buildId string
+param location string = resourceGroup().location
+
+param fusekiParameters array = [
+  {
+    name: 'olddugtrio'
+    clientId: env == 'prod' ? '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' : '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' // TODO add proper prod client id
+    fusekiConfig: 'mel_persisted_rdfs_reasoning_config.ttl'
+    location: resourceGroup().location
+  }
+  {
+    name: 'review'
+    clientId: env == 'prod' ? 'a11754fd-f094-438c-9b81-d4d5b14fabf5' : 'a11754fd-f094-438c-9b81-d4d5b14fabf5' // TODO add proper prod client id
+    fusekiConfig: 'mel_persisted_rdfs_reasoning_config.ttl'
+    location: resourceGroup().location
+  }
+  {
+    name: 'meta'
+    clientId: env == 'prod' ? '6dbf2494-f87f-4d25-a9ee-891d262ece45' : '6dbf2494-f87f-4d25-a9ee-891d262ece45' // TODO add proper prod client id
+    fusekiConfig: 'mel_persisted_rdfs_reasoning_config.ttl'
+    location: resourceGroup().location
+  }
+]
 
 var dotnetVersion = 'v6.0'
 var dugtrioGroupId = '5cb080af-069d-47db-8675-67efa584f59c'
@@ -11,10 +33,16 @@ var resourceTags = {
   Product: 'Spine Splinter'
   Team: 'Dugtrio'
   Env: env
+  BuildId: buildId
 }
 
+var shortResourcePrefix = '${environmentTag}splinter'
+var longResourcePrefix = '${environmentTag}-splinter'
+
+var vaultName = '${longResourcePrefix}-vault'
+
 resource StorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
-  name: '${env}spinesplinterstorage'
+  name: '${shortResourcePrefix}storage'
   location: location
   tags: resourceTags
   kind: 'StorageV2'
@@ -39,7 +67,7 @@ resource TieMelAdapterStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-
 }
 
 resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: '${resourcePrefix}-insights'
+  name: '${longResourcePrefix}-insights'
   location: location
   tags: resourceTags
   kind: 'web'
@@ -49,7 +77,7 @@ resource ApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
 }
 
 resource AppServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
-  name: '${resourcePrefix}-plan'
+  name: '${longResourcePrefix}-plan'
   location: location
   tags: resourceTags
   kind: 'linux'
@@ -63,8 +91,31 @@ resource AppServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
 
 var tieMelAdadpterConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${TieMelAdapterStorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(TieMelAdapterStorageAccount.id, TieMelAdapterStorageAccount.apiVersion).keys[0].value}'
 
+/*
+  Example appsetting
+
+  "Servers": {
+    "Dugtrio": {
+      "BaseUrl": "https://dev-dugtrio-fuseki.azurewebsites.net",
+      "Scopes": "2ff9de24-0dba-46e0-9dc1-096cc69ef0c6/.default"
+    }
+  }
+*/
+
+var fusekiSettingsBaseUrl = [for param in fusekiParameters: {
+  name: 'Servers__${param.name}__BaseUrl'
+  value: 'https://${environmentTag}-${param.name}-fuseki.azurewebsites.net'
+}]
+
+var fusekiSettingsScopes = [for param in fusekiParameters: {
+  name: 'Servers__${param.name}__Scopes'
+  value: '${param.clientId}/.default'
+}]
+
+var fusekiSettings = union(fusekiSettingsBaseUrl, fusekiSettingsScopes)
+
 resource Api 'Microsoft.Web/sites@2021-03-01' = {
-  name: '${resourcePrefix}-api'
+  name: '${longResourcePrefix}-api'
   kind: 'app'
   tags: resourceTags
   location: location
@@ -80,12 +131,15 @@ resource Api 'Microsoft.Web/sites@2021-03-01' = {
       netFrameworkVersion: dotnetVersion
       linuxFxVersion: 'DOTNETCORE|6.0'
       http20Enabled: true
-      appSettings: [
+      appSettings: union([
         {
           name: 'ApplicationInsights__ConnectionString'
           value: ApplicationInsights.properties.ConnectionString
         }
-      ]
+        { name: 'KeyVaultName'
+          value: vaultName
+        }
+      ], fusekiSettings)
       connectionStrings: [
         {
           name: 'SpineReviewStorage'
@@ -99,13 +153,12 @@ resource Api 'Microsoft.Web/sites@2021-03-01' = {
 }
 
 resource FuncServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
-  name: '${resourcePrefix}-func-plan'
+  name: '${longResourcePrefix}-func-plan'
   location: location
   tags: resourceTags
   kind: 'linux'
   properties: {
     reserved: true
-    computeMode: 'Dynamic'
   }
   sku: {
     name: 'Y1'
@@ -116,7 +169,7 @@ resource FuncServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
 var serviceBusEndpoint = '${ServiceBusNamespace.id}/AuthorizationRules/RootManageSharedAccessKey'
 
 resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
-  name: '${resourcePrefix}-func'
+  name: '${longResourcePrefix}-func'
   kind: 'functionapp,linux'
   tags: resourceTags
   location: location
@@ -163,7 +216,7 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
 }
 
 resource KeyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
-  name: '${resourcePrefix}-vault'
+  name: vaultName
   location: location
   tags: resourceTags
   properties: {
@@ -227,3 +280,16 @@ resource KeyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
     ]
   }
 }
+
+module fuskis './fuseki.bicep' = [for parameter in fusekiParameters: {
+  name: parameter.name
+  params: {
+    buildId: buildId
+    env: env
+    environmentTag: environmentTag
+    clientId: parameter.clientId
+    name: parameter.name
+    fusekiConfig: parameter.fusekiConfig
+    location: parameter.location
+  }
+}]
