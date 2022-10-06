@@ -6,7 +6,7 @@ param location string = resourceGroup().location
 
 param fusekiParameters array = [
   {
-    name: 'olddugtrio'
+    name: 'oldugtrio'
     clientId: env == 'prod' ? '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' : '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' // TODO add proper prod client id
     fusekiConfig: 'mel_persisted_rdfs_reasoning_config.ttl'
     location: resourceGroup().location
