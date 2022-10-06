@@ -28,6 +28,8 @@ public class TieConsumer
         _rdfService = rdfService;
         _spineNotificationService = spineNotificationService;
     }
+
+    //TODO - Rewrite functions to use Splinter API endpoints.
     [FunctionName(nameof(TieConsumer))]
     [StorageAccount("TieMelAdapterStorage")]
     public async Task Run([BlobTrigger("prodmeladapterfiles/{name}")] Stream? myBlob, string name, ILogger log)
@@ -42,11 +44,12 @@ public class TieConsumer
         if (provenance is null) return;
         if (string.IsNullOrEmpty(provenance.FacilityId) || string.IsNullOrEmpty(provenance.DocumentProjectId)) return;
 
-        await _spineNotificationService
+       /* await _spineNotificationService
            .PostToTopic(
                "new-mel-processed",
                new NewMelProcessedPayload(provenance.FacilityId, provenance.DocumentProjectId)
            );
+        */
     }
 
     private async Task<List<BlobItem>> GetBlobsInSameDirectory(string name)

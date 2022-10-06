@@ -65,9 +65,9 @@
               app-name: "${{ inputs.env }}-splinter-api"
               package: api/
 
-          #- name: Deploy Functions
-          #  uses: Azure/functions-action@v1.4.7
-          #  with:
-          #    app-name: '${{ inputs.env }}-splinter-func'
-          #    package: functions/
-          #    publish-profile: ${{ secrets.FUNC_PUBLISH_PROFILE }}
+          - name: Deploy Functions
+            uses: Azure/functions-action@v1.4.7
+            with:
+              app-name: '${{ inputs.env }}-splinter-func'
+              package: functions/
+              publish-profile: ${{ secrets.FUNC_PUBLISH_PROFILE }}
