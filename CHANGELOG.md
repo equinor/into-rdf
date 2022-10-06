@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.1](https://github.com/equinor/spine-splinter/compare/v1.3.0...v1.3.1) (2022-10-06)
+
+
+### Bug Fixes
+
+* Updated ci.yml with buildId ([96c421f](https://github.com/equinor/spine-splinter/commit/96c421fe542784f519410b95c59f52d8add00675))
+
+
+### Other
+
+* improve ci cd pipelines ([#109](https://github.com/equinor/spine-splinter/issues/109)) ([9ac2d7f](https://github.com/equinor/spine-splinter/commit/9ac2d7febcc8384f2f9b7a3200c3ad43d072f71e))
+* Remove deploy of Azure function ([1635ef0](https://github.com/equinor/spine-splinter/commit/1635ef0b7029ee8677956e676e6db1b1d176d89f))
+
 ## [1.3.0](https://github.com/equinor/spine-splinter/compare/v1.2.0...v1.3.0) (2022-10-04)
 
 
