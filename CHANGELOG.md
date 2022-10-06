@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.3](https://github.com/equinor/spine-splinter/compare/v1.3.2...v1.3.3) (2022-10-06)
+
+
+### Other
+
+* Deploy functions and remove message trigger ([#119](https://github.com/equinor/spine-splinter/issues/119)) ([1a53664](https://github.com/equinor/spine-splinter/commit/1a5366475870b895e55ad954a513c160ec6f7fa8))
+
 ## [1.3.2](https://github.com/equinor/spine-splinter/compare/v1.3.1...v1.3.2) (2022-10-06)
 
 
