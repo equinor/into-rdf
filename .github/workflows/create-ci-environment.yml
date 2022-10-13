@@ -1,27 +1,17 @@
 name: ⚗️ Create Ci Environment
 on:
   workflow_dispatch:
-  issue_comment:
-    types: [created]
 
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
-  debug:
-    runs-on: ubuntu-latest
-    steps:
-      - name: '🐛 Debug'
-        if: contains(github.event.comment.body, 'byggekjør')
-        run: echo 'Magic word was entered'
-  build:
-    if: contains(github.event.comment.body, 'byggekjør')
+ build:
     name: '🛠️ Build'
     uses: equinor/spine-splinter/.github/workflows/build.yml@main
 
   deploy_to_ci_env:
-    if: contains(github.event.comment.body, 'byggekjør')
     name: "🧪🚀 Deploy to CI environment"
     needs: [build]
     permissions:
