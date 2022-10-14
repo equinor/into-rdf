@@ -1,8 +1,11 @@
 ﻿using System.Net.Http.Headers;
+using Common.AppsettingsModels;
 using Common.Constants;
 using Common.Exceptions;
 using Common.FusekiModels;
 using Common.GraphModels;
+using Common.Utils;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Web;
 using Newtonsoft.Json;
 using Services.FusekiMappers;
@@ -12,24 +15,29 @@ namespace Services.FusekiServices;
 public class FusekiService : IFusekiService
 {
     private readonly IDownstreamWebApi _downstreamWebApi;
+    private readonly List<string> _fusekis; // only for debugging
 
-    public FusekiService(IDownstreamWebApi downstreamWebApi)
+    public FusekiService(IConfiguration config, IDownstreamWebApi downstreamWebApi)
     {
         _downstreamWebApi = downstreamWebApi;
+        _fusekis = config.GetSection(ApiKeys.Servers).Get<List<RdfServer>>().Select(f => f.Name).ToList();
     }
 
     public async Task<HttpResponseMessage> PostAsApp(string server, ResultGraph resultGraph, string contentType = "text/turtle")
     {
+        VerifyServer(server);
         return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForData(options, resultGraph, contentType));
     }
 
     public async Task<HttpResponseMessage> PostAsUser(string server, string turtle, string contentType = "text/turtle")
     {
+        VerifyServer(server);
         return await _downstreamWebApi.CallWebApiForUserAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForData(options, turtle, contentType));
     }
 
     public async Task<string> QueryAsApp(string server, string sparql)
     {
+        VerifyServer(server);
         var response = await ExecuteSparqlAsApp(server, sparql, new List<string> { "text/turtle", "application/sparql-results+json" });
 
         return await SerializeResponse(response);
@@ -37,11 +45,13 @@ public class FusekiService : IFusekiService
 
     public async Task<HttpResponseMessage> QueryAsUser(string server, string sparql)
     {
+        VerifyServer(server);
         return await ExecuteSparqlAsUser(server, sparql, new List<string> { "text/turtle", "application/sparql-results+json" });
     }
 
     public async Task<FusekiResponse> QueryFusekiResponseAsApp(string server, string sparql)
     {
+        VerifyServer(server);
         var result = await QueryAsApp(server, sparql);
 
         return DeserializeToFusekiResponse(result);
@@ -49,9 +59,17 @@ public class FusekiService : IFusekiService
 
     public async Task<List<T>> QueryFusekiResponseAsApp<T>(string server, string sparql) where T : new()
     {
+        VerifyServer(server);
         var result = FusekiResponseToPropsMapper.MapResponse<T>(await QueryFusekiResponseAsApp(server, sparql));
 
         return result;
+    }
+
+    private void VerifyServer(string server)
+    {
+        if (! _fusekis.Contains(server)) {
+            throw new Exception($"Downstream fuskeki named {server} not found among [{string.Join(", ", _fusekis)}]");
+        }
     }
 
     private async Task<string> SerializeResponse(HttpResponseMessage response)
