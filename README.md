@@ -16,8 +16,8 @@ If testing against
 "Servers": [
     {
         "name": "testfuseki",
-        "baseUri": "https://localhost:3030",
-        "scopes": "c0ffec0ffec0ffec0ffec0ffec0ffec0ffec0ffe.default"
+        "baseUrl": "https://localhost:3030",
+        "scopes": "c0ffec0ffec0ffec0ffec0ffec0ffec0ffec0ffe/.default"
     }
 ]
 ...
