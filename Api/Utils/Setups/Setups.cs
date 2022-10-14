@@ -8,10 +8,14 @@ namespace Api.Utils.Setups;
 
 public static class Setups
 {
-    public static void SetupKeyVault(this WebApplicationBuilder? builder)
+    public static void SetupKeyVault(this WebApplicationBuilder builder)
     {
-        if (builder is null) return;
-        var keyVaultUri = new Uri($"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/");
+        var keyVaultName = builder.Configuration["KeyVaultName"];
+        if (string.IsNullOrEmpty(keyVaultName))
+        {
+            throw new Exception("keyVaultName not set in configuration, see readme");
+        }
+        var keyVaultUri = new Uri($"https://{keyVaultName}.vault.azure.net/");
         var credentials = new DefaultAzureCredential();
         var secretClient = new SecretClient(keyVaultUri, credentials);
         builder.Configuration.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());

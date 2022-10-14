@@ -94,25 +94,28 @@ var tieMelAdadpterConnectionString = 'DefaultEndpointsProtocol=https;AccountName
 /*
   Example appsetting
 
-  "Servers": {
-    "Dugtrio": {
+  "Servers": [
+    {
+      "Name": "Dugtrio",
       "BaseUrl": "https://dev-dugtrio-fuseki.azurewebsites.net",
       "Scopes": "2ff9de24-0dba-46e0-9dc1-096cc69ef0c6/.default"
-    }
-  }
+    },
+    ...
+  ]
 */
 
-var fusekiSettingsBaseUrl = [for param in fusekiParameters: {
-  name: 'Servers__${param.name}__BaseUrl'
-  value: 'https://${environmentTag}-${param.name}-fuseki.azurewebsites.net'
-}]
-
-var fusekiSettingsScopes = [for param in fusekiParameters: {
-  name: 'Servers__${param.name}__Scopes'
-  value: '${param.clientId}/.default'
-}]
-
-var fusekiSettings = union(fusekiSettingsBaseUrl, fusekiSettingsScopes)
+var fusekiSettings = [for i in range(0, length(fusekiParameters)): [
+  {
+    name: 'Servers__${i}__BaseUrl'
+    value: 'https://${environmentTag}-${fusekiParameters[i].name}-fuseki.azurewebsites.net'
+  }, {
+    name: 'Servers__${i}__Scopes'
+    value: '${fusekiParameters[i].clientId}/.default'
+  }, {
+    name: 'Servers__${i}__Name'
+    value: '${fusekiParameters[i].name}'
+  }
+]]
 
 resource Api 'Microsoft.Web/sites@2021-03-01' = {
   name: '${longResourcePrefix}-api'
@@ -139,7 +142,7 @@ resource Api 'Microsoft.Web/sites@2021-03-01' = {
         { name: 'KeyVaultName'
           value: vaultName
         }
-      ], fusekiSettings)
+      ], flatten(fusekiSettings))
       connectionStrings: [
         {
           name: 'SpineReviewStorage'

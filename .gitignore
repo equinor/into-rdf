@@ -397,6 +397,8 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 *.idea
+
+# Local config setting
 Api/appsettings.Development.json
 
 #Excel data (used in the Excel2Rdf.Cli)
