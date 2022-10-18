@@ -50,8 +50,7 @@ PREFIX ja:      <http://jena.hpl.hp.com/2005/11/Assembler#>
 
 :model_inf a ja:InfModel;
     ja:baseModel :dataset
-.
+    .
 
 # Transactional in-memory dataset.
-:dataset rdf:type ja:MemoryModel ;
-    ja:content [ja:externalContent <file:/fuseki/ttl_data/stid.ttl> ] .
+:dataset rdf:type ja:MemoryModel .

@@ -81,7 +81,7 @@ resource Fuseki 'Microsoft.Web/sites@2021-03-01' = {
           type: 'AzureFiles'
           accountName: FusekiStorageAccount.name
           shareName: fileShareName
-          mountPath: '/meltdb2'
+          mountPath: '/tdb2'
           accessKey: listKeys(FusekiStorageAccount.id, FusekiStorageAccount.apiVersion).keys[0].value
         }
       }

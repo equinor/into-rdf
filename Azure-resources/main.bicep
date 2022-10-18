@@ -8,19 +8,31 @@ param fusekiParameters array = [
   {
     name: 'oldugtrio'
     clientId: env == 'prod' ? '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' : '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' // TODO add proper prod client id
-    fusekiConfig: 'mel_persisted_rdfs_reasoning_config.ttl'
+    fusekiConfig: 'persisted_no_reasoner_config.ttl'
     location: resourceGroup().location
   }
   {
     name: 'review'
-    clientId: env == 'prod' ? 'a11754fd-f094-438c-9b81-d4d5b14fabf5' : 'a11754fd-f094-438c-9b81-d4d5b14fabf5' // TODO add proper prod client id
-    fusekiConfig: 'mel_persisted_rdfs_reasoning_config.ttl'
+    clientId: env == 'prod' ? '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' : '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' // TODO add proper prod client id
+    fusekiConfig: 'persisted_no_reasoner_config.ttl'
+    location: resourceGroup().location
+  }
+  {
+    name: 'krafla'
+    clientId: env == 'prod' ? '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' : '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' // TODO add proper prod client id
+    fusekiConfig: 'persisted_no_reasoner_config.ttl'
+    location: resourceGroup().location
+  }
+  {
+    name: 'wisting'
+    clientId: env == 'prod' ? '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' : '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' // TODO add proper prod client id
+    fusekiConfig: 'persisted_no_reasoner_config.ttl'
     location: resourceGroup().location
   }
   {
     name: 'meta'
     clientId: env == 'prod' ? '6dbf2494-f87f-4d25-a9ee-891d262ece45' : '6dbf2494-f87f-4d25-a9ee-891d262ece45' // TODO add proper prod client id
-    fusekiConfig: 'mel_persisted_rdfs_reasoning_config.ttl'
+    fusekiConfig: 'persisted_no_reasoner_config.ttl'
     location: resourceGroup().location
   }
 ]

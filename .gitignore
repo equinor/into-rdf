@@ -406,7 +406,6 @@ data/
 
 #Rdf data (used in Excel2Rdf.Cli and ShipWeight2Rdf.Cli)
 output/
-*.ttl
 */local.settings.json
 __azurite*
 __blob*
