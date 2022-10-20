@@ -40,7 +40,7 @@ namespace Api.Controllers
             if (postedFile is null) return BadRequest("No file");
             var turtle = await _rdfService.ConvertDocToRdf(postedFile);
             var result = await _rdfService.PostToFusekiAsUser(server, turtle);
-            return result.IsSuccessStatusCode ? Ok(turtle) : BadRequest(result);
+            return result.IsSuccessStatusCode ? Ok(turtle) : BadRequest(await result.Content.ReadAsStringAsync());
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Api.Controllers
             using var streamReader = new StreamReader(formFile.OpenReadStream(), Encoding.UTF8);
             var content = await streamReader.ReadToEndAsync();
             var result = await _rdfService.PostToFusekiAsUser(server, content ?? string.Empty);
-            return result.IsSuccessStatusCode ? Ok(content) : BadRequest(result);
+            return result.IsSuccessStatusCode ? Ok(content) : BadRequest(await result.Content.ReadAsStringAsync());
         }
 
         /// <summary>
@@ -78,7 +78,8 @@ namespace Api.Controllers
             if (formFile is null) return BadRequest("No Content");
             var rdf = await _xmlRdfService.ConvertAMLToRdf(formFile.OpenReadStream());
             var result = await _rdfService.PostToFusekiAsUser(server, rdf, "application/n-quads");
-            return result.IsSuccessStatusCode ? Ok(rdf) : BadRequest(result);
+            return result.IsSuccessStatusCode ? Ok(rdf) : BadRequest(await result.Content.ReadAsStringAsync());
+
         }
     }
 }
