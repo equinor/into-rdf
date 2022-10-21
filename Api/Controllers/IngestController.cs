@@ -10,7 +10,7 @@ using Common.GraphModels;
 namespace Api.Controllers
 {
     /// <summary>
-    /// Controller for handling rdf uploads
+    /// Controller for handling rdf uploads. Soon to be deprecated in favour of DataController
     /// </summary>
     [Authorize(Roles = Roles.Admin)]
     [ApiController]
