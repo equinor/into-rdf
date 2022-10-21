@@ -1,17 +1,16 @@
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Common.AppsettingsModels;
 using Common.ProvenanceModels;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Services.RdfServices;
+using Services.SpineNotificationServices;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Azure.Messaging.ServiceBus;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Services.RdfServices;
-using Services.SpineNotificationServices;
 
 namespace TieMelConsumer;
 
@@ -20,13 +19,15 @@ public class TieConsumer
     private readonly BlobServiceClient _blobServiceClient;
     private readonly IRdfService _rdfService;
     private readonly ISpineNotificationServices _spineNotificationService;
+    private readonly IOptions<ServiceBusConfig> _serviceBusConfig;
     private const string container = "prodmeladapterfiles";
 
-    public TieConsumer(BlobServiceClient blobServiceClient, IRdfService rdfService, ISpineNotificationServices spineNotificationService)
+    public TieConsumer(BlobServiceClient blobServiceClient, IRdfService rdfService, ISpineNotificationServices spineNotificationService, IOptions<ServiceBusConfig> serviceBusConfig)
     {
         _blobServiceClient = blobServiceClient;
         _rdfService = rdfService;
         _spineNotificationService = spineNotificationService;
+        _serviceBusConfig = serviceBusConfig;
     }
 
     //TODO - Rewrite functions to use Splinter API endpoints.
@@ -44,12 +45,11 @@ public class TieConsumer
         if (provenance is null) return;
         if (string.IsNullOrEmpty(provenance.FacilityId) || string.IsNullOrEmpty(provenance.DocumentProjectId)) return;
 
-       /* await _spineNotificationService
-           .PostToTopic(
-               "new-mel-processed",
-               new NewMelProcessedPayload(provenance.FacilityId, provenance.DocumentProjectId)
-           );
-        */
+        //await _spineNotificationService
+        //   .PostToTopic(
+        //       _serviceBusConfig.Value.Topic,
+        //       new NewMelProcessedPayload(provenance.FacilityId, provenance.DocumentProjectId)
+        //   );
     }
 
     private async Task<List<BlobItem>> GetBlobsInSameDirectory(string name)

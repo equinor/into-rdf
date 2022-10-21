@@ -12,6 +12,11 @@ namespace TieMelConsumer;
 
 public static class SetupServices
 {
+    public static void SetupOptions(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<ServiceBusConfig>(configuration.GetSection("ServiceBus"));
+    }
+
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
         return services.AddSplinterServices();

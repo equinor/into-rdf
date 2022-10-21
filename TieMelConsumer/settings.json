@@ -9,6 +9,9 @@
     "TenantId": "3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
     "ClientId": "0e4fd761-34d0-42cf-8184-09d015d9f3df"
   },
+  "ServiceBus": {
+    "Topic": "dev-mel-processed"
+  },
   "AllowedHosts": "*",
   "KeyVaultName": "dev-spinesplinter-vault",
   "Servers": {

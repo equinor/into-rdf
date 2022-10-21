@@ -30,13 +30,15 @@ public class Startup : FunctionsStartup
         var context = builder.GetContext();
         var services = builder.Services;
         var configuration = context.Configuration;
-        
+
         // avoid calling builder.Services.AddAuthentication() since it overrides internal Azure Function authentication
         // https://github.com/AzureAD/microsoft-identity-web/issues/1548
-            services.AddMicrosoftIdentityWebApiAuthentication(configuration)
-            .EnableTokenAcquisitionToCallDownstreamApi()
-            .AddFusekiApis(configuration)
-            .AddInMemoryTokenCaches();
+        services.AddMicrosoftIdentityWebApiAuthentication(configuration)
+        .EnableTokenAcquisitionToCallDownstreamApi()
+        .AddFusekiApis(configuration)
+        .AddInMemoryTokenCaches();
+
+        services.SetupOptions(configuration);
 
         services.AddServices();
         services.AddServiceBusClient(configuration);
@@ -52,7 +54,7 @@ public class Startup : FunctionsStartup
         var builtConfig = config.Build();
         var keyVaultUri = new Uri($"https://{builtConfig["KeyVaultName"]}.vault.azure.net/");
         var credentials = new DefaultAzureCredential(new DefaultAzureCredentialOptions
-            { ExcludeSharedTokenCacheCredential = true });
+        { ExcludeSharedTokenCacheCredential = true });
         var secretClient = new SecretClient(keyVaultUri, credentials);
         config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
     }
