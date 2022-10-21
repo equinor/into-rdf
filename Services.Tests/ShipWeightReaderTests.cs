@@ -42,7 +42,6 @@ namespace Services.Tests
         {
             var facilityId = "Test";
             var provenance = new Provenance(facilityId, DataSource.Shipweight);
-            provenance.DocumentProjectId = "na";
             provenance.PlantId = "1234";
             provenance.DataCollectionName = "MyFacility";
             provenance.RevisionName = "01";

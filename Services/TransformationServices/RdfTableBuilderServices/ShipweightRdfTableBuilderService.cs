@@ -185,4 +185,6 @@ public class ShipweightRdfTableBuilderService : IRdfTableBuilderService
             _dataTable.Rows.Add(dataRow);
         }
     }
+
+    public Uri? GetTransformationUri(Provenance provenance) => null;
 }

@@ -299,4 +299,6 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
 
         return name;
     }
+
+    public Uri? GetTransformationUri(Provenance provenance) => null;
 }

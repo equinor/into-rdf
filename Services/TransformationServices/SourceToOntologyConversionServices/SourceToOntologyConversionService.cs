@@ -220,6 +220,7 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
         {
             _logger.LogWarning($"Wrong number ({datatypesOfPredicate.Count()}) of datatypes for predicate {predicate}");
             AssertValueWithoutDatatype(subjectIndividual, _graph.CreateUriNode(RdfCommonProperties.CreateDatumValue()), cellValue);
+            return;
         }
 
         var datatype = datatypesOfPredicate.First();
@@ -234,6 +235,7 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
         {
             _logger.LogWarning($"Wrong number ({datatypesOfPredicate.Count()}) of datatypes for predicate {predicate}");
             AssertValueWithoutDatatype(subjectIndividual, predicate, cellValue);
+            return;
         }
 
         var datatype = datatypesOfPredicate.First();

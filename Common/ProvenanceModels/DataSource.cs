@@ -10,4 +10,5 @@ public static class DataSource
     public const string Unknown = "unknown";
     public const string AML = "aml";
     public const string Spreadsheet = "spreadsheet";
+    public const string CommonLib = "commonlib";
 }

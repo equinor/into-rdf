@@ -11,4 +11,8 @@ public interface IRdfTableBuilderService
     DataTable GetDataCollectionTable(Uri dataCollectionUri, DataTable inputData);
     DataTable GetInputDataTable(Uri dataCollectionUri, Uri transformationUri, Provenance provenance, DataTable inputData);
     string GetBuilderType();
+    /// <summary>
+    /// Overrides creation of transformation uri. When this returns null, we use the default way.
+    /// </summary>
+    Uri? GetTransformationUri(Provenance provenance);
 }

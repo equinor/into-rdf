@@ -28,7 +28,6 @@ public class ShipweightTransformationService : IDatabaseTransformationService
         var facilityId = GetFacilityId(plantId);
 
         var provenance = new Provenance(facilityId, DataSource.Shipweight);
-        provenance.DocumentProjectId = "na";
         provenance.PlantId = plantId;
         provenance.DataCollectionName = facilityName;
         provenance.RevisionName = "01";
