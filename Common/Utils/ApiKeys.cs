@@ -4,6 +4,7 @@
     {
         public const string Servers = "Servers";
         public const string ServiceBus = "ServiceBus";
+        public const string CommonLib = "CommonLibApi";
     }
 
     public static class ServerKeys

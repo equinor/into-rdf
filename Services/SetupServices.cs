@@ -15,6 +15,8 @@ using Services.TransformationServices.SpreadsheetTransformationServices;
 using Services.TransformationServices.SourceToOntologyConversionService;
 using Services.TransformationServices.XMLTransformationServices;
 using Services.TransformationServices.XMLTransformationServices.Converters;
+using Services.CommonlibServices;
+using Services.CommonLibToRdfServices;
 
 namespace Services.DependencyInjection;
 public static class SetupServices
@@ -33,6 +35,7 @@ public static class SetupServices
         services.AddScoped<IRdfTableBuilderFactory, RdfTableBuilderFactory>();
         services.AddScoped<IRdfTableBuilderService, ExcelRdfTableBuilderService>();
         services.AddScoped<IRdfTableBuilderService, ShipweightRdfTableBuilderService>();
+        services.AddScoped<IRdfTableBuilderService, CommonLibTableBuilderService>();
         services.AddScoped<IRdfTransformationService, RdfTransformationService>();
         services.AddScoped<ISpreadsheetTransformationService, LineListTransformationService>();
         services.AddScoped<ISpreadsheetTransformationService, MelTransformationService>();
@@ -40,6 +43,12 @@ public static class SetupServices
         services.AddScoped<IXMLTransformationService, AmlTransformationService>();
         services.AddScoped<AmlToRdfConverter>();
         services.AddScoped<ITieMessageService, TieMessageService>();
+        services.AddScoped<ICommonLibService, CommonlibService>();
+        services.AddScoped<ICommonLibTransformationService, CommonLibTransformationService>();
+        services.AddScoped<ICommonLibToRdfService, CommonLibToRdfService>();
+        
+        
         return services;
     }
+
 }

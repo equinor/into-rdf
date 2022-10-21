@@ -21,6 +21,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
     .EnableTokenAcquisitionToCallDownstreamApi()
     .AddFusekiApis(builder.Configuration)
+    .AddDownstreamWebApi(ApiKeys.CommonLib, builder.Configuration.GetSection(ApiKeys.CommonLib))
     .AddInMemoryTokenCaches();
 
 builder.Services.AddApplicationInsightsTelemetry();

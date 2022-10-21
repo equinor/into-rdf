@@ -21,7 +21,7 @@ namespace Api
             }
             foreach (var fuseki in fusekis)
             {
-                builder.AddDownstreamWebApi(fuseki.Name, options =>
+                builder.AddDownstreamWebApi(fuseki.Name.ToLower(), options =>
                 {
                     options.BaseUrl = fuseki.BaseUrl;
                     options.Scopes = fuseki.Scopes;

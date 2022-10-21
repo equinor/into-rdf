@@ -1,9 +1,7 @@
-using Common.FacilityModels;
 using Common.ProvenanceModels;
 using Common.SpreadsheetModels;
 using Common.TieModels;
 using Common.Utils;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Services.FusekiServices;
 
@@ -11,15 +9,12 @@ namespace Services.ProvenanceServices;
 
 public class ProvenanceService : IProvenanceService
 {
-    private readonly IConfiguration _configuration;
     private readonly IFusekiService _fusekiService;
     private readonly ILogger<ProvenanceService> _logger;
 
-    public ProvenanceService(IConfiguration configuration,
-                             IFusekiService fusekiService,
+    public ProvenanceService(IFusekiService fusekiService,
                              ILogger<ProvenanceService> logger)
     {
-        _configuration = configuration;
         _fusekiService = fusekiService;
         _logger = logger;
     }
@@ -59,6 +54,17 @@ public class ProvenanceService : IProvenanceService
         return provenance;
     }
 
+    public async Task<Provenance> CreateProvenanceFromCommonLib(string library, RevisionRequirement requirement)
+    {
+        var provenance = await CreateProvenance(string.Empty, DataSource.CommonLib, requirement);
+
+        provenance.DataSourceTable = library;
+        provenance.RevisionName = provenance.RevisionNumber.ToString();
+        provenance.DataSourceType = DataSourceType.Database();
+
+        return provenance;
+    }
+
     private async Task<Provenance> CreateProvenance(string filename, string datasource, RevisionRequirement revisionRequirement)
     {
         _logger.LogDebug("<ProvenanceService> - CreateProvenance: Prepare to retrieve previous revisions for facilityId {facilityId}", revisionRequirement.FacilityId);
@@ -68,7 +74,7 @@ public class ProvenanceService : IProvenanceService
         _logger.LogDebug("<ProvenanceService> - CreateProvenance: Retrieved {count} previous versions", previousRevisions.Count);
 
         var existingRevision = previousRevisions.Count > 0 ? previousRevisions.FirstOrDefault(r => r.RevisionName?.ToLower() == revisionRequirement.RevisionName.ToLower()) : null;
-        var latestRevision = previousRevisions.Count > 0 ? previousRevisions.Aggregate((r1, r2) => r1.RevisionNumber > r2.RevisionNumber ? r1 : r2) : null;
+        var latestRevision = previousRevisions.Count > 0 ? previousRevisions.MaxBy(revision => revision.RevisionNumber) : null;
 
         GetRevisionStatus(existingRevision, latestRevision, revisionRequirement.RevisionDate, out var revisionStatus, out var revisionNumber);
 
@@ -101,12 +107,12 @@ public class ProvenanceService : IProvenanceService
 
     private void GetRevisionStatus(RevisionInfo? existingRevision, RevisionInfo? latestRevision, DateTime revisionDate, out RevisionStatus revisionStatus, out int revisionNumber)
     {
-        if (existingRevision == null && (latestRevision == null || latestRevision.RevisionDate <= revisionDate))
+        if (existingRevision == null && (latestRevision == null || latestRevision.RevisionDate < revisionDate))
         {
             revisionStatus = RevisionStatus.New;
             revisionNumber = latestRevision != null ? latestRevision.RevisionNumber + 1 : 1;
         }
-        else if (existingRevision == null && latestRevision != null && latestRevision.RevisionDate > revisionDate)
+        else if (existingRevision == null && latestRevision != null && latestRevision.RevisionDate >= revisionDate)
         {
             revisionStatus = RevisionStatus.Unknown;
             revisionNumber = -1;

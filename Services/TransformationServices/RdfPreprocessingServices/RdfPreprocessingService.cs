@@ -86,31 +86,36 @@ public class RdfPreprocessingService : IRdfPreprocessingService
 
     private Uri CreateDataCollectionUri(Provenance provenance)
     {
-        var facilityIdentifier = (provenance.FacilityId + "/" + (provenance.DocumentProjectId != "na" ?
-                                    provenance.DocumentProjectId :
-                                    provenance.PlantId)).ToLower();
+        var facilityIdentifierParts = new List<string> { provenance.FacilityId };
+        if (!string.IsNullOrEmpty(provenance.DocumentProjectId))
+            facilityIdentifierParts.Add(provenance.DocumentProjectId);
+        else if (!string.IsNullOrEmpty(provenance.PlantId))
+            facilityIdentifierParts.Add(provenance.PlantId);
+
+        var facilityIdentifier = string.Join("/", facilityIdentifierParts).ToLower();
 
         //TODO - Temporary solution to keep the current mel-transformation while updating line list
         //Clean up in new flow
         var dataCollectionUri = new Uri($"{RdfPrefixes.Prefix2Uri["equinor"]}");
 
-        if (provenance.DataSource != DataSource.LineList)
+        if (provenance.DataSource is DataSource.LineList)
+            dataCollectionUri = new Uri($"{dataCollectionUri}{provenance.FacilityId.ToLower()}/");
+        else if (provenance.DataSource is DataSource.CommonLib)
+            dataCollectionUri = new Uri(dataCollectionUri, $"{provenance.FacilityId.ToLower()}/{provenance.DataSourceTable}/");
+        else
         {
             dataCollectionUri = provenance.DataSourceTable != null ?
                     new Uri($"{dataCollectionUri.AbsoluteUri}{facilityIdentifier}/{provenance.DataSource}/{provenance.DataSourceTable}/{provenance.RevisionName}") :
                     new Uri($"{dataCollectionUri.AbsoluteUri}{provenance.FacilityId.ToLower()}/{provenance.DocumentName}/{provenance.RevisionName}");
         }
-        else
-        {
-            dataCollectionUri = new Uri($"{dataCollectionUri}{provenance.FacilityId.ToLower()}/");
-        }
+
         return dataCollectionUri;
     }
 
     private Uri CreateTransformationUri(Provenance provenance)
     {
-        var transformationUri = new Uri($"{RdfPrefixes.Prefix2Uri["transformation"]}{provenance.DataSource}_{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd")}");
-
-        return transformationUri;
+        IRdfTableBuilderService tableBuilder = _rdfTableBuilderFactory.GetRdfTableBuilder(provenance.DataSource);
+        return tableBuilder?.GetTransformationUri(provenance) 
+            ?? new Uri($"{RdfPrefixes.Prefix2Uri["transformation"]}{provenance.DataSource}_{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd")}");
     }
 }

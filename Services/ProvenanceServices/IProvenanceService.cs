@@ -7,4 +7,5 @@ public interface IProvenanceService
 {
     Task<Provenance> CreateProvenanceFromTieMessage(string datasource, TieData tieData);
     Task<Provenance> CreateProvenanceFromSpreadsheetInfo(SpreadsheetInfo info);
+    Task<Provenance> CreateProvenanceFromCommonLib(string library, RevisionRequirement requirement);
 }

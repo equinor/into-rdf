@@ -4,7 +4,8 @@ using Services.RdfServices;
 using System.Text;
 using Api.Authorization;
 using Services.RdfServices.XmlServives;
-using System.IO;
+using Services.CommonLibToRdfServices;
+using Common.GraphModels;
 
 namespace Api.Controllers
 {
@@ -18,11 +19,20 @@ namespace Api.Controllers
     {
         private readonly IRdfService _rdfService;
         private readonly IXmlRdfService _xmlRdfService;
+        private readonly ICommonLibToRdfService _commonLibToRdfService;
 
-        public IngestController(IRdfService doc2RdfService, IXmlRdfService xmlRdfService)
+        public IngestController(IRdfService doc2RdfService, IXmlRdfService xmlRdfService, ICommonLibToRdfService commonLibToRdfService)
         {
             _xmlRdfService = xmlRdfService;
             _rdfService = doc2RdfService;
+            _commonLibToRdfService = commonLibToRdfService;
+        }
+
+        [ProducesResponseType(typeof(ResultGraph), StatusCodes.Status200OK)]
+        [HttpPost("commonlib/{library}")]
+        public async Task<IActionResult> AddFromCommonlib(string server, string library, string scope)
+        {
+            return Ok(await _commonLibToRdfService.MoveCommonlibLibraryToRdf(server, library, scope));
         }
 
         /// <summary>
