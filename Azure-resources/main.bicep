@@ -30,7 +30,7 @@ param fusekiParameters array = [
     location: resourceGroup().location
   }
   {
-    name: 'meta'
+    name: 'main'
     clientId: env == 'prod' ? '6dbf2494-f87f-4d25-a9ee-891d262ece45' : '6dbf2494-f87f-4d25-a9ee-891d262ece45' // TODO add proper prod client id
     fusekiConfig: 'persisted_no_reasoner_config.ttl'
     location: resourceGroup().location

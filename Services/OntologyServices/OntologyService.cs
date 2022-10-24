@@ -18,9 +18,9 @@ public class OntologyService : IOntologyService
     public async Task<Graph> GetSourceOntologies(string source)
     {
         string query = GetConstructQuery(source);
-        var result = await _fusekiService.QueryAsApp(ServerKeys.SplinterConfig, query);
+        var result = await _fusekiService.QueryAsApp(ServerKeys.Main, query);
 
-        _logger.LogDebug(result != null ? $"Successfully retrieved {source} ontologies" : $"Failed to retrieve ontologies for {source}");
+        _logger.LogInformation(result != null ? $"Successfully retrieved {source} ontologies" : $"Failed to retrieve ontologies for {source}");
 
         Graph graph = new Graph();
         graph.LoadFromString(result, new TurtleParser());

@@ -59,13 +59,14 @@ namespace Services.RdfServices
             return resultGraph.Content;
         }
 
-        public async Task<Provenance?> HandleTieRequest(string datasource, List<BlobDownloadResult> blobData)
+        public async Task<Provenance?> HandleTieRequest(string server, string datasource, List<BlobDownloadResult> blobData)
         {
             var tieData = _tieMessageService.ParseXmlMessage(blobData);
             _logger.LogInformation("<RdfService> - HandleTieRequest: Successfully parsed TIE message for {TieFileData}", tieData.GetDataCollectionName());
 
             var ontology = await _ontologyService.GetSourceOntologies(datasource);
-            var provenance = await _provenanceService.CreateProvenanceFromTieMessage(datasource, tieData);
+            var previousRevisions = await _provenanceService.GetPreviousRevisions(server, tieData.GetDataCollectionName());
+            var provenance = _provenanceService.CreateProvenanceFromTieMessage(datasource, previousRevisions, tieData);
 
             if (!IsProvenanceValid(provenance, tieData.GetDataCollectionName()))
             {
@@ -86,15 +87,17 @@ namespace Services.RdfServices
             ResultGraph rdfGraphData = transformationService.Transform(provenance, ontology, xlsxBlob, spreadsheetInfo.GetSpreadSheetDetails());
             _logger.LogInformation("<RdfService> - HandleTieRequest: {TieFileName} Successfully transformed to rdf", tieData.GetDataCollectionName());
 
-            var response = await PostToFusekiAsApp(ServerKeys.Dugtrio, rdfGraphData, "text/turtle");
-            LogResponse(response, ServerKeys.Dugtrio);
+            var response = await PostToFusekiAsApp(server, rdfGraphData, "text/turtle");
+            LogResponse(response, server);
 
             return provenance;
         }
 
-        public async Task<string> HandleSpreadsheetRequest(SpreadsheetInfo info, BlobDownloadResult blobData)
+        public async Task<string> HandleSpreadsheetRequest(string server, SpreadsheetInfo info, BlobDownloadResult blobData)
         {
-            var provenance = await _provenanceService.CreateProvenanceFromSpreadsheetInfo(info);
+            var revisionRequirement = info.GetRevisionRequirements();
+            var previousRevisions = await _provenanceService.GetPreviousRevisions(server, revisionRequirement.DocumentName);
+            var provenance = _provenanceService.CreateProvenanceFromSpreadsheetInfo(previousRevisions, info);
 
             if (!IsProvenanceValid(provenance, info?.FileName ?? "Unknown"))
             {
@@ -109,8 +112,8 @@ namespace Services.RdfServices
 
             var resultGraph = transformationService.Transform(provenance, ontology, blobData, info.GetSpreadSheetDetails());
 
-            var response = await PostToFusekiAsApp(ServerKeys.Dugtrio, resultGraph, "text/turtle");
-            LogResponse(response, ServerKeys.Dugtrio);
+            var response = await PostToFusekiAsApp(server, resultGraph, "text/turtle");
+            LogResponse(response, server);
 
             return resultGraph.Content;
         }

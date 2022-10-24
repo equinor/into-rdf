@@ -9,7 +9,7 @@
 
     public static class ServerKeys
     {
-        public const string Dugtrio = "Dugtrio";
-        public const string SplinterConfig = "SplinterConfig";
+        public const string OlDugtrio = "oldugtrio";
+        public const string Main = "main";
     }
 }

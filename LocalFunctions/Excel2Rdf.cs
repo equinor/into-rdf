@@ -34,7 +34,12 @@ public class Excel2Rdf
     public async Task Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)]
                             HttpRequest req, ILogger log)
     {
+
         var spreadsheetInfo = await GetSpreadsheetInfo(req);
+        if (spreadsheetInfo.Server == null)
+        {
+            throw new InvalidOperationException("Missing Fuseki server");
+        }
 
         var blobServiceClient = new BlobServiceClient(Environment.GetEnvironmentVariable("TargetStorageAccount"));
         var blobInputClient = blobServiceClient.GetBlobContainerClient(InputContainer).GetBlobClient(spreadsheetInfo.FileName);
@@ -42,7 +47,7 @@ public class Excel2Rdf
         
         log.LogInformation("Starting transformation of {file}", blobInputClient.Name);
         
-        var turtle = await _rdfService.HandleSpreadsheetRequest(spreadsheetInfo, blobContent);
+        var turtle = await _rdfService.HandleSpreadsheetRequest(spreadsheetInfo.Server, spreadsheetInfo, blobContent);
 
         if (turtle == String.Empty) return;
 

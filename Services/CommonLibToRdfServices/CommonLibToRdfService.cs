@@ -31,12 +31,16 @@ public class CommonLibToRdfService : ICommonLibToRdfService
 
         var records = await _commonLibService.GetFromScopedLibrary(lowercaseLibrary, upperCaseScope);
 
+        var revisionTrain = $@"{upperCaseScope}/commonlib/{lowercaseLibrary}";
+        var previousRevisions = await _provenanceService.GetPreviousRevisions(server, revisionTrain);
+
         if (!records.Any()) return null;
 
-        var provenance = await _provenanceService
+        var provenance = _provenanceService
             .CreateProvenanceFromCommonLib(
                 lowercaseLibrary,
-                new RevisionRequirement(upperCaseScope, $@"{upperCaseScope}/commonlib/{lowercaseLibrary}", string.Empty, GetLatestCreatedDate(records))
+                previousRevisions,
+                new RevisionRequirement(upperCaseScope, revisionTrain, string.Empty, GetLatestCreatedDate(records))
             );
 
         if (provenance.RevisionStatus is not RevisionStatus.New or RevisionStatus.Update) return null;

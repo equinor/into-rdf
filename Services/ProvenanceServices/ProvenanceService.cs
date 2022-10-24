@@ -19,24 +19,25 @@ public class ProvenanceService : IProvenanceService
         _logger = logger;
     }
 
-    public async Task<Provenance> CreateProvenanceFromTieMessage(string datasource, TieData tieData)
+    public Provenance CreateProvenanceFromTieMessage(string datasource, List<RevisionInfo> previousRevisions, TieData tieData)
     {
         var revisionRequirement = tieData.GetRevisionRequirements();
 
         _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromTieMessage: Creating provenance document {doc} for facility {fid} with revision name {rn} dated {rd}",
                                 revisionRequirement.DocumentName, revisionRequirement.FacilityId , revisionRequirement.RevisionName, revisionRequirement.RevisionDate);
 
-        var provenance = await CreateProvenance(tieData.GetDataCollectionName(), datasource, revisionRequirement);
+        var provenance = CreateProvenance(tieData.GetDataCollectionName(), datasource, previousRevisions, revisionRequirement);
         provenance.DocumentProjectId = tieData.GetDocumentProjectId();
         provenance.Contractor = tieData.GetContractor();
         provenance.ContractNumber = tieData.GetContractNumber();
         provenance.ProjectCode = tieData.GetProjectNumber();
         provenance.DocumentTitle = tieData.GetDocumentTitle();
+        provenance.DataSourceType = DataSourceType.File();
 
         return provenance;
     }
 
-    public async Task<Provenance> CreateProvenanceFromSpreadsheetInfo(SpreadsheetInfo info)
+    public Provenance CreateProvenanceFromSpreadsheetInfo(List<RevisionInfo> previousRevisions, SpreadsheetInfo info)
     {
         if (info.FileName == null || info.DataSource == null)
         {
@@ -48,15 +49,16 @@ public class ProvenanceService : IProvenanceService
         _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromTieMessage: Creating provenance document {doc} for facility {fid} with revision name {rn} dated {rd}",
                                 revisionRequirement.DocumentName, revisionRequirement.FacilityId , revisionRequirement.RevisionName, revisionRequirement.RevisionDate);
 
-        var provenance = await CreateProvenance(info.FileName, info.DataSource.ToLower(), revisionRequirement);
+        var provenance = CreateProvenance(info.FileName, info.DataSource.ToLower(), previousRevisions, revisionRequirement);
         provenance.DocumentProjectId = info.DocumentProjectId;
+        provenance.DataSourceType = DataSourceType.File();
 
         return provenance;
     }
 
-    public async Task<Provenance> CreateProvenanceFromCommonLib(string library, RevisionRequirement requirement)
+    public Provenance CreateProvenanceFromCommonLib(string library, List<RevisionInfo> previousRevisions, RevisionRequirement requirement)
     {
-        var provenance = await CreateProvenance(string.Empty, DataSource.CommonLib, requirement);
+        var provenance = CreateProvenance(string.Empty, DataSource.CommonLib, previousRevisions, requirement);
 
         provenance.DataSourceTable = library;
         provenance.RevisionName = provenance.RevisionNumber.ToString();
@@ -65,14 +67,8 @@ public class ProvenanceService : IProvenanceService
         return provenance;
     }
 
-    private async Task<Provenance> CreateProvenance(string filename, string datasource, RevisionRequirement revisionRequirement)
+    private Provenance CreateProvenance(string filename, string datasource, List<RevisionInfo> previousRevisions, RevisionRequirement revisionRequirement)
     {
-        _logger.LogDebug("<ProvenanceService> - CreateProvenance: Prepare to retrieve previous revisions for facilityId {facilityId}", revisionRequirement.FacilityId);
-
-        var previousRevisions = await GetPreviousRevision(revisionRequirement.DocumentName, datasource);
-
-        _logger.LogDebug("<ProvenanceService> - CreateProvenance: Retrieved {count} previous versions", previousRevisions.Count);
-
         var existingRevision = previousRevisions.Count > 0 ? previousRevisions.FirstOrDefault(r => r.RevisionName?.ToLower() == revisionRequirement.RevisionName.ToLower()) : null;
         var latestRevision = previousRevisions.Count > 0 ? previousRevisions.MaxBy(revision => revision.RevisionNumber) : null;
 
@@ -89,20 +85,18 @@ public class ProvenanceService : IProvenanceService
         provenance.PreviousRevision = latestRevision?.FullName ?? null;
         provenance.RevisionDate = revisionRequirement.RevisionDate;
         provenance.RevisionStatus = revisionStatus;
-        provenance.DataSourceType = DataSourceType.File();
         return provenance;
     }
 
-    private async Task<List<RevisionInfo>> GetPreviousRevision(string documentName, string datasource)
+    public async Task<List<RevisionInfo>> GetPreviousRevisions(string server, string documentName)
     {
-        var rdfServerName = ServerKeys.Dugtrio;
+        _logger.LogDebug("<ProvenanceService> - GetPreviousRevisions: Get revisions for document {id} on server {server}", documentName, server);
+        string query = GetRevisionInfoFromNamedGraphQuery(documentName);
 
-        _logger.LogDebug("<ProvenanceService> - GetPreviousRevision: Retrieving data from {server}", rdfServerName);
-        _logger.LogDebug("<ProvenanceService> - GetPreviousRevision: Current document project id {id}", documentName);
-
-        string query = datasource == DataSource.Mel ? GetRevisionInfoQuery(documentName) : GetRevisionInfoFromNamedGraphQuery(documentName);
-
-        return await _fusekiService.QueryFusekiResponseAsApp<RevisionInfo>(rdfServerName, query);
+        var previousRevisions = await _fusekiService.QueryFusekiResponseAsApp<RevisionInfo>(server, query);
+        _logger.LogDebug("<ProvenanceService> - CreateProvenance: Retrieved {count} previous versions", previousRevisions.Count);
+        
+        return previousRevisions;
     }
 
     private void GetRevisionStatus(RevisionInfo? existingRevision, RevisionInfo? latestRevision, DateTime revisionDate, out RevisionStatus revisionStatus, out int revisionNumber)
@@ -131,27 +125,6 @@ public class ProvenanceService : IProvenanceService
         {
             throw new InvalidOperationException("Unable to establish provenance information");
         }
-    }
-
-    private string GetRevisionInfoQuery(string documentName)
-    {
-        return @$"
-            prefix sor: <https://rdf.equinor.com/ontology/sor#>
-            prefix identification: <https://rdf.equinor.com/ontology/facility-identification/v1#>
-            prefix identifier: <https://rdf.equinor.com/data/facility-identification/>
-            prefix prov: <http://www.w3.org/ns/prov#>
-
-                    SELECT ?{nameof(RevisionInfo.FullName)} ?{nameof(RevisionInfo.RevisionDate)} ?{nameof(RevisionInfo.RevisionNumber)} ?{nameof(RevisionInfo.RevisionName)}
-                    WHERE 
-                    {{
-                        ?{nameof(RevisionInfo.FullName)} sor:hasDocumentName ?DocumentName ;        
-                            prov:generatedAtTime ?{nameof(RevisionInfo.RevisionDate)} .
-
-                        OPTIONAL {{?{nameof(RevisionInfo.FullName)} sor:hasRevisionNumber ?{nameof(RevisionInfo.RevisionNumber)} .}}
-                        OPTIONAL {{?{nameof(RevisionInfo.FullName)} sor:hasRevisionName ?{nameof(RevisionInfo.RevisionName)} .}}
-
-                        FILTER (STR(?DocumentName) = '{documentName}') 
-                    }}";
     }
 
     private string GetRevisionInfoFromNamedGraphQuery(string documentName)

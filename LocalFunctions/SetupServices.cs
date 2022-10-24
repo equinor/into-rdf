@@ -19,14 +19,13 @@ public static class SetupServices
 
     public static MicrosoftIdentityAppCallsWebApiAuthenticationBuilder AddFusekiApis(this MicrosoftIdentityAppCallsWebApiAuthenticationBuilder builder, IConfiguration configuration)
     {
-        var servers = configuration.GetSection(ApiKeys.Servers).Get<Dictionary<string, RdfServer>>();
-        foreach (var serverKey in servers.Keys)
+        var fusekis = configuration.GetSection(ApiKeys.Servers).Get<List<RdfServer>>();
+        foreach (var fuseki in fusekis)
         {
-            var server = servers[serverKey];
-            builder.AddDownstreamWebApi(serverKey.ToLower(), options =>
+            builder.AddDownstreamWebApi(fuseki.Name.ToLower(), options =>
             {
-                options.BaseUrl = server.BaseUrl;
-                options.Scopes = server.Scopes;
+                options.BaseUrl = fuseki.BaseUrl;
+                options.Scopes = fuseki.Scopes;
             });
         }
         return builder;

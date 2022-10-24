@@ -233,7 +233,7 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
 
         if (datatypesOfPredicate.Count() != 1)
         {
-            _logger.LogWarning($"Wrong number ({datatypesOfPredicate.Count()}) of datatypes for predicate {predicate}");
+            _logger.LogDebug($"Wrong number ({datatypesOfPredicate.Count()}) of datatypes for predicate {predicate}");
             AssertValueWithoutDatatype(subjectIndividual, predicate, cellValue);
             return;
         }
@@ -259,7 +259,7 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
 
         if (uomsOfPredicate.Count() != 1)
         {
-            _logger.LogWarning($"Wrong number of units of measure for predicate {predicate}");
+            _logger.LogDebug($"Wrong number of units of measure for predicate {predicate}");
             return;
         }
 

@@ -11,7 +11,7 @@ namespace Services.RdfServices
         Task<string> ConvertDocToRdf(IFormFile formFile);
         Task<HttpResponseMessage> PostToFusekiAsUser(string server, string data, string contentType = "text/turtle");
         Task<HttpResponseMessage> QueryFusekiAsUser(string server, string query);
-        Task<string> HandleSpreadsheetRequest(SpreadsheetInfo info, BlobDownloadResult blobData);
-        Task<Provenance?> HandleTieRequest(string datasource, List<BlobDownloadResult> blobData);
+        Task<string> HandleSpreadsheetRequest(string server, SpreadsheetInfo info, BlobDownloadResult blobData);
+        Task<Provenance?> HandleTieRequest(string server, string datasource, List<BlobDownloadResult> blobData);
     }
 }

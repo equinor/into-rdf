@@ -2,6 +2,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Common.AppsettingsModels;
 using Common.ProvenanceModels;
+using Common.Utils;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -35,12 +36,13 @@ public class TieConsumer
     [StorageAccount("TieMelAdapterStorage")]
     public async Task Run([BlobTrigger("prodmeladapterfiles/{name}")] Stream? myBlob, string name, ILogger log)
     {
+        var server = ServerKeys.OlDugtrio;
         log.LogInformation("C# Blob trigger function Processed blob\n Name:{Name} \n Size: {Size}", name, myBlob?.Length);
 
         var blobs = await GetBlobsInSameDirectory(name);
         if (blobs.Count <= 1) return;
 
-        var provenance = await _rdfService.HandleTieRequest(DataSource.Mel, await GetData(blobs));
+        var provenance = await _rdfService.HandleTieRequest(server, DataSource.Mel, await GetData(blobs));
 
         if (provenance is null) return;
         if (string.IsNullOrEmpty(provenance.FacilityId) || string.IsNullOrEmpty(provenance.DocumentProjectId)) return;
