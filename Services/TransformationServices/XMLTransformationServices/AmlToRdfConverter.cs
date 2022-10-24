@@ -106,7 +106,8 @@ public class AmlToRdfConverter
         var xmlNameAttribute = xmlelement.GetAttribute("Name");
         if (xmlelement.Attributes is not null && xmlelement.HasChildNodes && xmlNameAttribute is not null)
         {
-            InstanceHierarchy = new RDFResource(amlBase + xmlelement.Name + xmlNameAttribute);
+            var urlEncodedName = System.Web.HttpUtility.UrlEncode(xmlNameAttribute, System.Text.Encoding.UTF8);
+            InstanceHierarchy = new RDFResource(amlBase + xmlelement.Name + "/" + urlEncodedName);
             amlGraph.AddTriple(new RDFTriple(InstanceHierarchy, a, new RDFResource(amlBase + xmlelement.Name)));
             var versionElem = xmlelement.GetElementsByTagName("Version").Item(0);
             if (versionElem is not null)
@@ -169,34 +170,35 @@ public class AmlToRdfConverter
     private static void decomposeExternalInterface(RDFResource parent, XmlElement element, RDFGraph amlGraph)
     {
         var externalInterfaceRdf = new RDFResource(amlBase + element.GetAttribute("ID"));
-        amlGraph.AddTriple(new RDFTriple(parent, amlXmlNesting, externalInterfaceRdf));
         var RefBaseSystemUnitPathRdf = new RDFResource(amlBase + element.GetAttribute("RefBaseClassPath"));
 
         amlGraph.AddTriple(new RDFTriple(externalInterfaceRdf, a, RefBaseSystemUnitPathRdf));
         amlGraph.AddTriple(new RDFTriple(externalInterfaceRdf, a, amlExternalInterface));
-        amlGraph.AddTriple(new RDFTriple(parent, amlXmlNesting, externalInterfaceRdf));
+        amlGraph.AddTriple(new RDFTriple(parent, amlHasExternalInterface, externalInterfaceRdf));
 
         amlGraph.AddTriple(new RDFTriple(externalInterfaceRdf, rdfslabel, RDFStringLiteral(element.GetAttribute("Name"))));
         //Fetchin Item(0) is reliable due to cardinality defined in XSD
-        AddLiteralFromInnerText(externalInterfaceRdf, amlDescription, element.GetElementsByTagName("Description").Item(0), amlGraph);
+        AddLiteralFromInnerText(externalInterfaceRdf, amlDescription , element.GetElementsByTagName("Description").Item(0), amlGraph);
         if (externalInterfaceRdf is not null)
         {
-            foreach (XmlElement nestedElement in element.ChildNodes)
+            foreach (XmlNode nestedElement in element.ChildNodes)
             {
                 if (nestedElement.Name == "Attribute")
                 {
-                    decomposeAttribute(externalInterfaceRdf, nestedElement, amlGraph);
+                    decomposeAttribute(externalInterfaceRdf, (XmlElement) nestedElement, amlGraph);
                 }
             }
         }
     }
 
+
     private static void decomposeInternalLink(XmlElement internalLink, RDFGraph amlGraph)
     {
         RDFResource RefPartnerSideA = new RDFResource(amlBase + internalLink.GetAttribute("RefPartnerSideA"));
         RDFResource RefPartnerSideB = new RDFResource(amlBase + internalLink.GetAttribute("RefPartnerSideB"));
-        RDFResource Name = new RDFResource(amlBase + internalLink.GetAttribute("Name"));
+        RDFResource Name = new RDFResource(amlBase + internalLink.GetAttribute("Name").Replace(" ", ""));
         amlGraph.AddTriple(new RDFTriple(RefPartnerSideA, Name, RefPartnerSideB));
+        amlGraph.AddTriple(new RDFTriple(Name, a, new RDFResource(amlBase+"internalLink")));
 
     }
 
@@ -317,6 +319,7 @@ public class AmlToRdfConverter
 
     private static RDFTypedLiteral RDFStringLiteral(string value)
     {
+        value = System.Text.RegularExpressions.Regex.Replace(value, @"\r\n?|\n", " ");
         return new RDFTypedLiteral(value, RDFModelEnums.RDFDatatypes.XSD_STRING);
     }
 }
