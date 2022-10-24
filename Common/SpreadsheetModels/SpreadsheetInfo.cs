@@ -19,6 +19,7 @@ public class SpreadsheetInfo
     public int StartColumn { get; set; }
     public int EndColumn { get; set; }
     public string? FileName { get; set; }
+    public string? Server { get; set; }
 
     public SpreadsheetDetails GetSpreadSheetDetails()
     {
