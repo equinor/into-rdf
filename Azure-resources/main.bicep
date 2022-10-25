@@ -297,7 +297,7 @@ resource KeyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
 }
 
 module fuskis './fuseki.bicep' = [for parameter in fusekiParameters: {
-  name: parameter.name
+  name: '${environmentTag}-${parameter.name}-fuseki'
   params: {
     buildId: buildId
     env: env
