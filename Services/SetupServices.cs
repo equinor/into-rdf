@@ -17,6 +17,8 @@ using Services.TransformationServices.XMLTransformationServices;
 using Services.TransformationServices.XMLTransformationServices.Converters;
 using Services.CommonlibServices;
 using Services.CommonLibToRdfServices;
+using Services.RevisionTrainServices;
+using Services.ValidationServices.RevisionTrainValidationServices;
 
 namespace Services.DependencyInjection;
 public static class SetupServices
@@ -24,6 +26,7 @@ public static class SetupServices
     public static IServiceCollection AddSplinterServices(this IServiceCollection services)
     {
         services.AddScoped<IDatabaseTransformationService, ShipweightTransformationService>();
+        services.AddScoped<IFusekiAskService, FusekiAskService>();
         services.AddScoped<IFusekiService, FusekiService>();
         services.AddScoped<IExcelDomReaderService, ExcelDomReaderService>();
         services.AddScoped<IProvenanceService, ProvenanceService>();
@@ -46,7 +49,8 @@ public static class SetupServices
         services.AddScoped<ICommonLibService, CommonlibService>();
         services.AddScoped<ICommonLibTransformationService, CommonLibTransformationService>();
         services.AddScoped<ICommonLibToRdfService, CommonLibToRdfService>();
-        
+        services.AddScoped<IRevisionTrainService, RevisionTrainService>();
+        services.AddScoped<IRevisionTrainValidator, RevisionTrainValidator>();
         
         return services;
     }
