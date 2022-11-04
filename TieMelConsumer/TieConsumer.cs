@@ -45,7 +45,7 @@ public class TieConsumer
         await _spineNotificationService
            .PostToTopic(
                "new-mel-processed",
-               new NewMelProcessedPayload(provenance.FacilityId, provenance.DocumentProjectId)
+               new NewMelProcessedPayload(provenance.FacilityId, provenance.DocumentProjectId, provenance.ContractNumber)
            );
     }
 
@@ -74,4 +74,4 @@ public class TieConsumer
     private BlobContainerClient GetClient(string container) => _blobServiceClient.GetBlobContainerClient(container.ToLower());
 }
 
-public record NewMelProcessedPayload(string Facility, string DocumentProjectId);
+public record NewMelProcessedPayload(string Facility, string DocumentProjectId, string ContractNumber);
