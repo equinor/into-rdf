@@ -43,6 +43,16 @@ public class FusekiService : IFusekiService
         return await SerializeResponse(response);
     }
 
+    public async Task<HttpResponseMessage> UpdateAsApp(string server, string sparql)
+    {
+        VerifyServer(server);
+
+        var response = await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options 
+            => GetDownStreamWebApiOptionsForUpdate(options, sparql, new List<string> { "application/xml"}));
+
+        return response;
+    }
+
     public async Task<HttpResponseMessage> QueryAsUser(string server, string sparql)
     {
         VerifyServer(server);
@@ -67,7 +77,8 @@ public class FusekiService : IFusekiService
 
     private void VerifyServer(string server)
     {
-        if (! _fusekis.Contains(server)) {
+        if (!_fusekis.Contains(server))
+        {
             throw new Exception($"Downstream fuskeki named {server} not found among [{string.Join(", ", _fusekis)}]");
         }
     }
@@ -103,6 +114,22 @@ public class FusekiService : IFusekiService
         return await _downstreamWebApi.CallWebApiForUserAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForQuery(options, sparql, accepts));
     }
 
+    private DownstreamWebApiOptions GetDownStreamWebApiOptionsForUpdate(DownstreamWebApiOptions options, string sparql, List<string> accepts)
+    {
+        options.HttpMethod = HttpMethod.Post;
+        options.RelativePath = "ds/update";
+        options.CustomizeHttpRequestMessage = message =>
+        {
+            message.Headers.Add("Accept", accepts);
+            message.Content = new FormUrlEncodedContent(new KeyValuePair<string, string>[]
+            {
+                new("update", sparql)
+            });
+        };
+
+        return options;
+    }
+
     private DownstreamWebApiOptions GetDownStreamWebApiOptionsForQuery(DownstreamWebApiOptions options, string sparql, List<string> accepts)
     {
         options.HttpMethod = HttpMethod.Post;
@@ -133,7 +160,7 @@ public class FusekiService : IFusekiService
         return options;
     }
 
-        private DownstreamWebApiOptions GetDownStreamWebApiOptionsForData(DownstreamWebApiOptions options, ResultGraph resultGraph, string contentType)
+    private DownstreamWebApiOptions GetDownStreamWebApiOptionsForData(DownstreamWebApiOptions options, ResultGraph resultGraph, string contentType)
     {
         options.HttpMethod = HttpMethod.Post;
         options.RelativePath = resultGraph.Name == GraphConstants.Default ? "ds/data" : $"ds/data?graph={resultGraph.Name}";

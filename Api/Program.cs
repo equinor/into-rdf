@@ -49,6 +49,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.AddEndpoints();
 app.MapControllers();
 
 app.Run();
