@@ -35,7 +35,7 @@ param fusekiParameters array = [
   }
   {
     name: 'main'
-    clientId: env == 'prod' ? '6dbf2494-f87f-4d25-a9ee-891d262ece45' : '6dbf2494-f87f-4d25-a9ee-891d262ece45' // TODO add proper prod client id
+    clientId: env == 'prod' ? '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' : '2ff9de24-0dba-46e0-9dc1-096cc69ef0c6' // TODO add proper prod client id
     fusekiConfig: 'persisted_no_reasoner_config.ttl'
     location: resourceGroup().location
     sku: 'P1V2'
