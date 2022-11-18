@@ -1,4 +1,4 @@
-name: 🎡 CI
+name: 🎡 Dev
 on:
   push:
     tags-ignore:
