@@ -9,13 +9,13 @@ namespace Services.ProvenanceServices;
 
 public class ProvenanceService : IProvenanceService
 {
-    private readonly IFusekiService _fusekiService;
+    private readonly IFusekiQueryService _fusekiQueryService;
     private readonly ILogger<ProvenanceService> _logger;
 
-    public ProvenanceService(IFusekiService fusekiService,
+    public ProvenanceService(IFusekiQueryService fusekiQueryService,
                              ILogger<ProvenanceService> logger)
     {
-        _fusekiService = fusekiService;
+        _fusekiQueryService = fusekiQueryService;
         _logger = logger;
     }
 
@@ -93,7 +93,7 @@ public class ProvenanceService : IProvenanceService
         _logger.LogDebug("<ProvenanceService> - GetPreviousRevisions: Get revisions for document {id} on server {server}", documentName, server);
         string query = GetRevisionInfoFromNamedGraphQuery(documentName);
 
-        var previousRevisions = await _fusekiService.QueryFusekiResponseAsApp<RevisionInfo>(server, query);
+        var previousRevisions = await _fusekiQueryService.Select<RevisionInfo>(server, query);
         _logger.LogDebug("<ProvenanceService> - CreateProvenance: Retrieved {count} previous versions", previousRevisions.Count);
         
         return previousRevisions;

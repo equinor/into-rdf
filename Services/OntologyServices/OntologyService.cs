@@ -18,12 +18,13 @@ public class OntologyService : IOntologyService
     public async Task<Graph> GetSourceOntologies(string source)
     {
         string query = GetConstructQuery(source);
-        var result = await _fusekiService.QueryAsApp(ServerKeys.Main, query);
+        var result = await _fusekiService.Query(ServerKeys.Main, query);
 
         _logger.LogInformation(result != null ? $"Successfully retrieved {source} ontologies" : $"Failed to retrieve ontologies for {source}");
 
+        var resultSerialization = result != null ? await FusekiUtils.SerializeResponse(result) : string.Empty;
         Graph graph = new Graph();
-        graph.LoadFromString(result, new TurtleParser());
+        graph.LoadFromString(resultSerialization, new TurtleParser());
         return graph;
     }
 

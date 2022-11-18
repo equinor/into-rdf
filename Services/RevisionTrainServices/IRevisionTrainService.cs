@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Http;
-using Common.RevisionTrainModels;
 
 namespace Services.RevisionTrainServices;
 
 public interface IRevisionTrainService
 {
-    Task<IResult> CreateRevisionTrain(HttpRequest turtle);
-    Task<IResult> GetRevisionTrain(string name);
-    Task<IResult> GetAllRevisionTrains();
-    Task<IResult> DeleteRevisionTrain(string name);
+    Task<HttpResponseMessage> CreateRevisionTrain(HttpRequest turtle);
+    Task<HttpResponseMessage> GetRevisionTrain(string name);
+    Task<HttpResponseMessage> GetAllRevisionTrains();
+    Task<HttpResponseMessage> DeleteRevisionTrain(string name);
 }

@@ -47,7 +47,7 @@ public class CommonLibToRdfService : ICommonLibToRdfService
 
         var ontology = await _ontologyService.GetSourceOntologies(lowercaseLibrary);
         var resultGraph = _commonLibTransformationService.Transform(provenance, ontology, records);
-        await _fusekiService.PostAsApp(server, resultGraph, "text/turtle");
+        await _fusekiService.AddData(server, resultGraph, "text/turtle");
         return resultGraph;
     }
 

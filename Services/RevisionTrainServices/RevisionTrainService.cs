@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Services.FusekiServices;
 using Services.ValidationServices.RevisionTrainValidationServices;
+using Common.Exceptions;
 using Common.GraphModels;
 using Common.Constants;
-using Common.RevisionTrainModels;
 using Common.Utils;
 using VDS.RDF;
 
@@ -13,25 +13,25 @@ namespace Services.RevisionTrainServices;
 public class RevisionTrainService : IRevisionTrainService
 {
     private readonly IFusekiService _fusekiService;
-    private readonly IFusekiAskService _fusekiAskService;
+    private readonly IFusekiQueryService _fusekiQueryService;
     private readonly IRevisionTrainValidator _revisionTrainValidator;
     private readonly ILogger<RevisionTrainService> _logger;
     private readonly string _server;
 
     public RevisionTrainService(
-        IFusekiAskService fusekiAskService,
+        IFusekiQueryService fusekiQueryService,
         IFusekiService fusekiService,
         IRevisionTrainValidator revisionTrainValidator,
         ILogger<RevisionTrainService> logger)
     {
-        _fusekiAskService = fusekiAskService;
+        _fusekiQueryService = fusekiQueryService;
         _fusekiService = fusekiService;
         _revisionTrainValidator = revisionTrainValidator;
         _logger = logger;
         _server = ServerKeys.Main;
     }
 
-    public async Task<IResult> CreateRevisionTrain(HttpRequest request)
+    public async Task<HttpResponseMessage> CreateRevisionTrain(HttpRequest request)
     {
         string revisionTrain;
         using (var stream = new StreamReader(request.Body))
@@ -42,7 +42,7 @@ public class RevisionTrainService : IRevisionTrainService
         if (revisionTrain == string.Empty)
         {
             _logger.LogWarning("Failed to create revision train because the train is empty");
-            return Results.BadRequest("Failed to create revision train because the train is empty");
+            throw new InvalidOperationException("Failed to create revision train because the train is empty");
         }
 
         var validationReport = _revisionTrainValidator.ValidateRevisionTrain(revisionTrain);
@@ -50,57 +50,59 @@ public class RevisionTrainService : IRevisionTrainService
         {
             var report = String.Join(" ", validationReport.Results.Select(result => result.Message));
             _logger.LogWarning($"Failed to create revision train because the train definition is invalid: {report}");
-            return Results.BadRequest($"Failed to create revision train because the train definition is invalid: {report}");
+            throw new ShapeValidationException($"Failed to create revision train because the train definition is invalid: {report}");
         }
 
         var trainExist = await RevisionTrainExist(revisionTrain);
         if (trainExist)
         {
-            return Results.Conflict($"Failed to upload revision train as a similarly named train already exists");
+            _logger.LogWarning($"Failed to upload revision train as a similarly named train already exists");
+            throw new ConflictOnInsertException($"Failed to upload revision train as a similarly named train already exists");
         }
 
-        var response = await _fusekiService.PostAsApp(_server, new ResultGraph(GraphConstants.Default, revisionTrain));
+        var response = await _fusekiService.AddData(_server, new ResultGraph(GraphConstants.Default, revisionTrain), "text/turtle");
         _logger.LogInformation("Successfully uploaded revision train");
 
-        return response.IsSuccessStatusCode ? Results.Text(revisionTrain) : Results.Problem(response.Content.ToString());
+        return response;
     }
 
-    public async Task<IResult> GetRevisionTrain(string name)
+    public async Task<HttpResponseMessage> GetRevisionTrain(string name)
     {
-        var revisionTrainQuery = GetRevisionTrainQuery(name);
-        var response = await _fusekiService.QueryFusekiResponseAsApp<RevisionTrainModel>(_server, revisionTrainQuery);
+        var trainExist = await _fusekiQueryService.Ask(_server, GetAskQuery(TripleContent.Object, name));
 
-        if (response.Count == 0)
+        if (!trainExist)
         {
-            return Results.BadRequest($"No revision train with name {name} exists");
+            _logger.LogWarning($"Failed to get train with name {name} because it doesn't exist");
+            throw new InvalidOperationException($"Failed to get train with name {name} because it doesn't exist");
         }
 
-        return response.Count == 1 ?
-            Results.Ok(response.Single()) :
-            Results.BadRequest($"{response.Count} revision trains returned, expected 1.");
+        var revisionTrainQuery = GetRevisionTrainQuery(name);
+        var response = await _fusekiService.Query(_server, revisionTrainQuery);
+
+        return response;
     }
 
-    public async Task<IResult> GetAllRevisionTrains()
+    public async Task<HttpResponseMessage> GetAllRevisionTrains()
     {
         var revisionTrainQuery = GetAllRevisionTrainQuery();
-        var response = await _fusekiService.QueryFusekiResponseAsApp<RevisionTrainModel>(_server, revisionTrainQuery);
+        var response = await _fusekiService.Query(_server, revisionTrainQuery);
 
-        return Results.Ok(response);
+        return response;
     }
 
-    public async Task<IResult> DeleteRevisionTrain(string name)
+    public async Task<HttpResponseMessage> DeleteRevisionTrain(string name)
     {
-        var trainExist = await _fusekiAskService.Ask(_server, GetAskQuery(TripleContent.Object, name));
+        var trainExist = await _fusekiQueryService.Ask(_server, GetAskQuery(TripleContent.Object, name));
 
         if (!trainExist)
         {
             _logger.LogWarning($"Failed to delete train because a train with name {name} doesn't exist");
-            return Results.BadRequest($"Failed to delete train because a train with name {name} doesn't exist");
+            throw new InvalidOperationException($"Failed to delete train because a train with name {name} doesn't exist");
         }
 
-        var response = await _fusekiService.UpdateAsApp(_server, GetDeleteRevisionTrain(name));
+        var response = await _fusekiService.Update(_server, GetDeleteRevisionTrain(name));
 
-        return response.IsSuccessStatusCode ? Results.Ok($"Successfully deleted revision train with name {name}") : Results.BadRequest($"Failed to delete revision train with name {name}");
+        return response;
     }
 
     private async Task<bool> RevisionTrainExist(string revisionTrain)
@@ -110,8 +112,8 @@ public class RevisionTrainService : IRevisionTrainService
         var trainIri = trainGraph.GetTriplesWithObject(trainGraph.CreateUriNode(new Uri("https://rdf.equinor.com/splinter#RevisionTrain"))).Single();
         var trainName = trainGraph.GetTriplesWithPredicate(trainGraph.CreateUriNode(new Uri("https://rdf.equinor.com/splinter#name"))).Single();
 
-        var trainExist = await _fusekiAskService.Ask(_server, GetAskQuery(TripleContent.Subject, trainIri.Subject.ToString()));
-        var trainNameExist = await _fusekiAskService.Ask(_server, GetAskQuery(TripleContent.Object, trainName.Object.ToString()));
+        var trainExist = await _fusekiQueryService.Ask(_server, GetAskQuery(TripleContent.Subject, trainIri.Subject.ToString()));
+        var trainNameExist = await _fusekiQueryService.Ask(_server, GetAskQuery(TripleContent.Object, trainName.Object.ToString()));
 
         if (trainExist || trainNameExist)
         {
@@ -129,26 +131,19 @@ public class RevisionTrainService : IRevisionTrainService
     {
         var query =
         @$"
-        prefix commonlib: <https://rdf.equinor.com/commonlib/tie#>
         prefix splinter: <https://rdf.equinor.com/splinter#>
-        prefix spreadsheet: <https://rdf.equinor.com/splinter/spreadsheet#>
 
-        SELECT ?DocumentName ?FacilityName ?ProjectCode ?ContractNumber ?TripleStore
+        CONSTRUCT 
+        {{
+            ?train ?trainProp ?trainValue .
+            ?trainValue ?contextProp ?contextValue . 
+        }}
         WHERE
         {{
-            ?Train 
-                a splinter:RevisionTrain ;
-                splinter:name ?DocumentName ;
-                splinter:triplestore ?TripleStore ;
-                splinter:hasTieContext ?TieContext .
-            
-            ?TieContext
-                a splinter:TieContext ;
-                commonlib:facilityName ?FacilityName ;
-                commonlib:projectCode ?ProjectCode ;
-                commonlib:contractNumber ?ContractNumber .
-
-            FILTER(?DocumentName = '{name}')
+            ?train a splinter:RevisionTrain ;
+                splinter:name '{name}' ;
+                ?trainProp ?trainValue .
+            OPTIONAL {{?trainValue ?contextProp ?contextValue .}} 
         }}
         ";
 
@@ -159,24 +154,18 @@ public class RevisionTrainService : IRevisionTrainService
     {
         var query =
         @$"
-        prefix commonlib: <https://rdf.equinor.com/commonlib/tie#>
         prefix splinter: <https://rdf.equinor.com/splinter#>
-        prefix spreadsheet: <https://rdf.equinor.com/splinter/spreadsheet#>
 
-        SELECT DISTINCT ?DocumentName ?FacilityName ?ProjectCode ?ContractNumber ?TripleStore
+        CONSTRUCT 
+        {{
+            ?train ?trainProp ?trainValue .
+            ?trainValue ?contextProp ?contextValue . 
+        }}
         WHERE
         {{
-            ?Train 
-                a splinter:RevisionTrain ;
-                splinter:name ?DocumentName ;
-                splinter:triplestore ?TripleStore ;
-                splinter:hasTieContext ?TieContext .
-            
-            ?TieContext
-                a splinter:TieContext ;
-                commonlib:facilityName ?FacilityName ;
-                commonlib:projectCode ?ProjectCode ;
-                commonlib:contractNumber ?ContractNumber .
+            ?train a splinter:RevisionTrain ;
+                ?trainProp ?trainValue .
+            OPTIONAL {{?trainValue ?contextProp ?contextValue .}} 
         }}
         ";
 

@@ -1,6 +1,5 @@
 using Api;
 using Api.Utils.Cors;
-using Api.Utils.Mvc;
 using Api.Utils.Setups;
 using Api.Utils.Swagger;
 using Common.Utils;
@@ -29,7 +28,7 @@ builder.Services.AddApplicationInsightsTelemetry();
 builder.SetupCustomSwagger();
 
 builder.Services.AddControllers();
-builder.Services.AddMvc(options => options.Filters.Add<SplinterExceptionActionFilter>());
+builder.Services.AddMvc();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddServices();
@@ -50,6 +49,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.AddEndpoints();
+app.AddExceptionHandling();
 app.MapControllers();
 
 app.Run();

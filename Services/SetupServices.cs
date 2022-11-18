@@ -26,7 +26,7 @@ public static class SetupServices
     public static IServiceCollection AddSplinterServices(this IServiceCollection services)
     {
         services.AddScoped<IDatabaseTransformationService, ShipweightTransformationService>();
-        services.AddScoped<IFusekiAskService, FusekiAskService>();
+        services.AddScoped<IFusekiQueryService, FusekiQueryService>();
         services.AddScoped<IFusekiService, FusekiService>();
         services.AddScoped<IExcelDomReaderService, ExcelDomReaderService>();
         services.AddScoped<IProvenanceService, ProvenanceService>();

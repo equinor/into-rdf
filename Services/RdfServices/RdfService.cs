@@ -1,5 +1,6 @@
 ﻿
 using Azure.Storage.Blobs.Models;
+using Common.Constants;
 using Common.GraphModels;
 using Common.ProvenanceModels;
 using Common.SpreadsheetModels;
@@ -120,17 +121,17 @@ namespace Services.RdfServices
 
         public async Task<HttpResponseMessage> PostToFusekiAsUser(string server, string data, string contentType)
         {
-            return await _fusekiService.PostAsUser(server, data, contentType);
+            return await _fusekiService.AddData(server, new ResultGraph(GraphConstants.Default, data), contentType);
         }
 
         public async Task<HttpResponseMessage> QueryFusekiAsUser(string server, string query)
         {
-            return await _fusekiService.QueryAsUser(server, query);
+            return await _fusekiService.Query(server, query);
         }
 
         private async Task<HttpResponseMessage> PostToFusekiAsApp(string server, ResultGraph resultGraph, string contentType)
         {
-            return await _fusekiService.PostAsApp(server, resultGraph, contentType);
+            return await _fusekiService.AddData(server, resultGraph, contentType);
         }
 
         private ISpreadsheetTransformationService GetTransformationService(string datasource)

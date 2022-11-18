@@ -34,7 +34,7 @@ public static class FusekiResponseToPropsMapper
         return obj;
     }
 
-    public static List<T> MapResponse<T>(FusekiResponse? fusekiResponse) where T : new()
+    public static List<T> MapResponse<T>(FusekiSelectResponse? fusekiResponse) where T : new()
     {
         return fusekiResponse switch
         {

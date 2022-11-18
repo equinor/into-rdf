@@ -1,14 +1,10 @@
 ﻿using System.Net.Http.Headers;
 using Common.AppsettingsModels;
 using Common.Constants;
-using Common.Exceptions;
-using Common.FusekiModels;
 using Common.GraphModels;
 using Common.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Web;
-using Newtonsoft.Json;
-using Services.FusekiMappers;
 
 namespace Services.FusekiServices;
 
@@ -23,95 +19,41 @@ public class FusekiService : IFusekiService
         _fusekis = config.GetSection(ApiKeys.Servers).Get<List<RdfServer>>().Select(f => f.Name).ToList();
     }
 
-    public async Task<HttpResponseMessage> PostAsApp(string server, ResultGraph resultGraph, string contentType = "text/turtle")
+    public async Task<HttpResponseMessage> Query(string server, string sparql)
     {
         VerifyServer(server);
-        return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForData(options, resultGraph, contentType));
+        var response = await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options 
+            => GetDownStreamWebApiOptionsForQuery(options, sparql, new List<string> { "text/turtle", "application/sparql-results+json" }));
+
+        await FusekiUtils.ValidateResponse(response);
+
+        return response;
     }
 
-    public async Task<HttpResponseMessage> PostAsUser(string server, string turtle, string contentType = "text/turtle")
+    public async Task<HttpResponseMessage> Update(string server, string sparql)
     {
         VerifyServer(server);
-        return await _downstreamWebApi.CallWebApiForUserAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForData(options, turtle, contentType));
-    }
-
-    public async Task<string> QueryAsApp(string server, string sparql)
-    {
-        VerifyServer(server);
-        var response = await ExecuteSparqlAsApp(server, sparql, new List<string> { "text/turtle", "application/sparql-results+json" });
-
-        return await SerializeResponse(response);
-    }
-
-    public async Task<HttpResponseMessage> UpdateAsApp(string server, string sparql)
-    {
-        VerifyServer(server);
-
         var response = await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options 
             => GetDownStreamWebApiOptionsForUpdate(options, sparql, new List<string> { "application/xml"}));
 
         return response;
     }
 
-    public async Task<HttpResponseMessage> QueryAsUser(string server, string sparql)
+    public async Task<HttpResponseMessage> AddData(string server, ResultGraph resultGraph, string contentType)
     {
         VerifyServer(server);
-        return await ExecuteSparqlAsUser(server, sparql, new List<string> { "text/turtle", "application/sparql-results+json" });
-    }
+        var response = await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options
+            => GetDownStreamWebApiOptionsForData(options, resultGraph, contentType));
 
-    public async Task<FusekiResponse> QueryFusekiResponseAsApp(string server, string sparql)
-    {
-        VerifyServer(server);
-        var result = await QueryAsApp(server, sparql);
-
-        return DeserializeToFusekiResponse(result);
-    }
-
-    public async Task<List<T>> QueryFusekiResponseAsApp<T>(string server, string sparql) where T : new()
-    {
-        VerifyServer(server);
-        var result = FusekiResponseToPropsMapper.MapResponse<T>(await QueryFusekiResponseAsApp(server, sparql));
-
-        return result;
+        return response;
     }
 
     private void VerifyServer(string server)
     {
         if (!_fusekis.Contains(server))
         {
-            throw new Exception($"Downstream fuskeki named {server} not found among [{string.Join(", ", _fusekis)}]");
+            throw new Exception($"Downstream Fuskeki named {server} not found among [{string.Join(", ", _fusekis)}]");
         }
-    }
-
-    private async Task<string> SerializeResponse(HttpResponseMessage response)
-    {
-        var content = await response.Content.ReadAsStringAsync();
-
-        if (content.StartsWith("Parse error")) throw new FusekiException(content);
-
-        return content;
-    }
-
-    private FusekiResponse DeserializeToFusekiResponse(string result)
-    {
-        var fusekiResponse = JsonConvert.DeserializeObject<FusekiResponse>(result);
-
-        if (fusekiResponse == null)
-        {
-            throw new InvalidOperationException("Failed to get response from Sparql query");
-        }
-
-        return fusekiResponse;
-    }
-
-    private async Task<HttpResponseMessage> ExecuteSparqlAsApp(string server, string sparql, List<string> accepts)
-    {
-        return await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForQuery(options, sparql, accepts));
-    }
-
-    private async Task<HttpResponseMessage> ExecuteSparqlAsUser(string server, string sparql, List<string> accepts)
-    {
-        return await _downstreamWebApi.CallWebApiForUserAsync(server.ToLower(), options => GetDownStreamWebApiOptionsForQuery(options, sparql, accepts));
     }
 
     private DownstreamWebApiOptions GetDownStreamWebApiOptionsForUpdate(DownstreamWebApiOptions options, string sparql, List<string> accepts)
@@ -141,20 +83,6 @@ public class FusekiService : IFusekiService
             {
                 new("query", sparql)
             });
-        };
-
-        return options;
-    }
-
-    private DownstreamWebApiOptions GetDownStreamWebApiOptionsForData(DownstreamWebApiOptions options, string turtle, string contentType)
-    {
-        options.HttpMethod = HttpMethod.Post;
-        options.RelativePath = "ds/data";
-        options.CustomizeHttpRequestMessage = message =>
-        {
-            message.Headers.Add("Accept", contentType);
-            message.Content = new StringContent(turtle);
-            message.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
         };
 
         return options;
