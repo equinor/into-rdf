@@ -1,5 +1,6 @@
 using Common.ProvenanceModels;
 using Common.RdfModels;
+using Common.RevisionTrainModels;
 using System.Data;
 
 namespace Services.TransformationServices.RdfTableBuilderServices;
@@ -60,6 +61,11 @@ public class ShipweightRdfTableBuilderService : IRdfTableBuilderService
         AddInputDataRows(dataCollectionUri, transformationUri, inputData);
 
         return _dataTable;
+    }
+
+    public DataTable GetInputDataTable(Uri dataCollectionUri, RevisionTrainModel revisionTrainModels, DataTable inputData )
+    {
+        throw new NotImplementedException();
     }
 
     private void AddTableName(string tableName)

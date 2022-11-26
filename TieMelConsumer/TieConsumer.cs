@@ -31,11 +31,12 @@ public class TieConsumer
         _serviceBusConfig = serviceBusConfig;
     }
 
-    //TODO - Rewrite functions to use Splinter API endpoints.
+    //TODO - Depricated - rewrite to use Record endpoints.
     [FunctionName(nameof(TieConsumer))]
     [StorageAccount("TieMelAdapterStorage")]
-    public async Task Run([BlobTrigger("prodmeladapterfiles/{name}")] Stream? myBlob, string name, ILogger log)
+    public void Run([BlobTrigger("prodmeladapterfiles/{name}")] Stream? myBlob, string name, ILogger log)
     {
+       /*
         var server = ServerKeys.OlDugtrio;
         log.LogInformation("C# Blob trigger function Processed blob\n Name:{Name} \n Size: {Size}", name, myBlob?.Length);
 
@@ -46,6 +47,8 @@ public class TieConsumer
 
         if (provenance is null) return;
         if (string.IsNullOrEmpty(provenance.FacilityId) || string.IsNullOrEmpty(provenance.DocumentProjectId)) return;
+
+        */
 
         //await _spineNotificationService
         //   .PostToTopic(

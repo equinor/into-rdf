@@ -24,7 +24,10 @@ public class OntologyService : IOntologyService
 
         var resultSerialization = result != null ? await FusekiUtils.SerializeResponse(result) : string.Empty;
         Graph graph = new Graph();
-        graph.LoadFromString(resultSerialization, new TurtleParser());
+        if (resultSerialization != string.Empty)
+        {
+            graph.LoadFromString(resultSerialization, new TurtleParser());
+        }
         return graph;
     }
 

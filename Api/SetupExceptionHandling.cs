@@ -16,14 +16,24 @@ public static class SetupExceptionHandling
 
             switch (exceptionHandlerPathFeature?.Error)
             {
-                case InvalidOperationException:
                 case FusekiException:
                 case ShapeValidationException:
+                case RevisionValidationException:
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    break;
+                case FileNotFoundException:
+                    context.Response.StatusCode =StatusCodes.Status404NotFound;
+                    break;
+                case UnsupportedContentTypeException:
+                    context.Response.StatusCode = StatusCodes.Status415UnsupportedMediaType;
                     break;
                 case ConflictOnInsertException:
                     context.Response.StatusCode = StatusCodes.Status409Conflict;
                     break;
+                case RevisionTrainValidationException:
+                    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                    break;
+                case InvalidOperationException:
                 default:
                     context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                     break;

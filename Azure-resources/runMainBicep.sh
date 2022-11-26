@@ -39,7 +39,7 @@ case "$environment" in
         ;;
 esac
 
-splinterSku="B1"
+splinterSku="P1V2"
 location="norwayeast";
 group="$environmentTag-spine-splinter"
 

@@ -7,8 +7,9 @@ using Common.GraphModels;
 using Common.Constants;
 using Common.Utils;
 using VDS.RDF;
+using VDS.RDF.Parsing;
 
-namespace Services.RevisionTrainServices;
+namespace Services.RevisionServices;
 
 public class RevisionTrainService : IRevisionTrainService
 {
@@ -73,7 +74,7 @@ public class RevisionTrainService : IRevisionTrainService
         if (!trainExist)
         {
             _logger.LogWarning($"Failed to get train with name {name} because it doesn't exist");
-            throw new InvalidOperationException($"Failed to get train with name {name} because it doesn't exist");
+            throw new FileNotFoundException($"Failed to get train with name {name} because it doesn't exist");
         }
 
         var revisionTrainQuery = GetRevisionTrainQuery(name);
@@ -97,12 +98,20 @@ public class RevisionTrainService : IRevisionTrainService
         if (!trainExist)
         {
             _logger.LogWarning($"Failed to delete train because a train with name {name} doesn't exist");
-            throw new InvalidOperationException($"Failed to delete train because a train with name {name} doesn't exist");
+            throw new FileNotFoundException($"Failed to delete train because a train with name {name} doesn't exist");
         }
 
         var response = await _fusekiService.Update(_server, GetDeleteRevisionTrain(name));
 
         return response;
+    }
+
+    public async Task<Graph> GetRevisionTrainGraph(string revisionTrainGraph)
+    {
+        Graph revisionTrain = new Graph();
+        var response = await GetRevisionTrain(revisionTrainGraph);
+        revisionTrain.LoadFromString(await response.Content.ReadAsStringAsync(), new TurtleParser());
+        return revisionTrain;
     }
 
     private async Task<bool> RevisionTrainExist(string revisionTrain)
@@ -178,10 +187,10 @@ public class RevisionTrainService : IRevisionTrainService
         switch (tripleContent)
         {
             case TripleContent.Subject:
-                pattern = $"'{name}' ?p ?o .";
+                pattern = $"<{name}> ?p ?o .";
                 break;
             case TripleContent.Predicate:
-                pattern = $"?s '{name}' ?o .";
+                pattern = $"?s <{name}> ?o .";
                 break;
             case TripleContent.Object:
                 pattern = $"?s ?p '{name}' .";

@@ -4,9 +4,10 @@ using Common.TieModels;
 using Common.Utils;
 using Microsoft.Extensions.Logging;
 using Services.FusekiServices;
+using VDS.RDF;
 
 namespace Services.ProvenanceServices;
-
+//TODO - Deprecated, to be removed when FunctionalSystems are moved over to a new Record endpoint.
 public class ProvenanceService : IProvenanceService
 {
     private readonly IFusekiQueryService _fusekiQueryService;
@@ -17,43 +18,6 @@ public class ProvenanceService : IProvenanceService
     {
         _fusekiQueryService = fusekiQueryService;
         _logger = logger;
-    }
-
-    public Provenance CreateProvenanceFromTieMessage(string datasource, List<RevisionInfo> previousRevisions, TieData tieData)
-    {
-        var revisionRequirement = tieData.GetRevisionRequirements();
-
-        _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromTieMessage: Creating provenance document {doc} for facility {fid} with revision name {rn} dated {rd}",
-                                revisionRequirement.DocumentName, revisionRequirement.FacilityId , revisionRequirement.RevisionName, revisionRequirement.RevisionDate);
-
-        var provenance = CreateProvenance(tieData.GetDataCollectionName(), datasource, previousRevisions, revisionRequirement);
-        provenance.DocumentProjectId = tieData.GetDocumentProjectId();
-        provenance.Contractor = tieData.GetContractor();
-        provenance.ContractNumber = tieData.GetContractNumber();
-        provenance.ProjectCode = tieData.GetProjectNumber();
-        provenance.DocumentTitle = tieData.GetDocumentTitle();
-        provenance.DataSourceType = DataSourceType.File();
-
-        return provenance;
-    }
-
-    public Provenance CreateProvenanceFromSpreadsheetInfo(List<RevisionInfo> previousRevisions, SpreadsheetInfo info)
-    {
-        if (info.FileName == null || info.DataSource == null)
-        {
-            throw new InvalidOperationException("Not sufficient info about spreadsheet to create provenance");
-        }
-
-        var revisionRequirement = info.GetRevisionRequirements();
-
-        _logger.LogDebug("<ProvenanceService> - CreateProvenanceFromTieMessage: Creating provenance document {doc} for facility {fid} with revision name {rn} dated {rd}",
-                                revisionRequirement.DocumentName, revisionRequirement.FacilityId , revisionRequirement.RevisionName, revisionRequirement.RevisionDate);
-
-        var provenance = CreateProvenance(info.FileName, info.DataSource.ToLower(), previousRevisions, revisionRequirement);
-        provenance.DocumentProjectId = info.DocumentProjectId;
-        provenance.DataSourceType = DataSourceType.File();
-
-        return provenance;
     }
 
     public Provenance CreateProvenanceFromCommonLib(string library, List<RevisionInfo> previousRevisions, RevisionRequirement requirement)

@@ -91,7 +91,7 @@ public class FusekiService : IFusekiService
     private DownstreamWebApiOptions GetDownStreamWebApiOptionsForData(DownstreamWebApiOptions options, ResultGraph resultGraph, string contentType)
     {
         options.HttpMethod = HttpMethod.Post;
-        options.RelativePath = resultGraph.Name == GraphConstants.Default ? "ds/data" : $"ds/data?graph={resultGraph.Name}";
+        options.RelativePath = resultGraph.IsDefault ? "ds/data" : $"ds/data?graph={resultGraph.Name}";
         options.CustomizeHttpRequestMessage = message =>
         {
             message.Headers.Add("Accept", contentType);

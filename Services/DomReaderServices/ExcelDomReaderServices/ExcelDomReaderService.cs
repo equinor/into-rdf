@@ -1,10 +1,12 @@
 using Common.ProvenanceModels;
+using Common.RevisionTrainModels;
 using Common.SpreadsheetModels;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Text.RegularExpressions;
+using VDS.RDF;
 
 namespace Services.DomReaderServices.ExcelDomReaderServices;
 
@@ -16,71 +18,38 @@ public class ExcelDomReaderService : IExcelDomReaderService
     {
         _logger = logger;
     }
-
-    public SpreadsheetInfo GetSpreadsheetInfo(Stream excelFile, string fileName)
+    
+    public DataTable GetSpreadsheetData( Stream excelFile, SpreadsheetContext spreadsheetContext)
     {
-        var doc = SpreadsheetDocument.Open(excelFile, false);
-
-        var workbookPart = doc.WorkbookPart ?? throw new ArgumentNullException($"The file {fileName} does not contain a workbook");
-        var worksheetPart = GetWorksheetPart(doc, "Provenance");
-
-        var rows = worksheetPart
-            .Worksheet
-            .Descendants<Row>()
-            .Take(13)
-            .Select(row => GetCompleteRow(workbookPart, row, 1, 2).ToList())
-            .ToDictionary(
-                pair => pair[0],
-                pair => pair[1]
-            );
-
-        return new SpreadsheetInfo
-        {
-            HeaderRow = int.Parse(rows["HeaderRow"]),
-            StartColumn = NumberFromExcelColumn(rows["StartColumn"]),
-            EndColumn = NumberFromExcelColumn(rows["EndColumn"]),
-            DataStartRow = int.Parse(rows["DataStartRow"]),
-            DataEndRow = int.Parse(rows["DataEndRow"]),
-            Contractor = rows["Contractor"],
-            DataSource = rows.TryGetValue("DataType", out string? dataType) ? dataType : DataSourceType.Unknown(),
-            IsTransposed = bool.Parse(rows.TryGetValue("IsTransposed", out string? isTransposed) ? isTransposed : "false"),
-            DocumentProjectId = rows["ProjectCode"],
-            Revision = int.Parse(rows["Revision"].TrimStart('0')),
-            RevisionDate = DateTime.Parse(rows["RevisionDate"]),
-            SheetName = rows["SheetName"],
-            FileName = Path.GetFileName(fileName)
-        };
-    }
-
-    public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails details)
-    {
+        if (spreadsheetContext.SheetName == null) throw new InvalidOperationException("Failed to transform spreadsheet. Missing spreadsheet name in SpreadsheetContext");
+        
         var doc = SpreadsheetDocument.Open(excelFile, false);
         var workbookPart = doc.WorkbookPart ?? throw new ArgumentNullException("The file does not contain a workbook");
-        var worksheetPart = GetWorksheetPart(doc, details.SheetName);
+        var worksheetPart = GetWorksheetPart(doc, spreadsheetContext.SheetName);
 
-        var headerRow = GetHeaderRow(worksheetPart, workbookPart, details);
+       var headerRow = GetHeaderRow(worksheetPart, workbookPart, spreadsheetContext);
 
         _logger.LogDebug("<ExcelDomReaderService> - GetSpreadsheetData: - Created header row with {nbOfColumns} columns", headerRow.Count);
 
-        var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, details);
+        var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetContext);
 
         _logger.LogDebug("<ExcelDomReaderService> - GetSpreadsheetData: - Created dataset with {nbOfRows} rows", dataRows.Count);
 
-        var data = CreateDataTable(details.DataStartRow, headerRow, dataRows, details.SheetName);
+        var data = CreateDataTable(spreadsheetContext.DataStartRow, headerRow, dataRows, spreadsheetContext.SheetName);
 
         _logger.LogDebug("<ExcelDomReaderService> - GetSpreadsheetData: - Created table with {nbOfRows} rows", data.Rows.Count);
         return data;
     }
 
-    private List<string> GetHeaderRow(WorksheetPart worksheetPart, WorkbookPart workbookPart, SpreadsheetDetails details)
+    private List<string> GetHeaderRow(WorksheetPart worksheetPart, WorkbookPart workbookPart, SpreadsheetContext spreadsheetContext)
     {
-        var columnSkip = details.StartColumn - 1;
-        var columnTake = details.EndColumn - columnSkip;
+        var columnSkip = spreadsheetContext.StartColumn - 1;
+        var columnTake = spreadsheetContext.EndColumn - columnSkip;
 
         var completeHeaderRow = worksheetPart
             .Worksheet
             .Descendants<Row>()
-            .First(r => (r.RowIndex ?? 0) == details.HeaderRow)
+            .First(r => (r.RowIndex ?? 0) == spreadsheetContext.HeaderRow)
             .Skip(columnSkip);
 
         var trimmedHeaderRow = columnTake > 0 ? completeHeaderRow.Take(columnTake) : completeHeaderRow;
@@ -94,10 +63,10 @@ public class ExcelDomReaderService : IExcelDomReaderService
     private List<List<string>> GetDataRows(WorksheetPart worksheetPart,
                                             WorkbookPart workbookPart,
                                             List<string> headerRow,
-                                            SpreadsheetDetails details)
+                                            SpreadsheetContext spreadsheetContext)
     {
-        var rowSkip = details.DataStartRow - 1;
-        var rowTake = details.DataEndRow - rowSkip;
+        var rowSkip = spreadsheetContext.DataStartRow - 1;
+        var rowTake = spreadsheetContext.DataEndRow - rowSkip;
 
         var completeDataRows = worksheetPart
             .Worksheet
@@ -107,8 +76,8 @@ public class ExcelDomReaderService : IExcelDomReaderService
         var trimmedDataRows = rowTake > 0 ? completeDataRows.Take(rowTake) : completeDataRows;
 
         return trimmedDataRows
-            .Where(row => ValidRow(workbookPart, row, headerRow, details.SheetName))
-            .Select(row => GetCompleteRow(workbookPart, row, details.StartColumn, headerRow.Count).ToList())
+            .Where(row => ValidRow(workbookPart, row, headerRow, spreadsheetContext.SheetName))
+            .Select(row => GetCompleteRow(workbookPart, row, spreadsheetContext.StartColumn, headerRow.Count).ToList())
             .ToList();
     }
 

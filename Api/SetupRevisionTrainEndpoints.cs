@@ -1,12 +1,12 @@
-using Services.RevisionTrainServices;
+using Services.RevisionServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-public static class SetupEndpoints
+public static class SetupRevisionTrainEndpoints
 {
     private static readonly string[] trainTag = { "Revision trains" };
 
-    public static WebApplication AddEndpoints(this WebApplication app)
+    public static WebApplication AddRevisionTrainEndpoints(this WebApplication app)
     {
         app.MapPost("revision-trains", [Authorize] async (HttpRequest request, HttpContext context, [FromServices] IRevisionTrainService revisionTrainService)
             =>
@@ -19,7 +19,6 @@ public static class SetupEndpoints
             .Produces<string>(
                 StatusCodes.Status200OK
             )
-            .Produces(StatusCodes.Status400BadRequest)
             .WithTags(trainTag);
 
         app.MapGet("revision-trains/{id}", [Authorize] async (string id, HttpContext context, [FromServices] IRevisionTrainService revisionTrainService)
@@ -62,6 +61,7 @@ public static class SetupEndpoints
 
     public static void SetContextContentType(HttpContext context, HttpResponseMessage response)
     {
+
         if (context != null && context.Response != null)
         {
             context.Response.ContentType = response.Content.Headers?.ContentType?.ToString() ?? "text/turtle";

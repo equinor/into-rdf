@@ -34,6 +34,11 @@ public class RdfGraphService : IRdfGraphService
         return graph;
     }
 
+    public void AssertDataTable(DataTable dataTable)
+    {
+        _graph.Merge(AssertRawData(dataTable));
+    }
+
     public void AssertDataTable(DataTable dataTable, Graph ontologyGraph)
     {
         _graph.Merge(AssertRawData(dataTable));
@@ -53,7 +58,7 @@ public class RdfGraphService : IRdfGraphService
         return new ResultGraph(name, content);
     }
 
-    private string WriteGraphToString()
+    public string WriteGraphToString()
     {
         using MemoryStream outputStream = new MemoryStream();
         

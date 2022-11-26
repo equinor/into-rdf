@@ -1,5 +1,6 @@
 ﻿using Common.ProvenanceModels;
 using Common.RdfModels;
+using Common.RevisionTrainModels;
 using System.Data;
 
 namespace Services.TransformationServices.RdfTableBuilderServices;
@@ -10,7 +11,7 @@ public class CommonLibTableBuilderService : IRdfTableBuilderService
 
     public DataTable GetDataCollectionTable(Uri dataCollectionUri, DataTable inputData)
     {
-        var dataTable = new DataTable 
+        var dataTable = new DataTable
         {
             TableName = "DataCollection",
         };
@@ -31,6 +32,11 @@ public class CommonLibTableBuilderService : IRdfTableBuilderService
         return dataTable;
     }
 
+    public DataTable GetInputDataTable(Uri dataCollectionUri, RevisionTrainModel revisionTrain, DataTable inputData)
+    {
+        throw new NotImplementedException();
+    }
+
     public DataTable GetProvenanceTable(Uri dataCollectionUri, Provenance provenance)
     {
         var dataTable = new DataTable
@@ -47,7 +53,7 @@ public class CommonLibTableBuilderService : IRdfTableBuilderService
         {
             TableName = "Transformation"
         });
-        dataTable.Rows.Add(transformationUri, DateTime.Now,  dataCollectionUri);
+        dataTable.Rows.Add(transformationUri, DateTime.Now, dataCollectionUri);
         return dataTable;
     }
 
@@ -109,7 +115,7 @@ public class CommonLibTableBuilderService : IRdfTableBuilderService
 
         var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{provenance.DataSourceTable}#";
 
-        foreach(DataColumn column in columns)
+        foreach (DataColumn column in columns)
             dataTable.Columns.Add(dataUri + column.ColumnName, typeof(string));
 
         return dataTable;

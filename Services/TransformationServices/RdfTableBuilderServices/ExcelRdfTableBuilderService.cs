@@ -1,7 +1,7 @@
 using Common.ProvenanceModels;
 using Common.RdfModels;
 using System.Data;
-using System.Linq;
+using Common.RevisionTrainModels;
 
 namespace Services.TransformationServices.RdfTableBuilderServices;
 
@@ -67,6 +67,17 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
         AddTableName("InputData");
         CreateInputDataSchema(provenance, inputData.Columns);
         AddInputDataRows(dataCollectionUri, transformationUri, provenance, inputData);
+
+        return _dataTable;
+    }
+
+    public DataTable GetInputDataTable(Uri dataCollectionUri, RevisionTrainModel revisionTrain, DataTable inputData)
+    {
+        _dataTable = new DataTable();
+        var idColumn = GetItemIdentification(revisionTrain.TrainType, inputData.Columns);
+        AddTableName("InputData");
+        CreateInputDataSchema(revisionTrain, inputData.Columns);
+        AddInputDataRows(dataCollectionUri, revisionTrain, inputData);
 
         return _dataTable;
     }
@@ -229,7 +240,28 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
         }
     }
 
+        private void CreateInputDataSchema(RevisionTrainModel revisionTrain, DataColumnCollection columns)
+    {
+        var idColumn = RdfCommonColumns.CreateIdColumn();
+        _dataTable.Columns.Add(idColumn);
+        _dataTable.PrimaryKey = new DataColumn[] { idColumn };
 
+        _dataTable.Columns.Add(RdfCommonColumns.CreateWasGeneratedBy());
+
+        var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{revisionTrain.TrainType}#";
+
+        foreach (DataColumn column in columns)
+        {
+            //For excel input, row numbers are temporarily stored in an id column. The row number is 
+            //used as a row uri, but the literal value is taken away again when creating the rdfDataTables.
+            if (column.ColumnName == "id")
+            {
+                continue;
+            }
+
+            _dataTable.Columns.Add(dataUri + column.ColumnName, typeof(string));
+        }
+    }
 
     private void AddInputDataRows(Uri dataCollectionUri, Uri transformationUri, Provenance provenance, DataTable inputData)
     {
@@ -262,6 +294,36 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
         }
     }
 
+    private void AddInputDataRows(Uri dataCollectionUri, RevisionTrainModel revisionTrain, DataTable inputData)
+    {
+        const int NumberOfFixedColumns = 2;
+
+        var idColumn = GetItemIdentification(revisionTrain.TrainType, inputData.Columns);
+
+        foreach (DataRow row in inputData.Rows)
+        {
+            var itemUri = new Uri($"{dataCollectionUri.AbsoluteUri}{row[idColumn]}");
+            var existingId = _dataTable.AsEnumerable().Any(row => itemUri.ToString() == row.Field<Uri>("id")?.ToString());
+
+            if (existingId)
+            {
+                itemUri = new Uri($"{itemUri.AbsoluteUri}_row={row[idColumn]}");
+            }
+
+            var dataRow = _dataTable.NewRow();
+            dataRow[0] = itemUri;
+
+            //Row number, adjusted for the start row, was added to the input data as column 0 and is
+            //skipped here.
+            for (var columnIndex = 1; columnIndex < inputData.Columns.Count; columnIndex++)
+            {
+                dataRow[columnIndex - 1 + NumberOfFixedColumns] = row[columnIndex];
+            }
+
+            _dataTable.Rows.Add(dataRow);
+        }
+    }
+
     private void GetItemIdentification(Uri dataCollectionUri, DataColumnCollection columns, string source, out string idColumn, out Uri identificationUri)
     {
         switch (source) 
@@ -278,6 +340,23 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
                 break;
             }
         }
+    }
+
+    private string GetItemIdentification(string trainType, DataColumnCollection columns)
+    {
+        var idColumn = string.Empty;
+        switch (trainType.ToLower())
+        {
+            case "mel":
+            {
+                idColumn = columns.Contains("Tag Number") ? "Tag Number" : string.Empty;
+                break;
+            }
+            default:
+                break;
+        }
+        if (idColumn == string.Empty) {throw new InvalidOperationException($"Failed to parse spreadsheet. Unable to find column with identifiers for train type {trainType}"); }
+        return idColumn;
     }
 
     private void GetLineListItemIdentification(Uri dataCollectionUri, DataColumnCollection columns, out string idColumn, out Uri identificationUri)

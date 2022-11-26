@@ -36,7 +36,13 @@ public class RevisionTrainValidator : IRevisionTrainValidator
                     sh:datatype xsd:string ;
                 ] ;
                 sh:property [
-                    sh:path splinter:triplestore ;
+                    sh:path splinter:tripleStore ;
+                    sh:minCount 1 ; 
+                    sh:maxCount 1 ; 
+                    sh:datatype xsd:string ;
+                ] ;
+                sh:property [
+                    sh:path splinter:trainType ;
                     sh:minCount 1 ; 
                     sh:maxCount 1 ; 
                     sh:datatype xsd:string ;
