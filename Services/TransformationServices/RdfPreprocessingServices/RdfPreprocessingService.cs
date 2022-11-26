@@ -1,5 +1,6 @@
 using Common.ProvenanceModels;
 using Common.RdfModels;
+using Common.RevisionTrainModels;
 using Microsoft.Extensions.Logging;
 using Services.TransformationServices.RdfTableBuilderServices;
 using System.Data;
@@ -60,6 +61,23 @@ public class RdfPreprocessingService : IRdfPreprocessingService
         return rdfDataSet;
     }
 
+    public DataSet CreateRdfTable(RevisionTrainModel revisionTrain, DataTable inputData)
+    {
+        var dataCollectionUri = CreateDataCollectionUri(revisionTrain);
+
+        _logger.LogDebug("<RdfPreprocessor> - CreateRdfTables: Data collection uri {dataCollectionUri} created", dataCollectionUri.ToString());
+
+        var rdfDataSet = new DataSet();
+        var dataTable = CreateInputTable(dataCollectionUri, revisionTrain, inputData);
+        rdfDataSet.Tables.Add(dataTable);
+
+        _logger.LogDebug(dataTable != null ?
+                        "<RdfPreprocessor> - CreateRdfTables: Input data successfully added" :
+                        "<RdfPreprocessor> - CreateRdfTables: Failed to create input data");
+
+        return rdfDataSet;
+    }
+
     private DataTable CreateProvenanceTable(Uri dataCollectionUri, Provenance provenance)
     {
         IRdfTableBuilderService tableBuilder = _rdfTableBuilderFactory.GetRdfTableBuilder(provenance.DataSource);
@@ -82,6 +100,12 @@ public class RdfPreprocessingService : IRdfPreprocessingService
     {
         IRdfTableBuilderService tableBuilder = _rdfTableBuilderFactory.GetRdfTableBuilder(provenance.DataSource);
         return tableBuilder.GetInputDataTable(dataCollectionUri, transformationUri, provenance, inputData);
+    }
+
+    private DataTable CreateInputTable(Uri dataCollectionUri, RevisionTrainModel revisionTrain, DataTable inputData)
+    {
+        IRdfTableBuilderService tableBuilder = _rdfTableBuilderFactory.GetRdfTableBuilder(revisionTrain.TrainType);
+        return tableBuilder.GetInputDataTable(dataCollectionUri, revisionTrain, inputData);
     }
 
     private Uri CreateDataCollectionUri(Provenance provenance)
@@ -112,10 +136,15 @@ public class RdfPreprocessingService : IRdfPreprocessingService
         return dataCollectionUri;
     }
 
+    private Uri CreateDataCollectionUri(RevisionTrainModel revisionTrain)
+    {
+        return new Uri($"{RdfPrefixes.Prefix2Uri["equinor"]}{revisionTrain.TripleStore.ToLower()}/");
+    }
+
     private Uri CreateTransformationUri(Provenance provenance)
     {
         IRdfTableBuilderService tableBuilder = _rdfTableBuilderFactory.GetRdfTableBuilder(provenance.DataSource);
-        return tableBuilder?.GetTransformationUri(provenance) 
+        return tableBuilder?.GetTransformationUri(provenance)
             ?? new Uri($"{RdfPrefixes.Prefix2Uri["transformation"]}{provenance.DataSource}_{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd")}");
     }
 }

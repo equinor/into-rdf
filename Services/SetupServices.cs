@@ -2,6 +2,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Services.DomReaderServices.ExcelDomReaderServices;
 using Services.FusekiServices;
 using Services.OntologyServices.OntologyService;
+using Services.RecordServices;
+using Services.GraphParserServices;
 using Services.ProvenanceServices;
 using Services.RdfServices;
 using Services.RdfServices.XmlServives;
@@ -17,7 +19,7 @@ using Services.TransformationServices.XMLTransformationServices;
 using Services.TransformationServices.XMLTransformationServices.Converters;
 using Services.CommonlibServices;
 using Services.CommonLibToRdfServices;
-using Services.RevisionTrainServices;
+using Services.RevisionServices;
 using Services.ValidationServices.RevisionTrainValidationServices;
 
 namespace Services.DependencyInjection;
@@ -51,6 +53,9 @@ public static class SetupServices
         services.AddScoped<ICommonLibToRdfService, CommonLibToRdfService>();
         services.AddScoped<IRevisionTrainService, RevisionTrainService>();
         services.AddScoped<IRevisionTrainValidator, RevisionTrainValidator>();
+        services.AddScoped<IRecordService, RecordService>();
+        services.AddScoped<IGraphParser, GraphParser>();
+        services.AddScoped<IRevisionService, RevisionService>();
         
         return services;
     }

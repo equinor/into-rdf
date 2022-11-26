@@ -4,7 +4,8 @@
 
 <https://rdf.equinor.com/revision-train/C277-AS-W-LA-00001> a splinter:RevisionTrain ;
     splinter:name "C277-AS-W-LA-00001" ;
-    splinter:triplestore "wisting" ;
+    splinter:tripleStore "wisting" ;
+    splinter:trainType "mel";
     splinter:hasTieContext <https://rdf.equinor.com/revision-train/C277-AS-W-LA-00001_TieContext> ;
     splinter:hasSpreadsheetContext <https://rdf.equinor.com/revision-train/C277-AS-W-LA-00001_SpreadsheetContext> .
 

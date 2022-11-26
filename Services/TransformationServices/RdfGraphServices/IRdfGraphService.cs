@@ -7,5 +7,7 @@ namespace Services.TransformationServices.RdfGraphServices;
 public interface IRdfGraphService
 {
     void AssertDataTable(DataTable dataTable, Graph ontologyGraph);
+    void AssertDataTable(DataTable dataTable);
     ResultGraph GetResultGraph(string datasource);
+    string WriteGraphToString();
 }

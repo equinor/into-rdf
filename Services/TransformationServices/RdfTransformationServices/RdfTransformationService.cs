@@ -1,5 +1,6 @@
 using Common.GraphModels;
 using Common.ProvenanceModels;
+using Common.RevisionTrainModels;
 using Microsoft.Extensions.Logging;
 using Services.TransformationServices.RdfGraphServices;
 using Services.TransformationServices.RdfPreprocessingServices;
@@ -35,5 +36,19 @@ public class RdfTransformationService : IRdfTransformationService
         }
 
         return _rdfGraphService.GetResultGraph(provenance.DataSource);
+    }
+
+    public string Transform(RevisionTrainModel revisionTrain, DataTable data)
+    {
+        var rdfDataSet = _rdfPreprocessor.CreateRdfTable(revisionTrain, data);
+
+        foreach (DataTable table in rdfDataSet.Tables)
+        {
+            _logger.LogDebug("<RdfTransformer> - Transform: Asserting data from table: {tableName}", table.TableName);
+            _rdfGraphService.AssertDataTable(table);
+            _logger.LogDebug("<RdfTransformer> - Transform: Asserted data from table: {tableName}", table.TableName);
+        }
+
+        return _rdfGraphService.WriteGraphToString();
     }
 }

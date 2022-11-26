@@ -1,6 +1,4 @@
 
-using System.Runtime.Serialization;
-
 namespace Common.Exceptions;
 
 [Serializable]
