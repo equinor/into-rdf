@@ -1,5 +1,51 @@
 # Changelog
 
+## [1.4.0](https://github.com/equinor/spine-splinter/compare/v1.3.3...v1.4.0) (2022-11-26)
+
+
+### Features
+
+* 🎸 add contract number to new mel processed event ([#152](https://github.com/equinor/spine-splinter/issues/152)) ([8563335](https://github.com/equinor/spine-splinter/commit/856333553599785ce62345f8cc56333ee79d8a11))
+* add commonlib routine ([#105](https://github.com/equinor/spine-splinter/issues/105)) ([d7dce78](https://github.com/equinor/spine-splinter/commit/d7dce78f451d3826078be7fa67d883c922c678d3))
+* add contractnumber to event ([#150](https://github.com/equinor/spine-splinter/issues/150)) ([7e6375f](https://github.com/equinor/spine-splinter/commit/7e6375fc21f0d4fa84e2a703df92a30b5738b721))
+* add revision train ([#151](https://github.com/equinor/spine-splinter/issues/151)) ([a4d7aa8](https://github.com/equinor/spine-splinter/commit/a4d7aa885908dd24e2c3cdc8e940e08c8000ee0a))
+* Create named graph ([#163](https://github.com/equinor/spine-splinter/issues/163)) ([d068d0c](https://github.com/equinor/spine-splinter/commit/d068d0cbda6cca6f2c076c062b263f9841ea3372))
+* new empty endpoints for revisioned data ([#136](https://github.com/equinor/spine-splinter/issues/136)) ([7299c5a](https://github.com/equinor/spine-splinter/commit/7299c5ad383e363372948651d32ee9b9ce5171c0))
+* Use multiple Service Bus Topics ([#138](https://github.com/equinor/spine-splinter/issues/138)) ([bbe4434](https://github.com/equinor/spine-splinter/commit/bbe44345eafaee47171239b64b78f410d39661fe))
+
+
+### Bug Fixes
+
+* Ingestcontroller now returns the errors ([#137](https://github.com/equinor/spine-splinter/issues/137)) ([12a9387](https://github.com/equinor/spine-splinter/commit/12a9387d553a68f8d512619ebe9b813c04a8acb7))
+* Remove hardcoded server from Provenance ([#140](https://github.com/equinor/spine-splinter/issues/140)) ([a8c02f9](https://github.com/equinor/spine-splinter/commit/a8c02f9ca4b4a9cb5e166569874f7c5ae2b60487))
+* Update bicep module deployment name ([#144](https://github.com/equinor/spine-splinter/issues/144)) ([c2e0087](https://github.com/equinor/spine-splinter/commit/c2e00878aec7e8d628e29be9cbd05e7bace3aed8))
+
+
+### Other
+
+* add endpoint for information ([#132](https://github.com/equinor/spine-splinter/issues/132)) ([74d4981](https://github.com/equinor/spine-splinter/commit/74d498161564dab85f262743c56b4dd4c50dcc1d))
+* **deps:** bump actions/setup-dotnet from 3.0.0 to 3.0.1 ([#121](https://github.com/equinor/spine-splinter/issues/121)) ([0aa8688](https://github.com/equinor/spine-splinter/commit/0aa86880d56b59774ec372b095a85a32d95a38db))
+* **deps:** bump actions/setup-dotnet from 3.0.1 to 3.0.2 ([#134](https://github.com/equinor/spine-splinter/issues/134)) ([23c2326](https://github.com/equinor/spine-splinter/commit/23c2326cfebb71e8d45aed7b298896cb568db890))
+* **deps:** bump actions/setup-dotnet from 3.0.2 to 3.0.3 ([#147](https://github.com/equinor/spine-splinter/issues/147)) ([2171328](https://github.com/equinor/spine-splinter/commit/217132825ff1d5442ad6a37fe3b7aa8e5258be82))
+* **deps:** bump Azure.Messaging.ServiceBus from 7.10.0 to 7.11.0 ([#125](https://github.com/equinor/spine-splinter/issues/125)) ([9d8e16b](https://github.com/equinor/spine-splinter/commit/9d8e16b21449111ff44f4f7eace29a50081c4afb))
+* **deps:** bump Azure.Storage.Blobs from 12.13.1 to 12.14.0 ([#129](https://github.com/equinor/spine-splinter/issues/129)) ([a11bb55](https://github.com/equinor/spine-splinter/commit/a11bb55a2800342195fe21e8a93e2199680a84dc))
+* **deps:** bump Microsoft.AspNetCore.Authentication.JwtBearer ([#124](https://github.com/equinor/spine-splinter/issues/124)) ([0e1db51](https://github.com/equinor/spine-splinter/commit/0e1db5114b9652df9165db1f06990309499bf672))
+* **deps:** bump Microsoft.AspNetCore.Authentication.OpenIdConnect ([#123](https://github.com/equinor/spine-splinter/issues/123)) ([968d4e0](https://github.com/equinor/spine-splinter/commit/968d4e010e67a8fc61e5107dc80197c496624766))
+* **deps:** bump Microsoft.Data.SqlClient from 5.0.0 to 5.0.1 ([#122](https://github.com/equinor/spine-splinter/issues/122)) ([4152c77](https://github.com/equinor/spine-splinter/commit/4152c77700bb1be399954af487939eb18bf1268c))
+* **deps:** bump Microsoft.Extensions.Azure from 1.5.0 to 1.6.0 ([#130](https://github.com/equinor/spine-splinter/issues/130)) ([cc73fb9](https://github.com/equinor/spine-splinter/commit/cc73fb94d298430c98cb07def937164e7035ee4e))
+* **deps:** bump Microsoft.Extensions.DependencyInjection ([#127](https://github.com/equinor/spine-splinter/issues/127)) ([44454b8](https://github.com/equinor/spine-splinter/commit/44454b806e30ab2d167bf7656ea0c8a8f767a26f))
+* **deps:** bump Xunit.DependencyInjection from 8.5.0 to 8.6.0 ([#126](https://github.com/equinor/spine-splinter/issues/126)) ([195279e](https://github.com/equinor/spine-splinter/commit/195279e347eec8b795846dbca6077eef915457cb))
+* fix yaml in workflow ([db8e7e3](https://github.com/equinor/spine-splinter/commit/db8e7e3b76d8b62d9de1e50e01b7db69b10aa116))
+* Fixed typo in readme example ([519cfe5](https://github.com/equinor/spine-splinter/commit/519cfe5d2d046de82c3843491d7cb1758a1319e7))
+* Generalize Fuseki Docker images ([#135](https://github.com/equinor/spine-splinter/issues/135)) ([880f8ce](https://github.com/equinor/spine-splinter/commit/880f8cead51a9e6f4fa2c3eefc49a7ec00138913))
+* improve error message on missing fuseki ([#133](https://github.com/equinor/spine-splinter/issues/133)) ([f83e65d](https://github.com/equinor/spine-splinter/commit/f83e65d512f777352690dc1332a768073f874b83))
+* refactor fuseki services ([#162](https://github.com/equinor/spine-splinter/issues/162)) ([aaa10e1](https://github.com/equinor/spine-splinter/commit/aaa10e1dda3fe88fddc69e7098f11bae514564bb))
+* Remove keyword trigger in workflow ([25db83f](https://github.com/equinor/spine-splinter/commit/25db83f9311769f062e77e753be5d48706533628))
+* Renamed CI workflow to Dev ([f774840](https://github.com/equinor/spine-splinter/commit/f774840154ea6c49975f2b6dcb4027c5593d13ac))
+* Update dependencies ([#153](https://github.com/equinor/spine-splinter/issues/153)) ([3d5ffe4](https://github.com/equinor/spine-splinter/commit/3d5ffe4463eca24bdb29551de328340c23373bb0))
+* update main fuseki client id ([#161](https://github.com/equinor/spine-splinter/issues/161)) ([f179d80](https://github.com/equinor/spine-splinter/commit/f179d803bdd7406324550bce8b800833da18c8b8))
+* Update sku levels of key Fusekis ([#145](https://github.com/equinor/spine-splinter/issues/145)) ([7cabaff](https://github.com/equinor/spine-splinter/commit/7cabaff2dad159ed96643564eb5d3667a37e6fe1))
+
 ## [1.3.3](https://github.com/equinor/spine-splinter/compare/v1.3.2...v1.3.3) (2022-10-06)
 
 
