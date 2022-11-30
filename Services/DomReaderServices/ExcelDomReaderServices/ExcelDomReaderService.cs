@@ -76,25 +76,25 @@ public class ExcelDomReaderService : IExcelDomReaderService
         var trimmedDataRows = rowTake > 0 ? completeDataRows.Take(rowTake) : completeDataRows;
 
         return trimmedDataRows
-            .Where(row => ValidRow(workbookPart, row, headerRow, spreadsheetContext.SheetName))
+            .Where(row => ValidRow(workbookPart, row, headerRow, spreadsheetContext.IdentityColumn))
             .Select(row => GetCompleteRow(workbookPart, row, spreadsheetContext.StartColumn, headerRow.Count).ToList())
             .ToList();
     }
 
-    private bool ValidRow(WorkbookPart workBookPart, Row row, List<string> headerRow, string dataSource)
+    private bool ValidRow(WorkbookPart workBookPart, Row row, List<string> headerRow, string? identityColumn)
     {
         var descendants = row.Descendants<Cell>();
 
-        if (dataSource.ToLower() == DataSource.Mel)
+        if (identityColumn != null)
         {
-            var tagNumberIndex = headerRow.FindIndex(x => x == "Tag Number");
+            var identityIndex = headerRow.FindIndex(x => x == identityColumn);
 
-            if (descendants.Count() < tagNumberIndex)
+            if (descendants.Count() < identityIndex)
             {
                 return false;
             }
 
-            var cell = descendants.ElementAt(tagNumberIndex);
+            var cell = descendants.ElementAt(identityIndex);
 
             return cell.CellValue != null && GetCellValue(cell, workBookPart) != "BOTTOM LINE";
         }

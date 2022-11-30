@@ -21,4 +21,5 @@
     spreadsheet:sheetName "MEL" ;
     spreadsheet:headerRow 6 ;
     spreadsheet:dataStartRow 8 ;
-    spreadsheet:startColumn 1 .
+    spreadsheet:startColumn 1 ;
+    spreadsheet:identityColumn "Tag Number" .
