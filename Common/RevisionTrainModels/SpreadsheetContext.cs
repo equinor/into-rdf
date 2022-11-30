@@ -2,7 +2,7 @@ namespace Common.RevisionTrainModels
 {
     public class SpreadsheetContext
     {
-        public SpreadsheetContext(string sheetName, int headerRow, int dataStartRow, int startColumn)
+        public SpreadsheetContext(string sheetName,int headerRow, int dataStartRow, int startColumn)
         {
             SheetName = sheetName;
             HeaderRow = headerRow;
@@ -14,8 +14,9 @@ namespace Common.RevisionTrainModels
         public int HeaderRow { get; set; }
         public int DataStartRow { get; set; }
         public int StartColumn { get; set; }
-        public int DataEndRow { get; set; } 
+        public int DataEndRow { get; set; }
         public int EndColumn { get; set; }
-        public bool IsTransposed {get; set;}
+        public bool IsTransposed { get; set; }
+        public string? IdentityColumn { get; set; }
     }
 }

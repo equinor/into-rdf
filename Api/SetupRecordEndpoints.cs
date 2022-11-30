@@ -6,7 +6,7 @@ using Common.GraphModels;
 using Services.RecordServices;
 using Services.RevisionServices;
 using Services.GraphParserServices;
-using VDS.RDF;
+using Services.Utils;
 
 public static class SetupNamedGraphsEndpoints
 {
@@ -35,7 +35,7 @@ public static class SetupNamedGraphsEndpoints
             //Parse revision train
             var revisionTrainModel = graphParser.ParseRevisionTrain(revisionTrain);
 
-            DateTime date = DateTime.Parse(revisionDate);
+            DateTime date = DateFormatter.FormateToDate(revisionDate);
             //Validate new revision
             revisionService.ValidateRevision(revisionTrainModel, revision, date);
 

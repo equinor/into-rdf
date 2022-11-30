@@ -1,9 +1,10 @@
 using Common.RevisionTrainModels;
 using Common.Exceptions;
+using Services.Utils;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Nodes;
-using VDS.RDF.Query.Expressions;
+
 
 namespace Services.GraphParserServices;
 public class GraphParser : IGraphParser
@@ -97,6 +98,9 @@ public class GraphParser : IGraphParser
         var isTransposedNode = GetObjectNodeFromTripleWithPredicate(trainGraph, new Uri("https://rdf.equinor.com/splinter/spreadsheet#startColumn"));
         if (isTransposedNode != null) { spreadsheetContext.IsTransposed = isTransposedNode.AsValuedNode().AsBoolean(); }
 
+        var identityColumnNode = GetObjectNodeFromTripleWithPredicate(trainGraph, new Uri("https://rdf.equinor.com/splinter/spreadsheet#identityColumn"));
+        if (identityColumnNode != null) { spreadsheetContext.IdentityColumn = identityColumnNode.ToString(); }
+
         return spreadsheetContext;
     }
 
@@ -117,7 +121,7 @@ public class GraphParser : IGraphParser
 
             var revisionDateNode = GetObjectNodeFromTripleWithSubjectAndPredicate(trainGraph, ngt.Subject, new Uri("https://rdf.equinor.com/ontology/revision#hasRevisionDate"));
             if (revisionDateNode == null) { continue; }
-            var revisionDate = DateTime.Parse(revisionDateNode.ToString());
+            var revisionDate = DateFormatter.FormateToDate(revisionDateNode.ToString());
 
             var namedGraph = new NamedGraph(((UriNode)ngt.Subject).Uri, revisionName, revisionDate);
 

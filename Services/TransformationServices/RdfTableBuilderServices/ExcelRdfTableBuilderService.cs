@@ -20,8 +20,8 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
 
     public DataTable GetProvenanceTable(Uri dataCollectionUri, Provenance provenance)
     {
-        _dataTable = new DataTable(); 
-        
+        _dataTable = new DataTable();
+
         AddTableName("Provenance");
 
         //Temporary solution so that the old MEL transformation works until it is migrated to named graph provenance.
@@ -42,11 +42,11 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
     public DataTable GetTransformationTable(Uri dataCollectionUri, Uri transformationUri)
     {
         _dataTable = new DataTable();
-        
+
         AddTableName("Transformation");
         CreateTransformationSchema();
         AddTransformationRow(dataCollectionUri, transformationUri);
-        
+
         return _dataTable;
     }
 
@@ -74,7 +74,6 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
     public DataTable GetInputDataTable(Uri dataCollectionUri, RevisionTrainModel revisionTrain, DataTable inputData)
     {
         _dataTable = new DataTable();
-        var idColumn = GetItemIdentification(revisionTrain.TrainType, inputData.Columns);
         AddTableName("InputData");
         CreateInputDataSchema(revisionTrain, inputData.Columns);
         AddInputDataRows(dataCollectionUri, revisionTrain, inputData);
@@ -133,9 +132,9 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
     {
         var facilityUriSegment = $"{provenance.FacilityId.ToLower()}";
         var documentUriSegment = GetDocumentUriSegment(provenance.DataCollectionName ?? provenance.DataSource);
-        
-        var currentRevision = new Uri($"{RdfPrefixes.Prefix2Uri["equinor"].ToString()}graph/{facilityUriSegment}/{documentUriSegment}/{provenance.RevisionNumber}"); 
-        
+
+        var currentRevision = new Uri($"{RdfPrefixes.Prefix2Uri["equinor"].ToString()}graph/{facilityUriSegment}/{documentUriSegment}/{provenance.RevisionNumber}");
+
         _dataTable.Rows.Add(
             currentRevision,
             RdfCommonClasses.CreateNamedGraphClass(),
@@ -156,7 +155,7 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
 
 
     private void AddProvenanceRow(Uri dataCollectionUri, Provenance provenance)
-    {        
+    {
         _dataTable.Rows.Add(
             dataCollectionUri,
             RdfCommonClasses.CreateCollectionClass(),
@@ -240,7 +239,7 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
         }
     }
 
-        private void CreateInputDataSchema(RevisionTrainModel revisionTrain, DataColumnCollection columns)
+    private void CreateInputDataSchema(RevisionTrainModel revisionTrain, DataColumnCollection columns)
     {
         var idColumn = RdfCommonColumns.CreateIdColumn();
         _dataTable.Columns.Add(idColumn);
@@ -298,7 +297,14 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
     {
         const int NumberOfFixedColumns = 2;
 
-        var idColumn = GetItemIdentification(revisionTrain.TrainType, inputData.Columns);
+        var idColumn = GetIdentificationColumn(revisionTrain, inputData.Columns);
+
+        //Default - if identification column is null, row number is used. 
+        if (idColumn == null)
+        {
+            idColumn = "id";
+            dataCollectionUri = new Uri(dataCollectionUri.AbsoluteUri + "row_");
+        }
 
         foreach (DataRow row in inputData.Rows)
         {
@@ -307,7 +313,7 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
 
             if (existingId)
             {
-                itemUri = new Uri($"{itemUri.AbsoluteUri}_row={row[idColumn]}");
+                itemUri = new Uri($"{itemUri.AbsoluteUri}_row={row["id"]}");
             }
 
             var dataRow = _dataTable.NewRow();
@@ -326,42 +332,38 @@ public class ExcelRdfTableBuilderService : IRdfTableBuilderService
 
     private void GetItemIdentification(Uri dataCollectionUri, DataColumnCollection columns, string source, out string idColumn, out Uri identificationUri)
     {
-        switch (source) 
+        switch (source)
         {
             case DataSource.LineList:
-            {
-                GetLineListItemIdentification(dataCollectionUri, columns, out idColumn, out identificationUri);
-                break;
-            }
+                {
+                    GetLineListItemIdentification(dataCollectionUri, columns, out idColumn, out identificationUri);
+                    break;
+                }
             default:
-            {
-                idColumn = "id";
-                identificationUri = new Uri($"{dataCollectionUri.AbsoluteUri}#row=");
-                break;
-            }
+                {
+                    idColumn = "id";
+                    identificationUri = new Uri($"{dataCollectionUri.AbsoluteUri}#row=");
+                    break;
+                }
         }
     }
 
-    private string GetItemIdentification(string trainType, DataColumnCollection columns)
+    private string? GetIdentificationColumn(RevisionTrainModel trainType, DataColumnCollection columns)
     {
-        var idColumn = string.Empty;
-        switch (trainType.ToLower())
+        var identity = trainType?.SpreadsheetContext?.IdentityColumn;
+        if (identity == null) { return null; }
+
+        if (!columns.Contains(identity))
         {
-            case "mel":
-            {
-                idColumn = columns.Contains("Tag Number") ? "Tag Number" : string.Empty;
-                break;
-            }
-            default:
-                break;
+            throw new InvalidOperationException($"Failed to parse spreadsheet. Unable to find column with identifiers for train type {identity}");
         }
-        if (idColumn == string.Empty) {throw new InvalidOperationException($"Failed to parse spreadsheet. Unable to find column with identifiers for train type {trainType}"); }
-        return idColumn;
+
+        return identity;
     }
 
     private void GetLineListItemIdentification(Uri dataCollectionUri, DataColumnCollection columns, out string idColumn, out Uri identificationUri)
     {
-        idColumn = columns.Contains("Line Tag") ? "Line Tag" : 
+        idColumn = columns.Contains("Line Tag") ? "Line Tag" :
                         columns.Contains("Line number") ? "Line number" : "id";
 
         identificationUri = dataCollectionUri;

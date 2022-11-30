@@ -28,7 +28,7 @@ public class MelTransformationService : ISpreadsheetTransformationService
     public string Transform(RevisionTrainModel revisionTrain, Stream content)
     {
         if(revisionTrain.SpreadsheetContext == null) { throw new InvalidOperationException("Missing spreadsheet context"); }
-        _logger.LogInformation("<MelTransformer> - Transform: Starting parsing of spreadsheet data from TIE message");
+        _logger.LogInformation("<MelTransformer> - Transform: Starting parsing of spreadsheet data");
         
         var data = _excelDomReaderService.GetSpreadsheetData(content, revisionTrain.SpreadsheetContext);
         _logger.LogInformation("<MelTransformer> - Transform: Spreadsheet table with {numberOfColumns} columns and {numberOfRows} rows retrieved", data.Columns.Count, data.Rows.Count);

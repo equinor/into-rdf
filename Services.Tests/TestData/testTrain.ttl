@@ -21,4 +21,5 @@
     spreadsheet:sheetName "sheetName" ;
     spreadsheet:headerRow 1 ;
     spreadsheet:dataStartRow 2 ;
-    spreadsheet:startColumn 1 .
+    spreadsheet:startColumn 1 ;
+    spreadsheet:identityColumn "Tag Number" .

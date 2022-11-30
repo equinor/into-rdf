@@ -1,5 +1,4 @@
 using Common.Exceptions;
-using Common.Constants;
 using Common.GraphModels;
 using Common.RdfModels;
 using Common.RevisionTrainModels;
@@ -8,6 +7,7 @@ using Services.FusekiServices;
 using Services.OntologyServices.OntologyService;
 using Services.TransformationServices.SpreadsheetTransformationServices;
 using Services.RevisionServices;
+using Services.Utils;
 using VDS.RDF;
 using System.Text;
 using VDS.RDF.Writing;
@@ -71,7 +71,7 @@ public class RecordService : IRecordService
         recordContext.Assert(new Triple(graphNode, hasRevisionNameNode, revisionNameNode));
 
         var hasRevisionDateNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/ontology/revision#hasRevisionDate"));
-        var revisionDateNode = recordContext.CreateLiteralNode(revisionDate.ToString()); //, XmlSpecsHelper.XmlSchemaDataTypeDateTime);
+        var revisionDateNode = recordContext.CreateLiteralNode(DateFormatter.FormateToString(revisionDate)); //, XmlSpecsHelper.XmlSchemaDataTypeDateTime);
 
         recordContext.Assert(new Triple(graphNode, hasRevisionDateNode, revisionDateNode));
 
