@@ -8,7 +8,7 @@
             Name = name;
             TripleStore = tripleStore;
             TrainType = trainType;
-            NamedGraphs = new List<NamedGraph>();
+            Records = new List<RecordModels>();
         }
 
         public Uri TrainUri { get; set; }
@@ -17,6 +17,6 @@
         public string TrainType { get; set; }
         public TieContext? TieContext { get; set; }
         public SpreadsheetContext? SpreadsheetContext { get; set; }
-        public List<NamedGraph> NamedGraphs {get; set; }
+        public List<RecordModels> Records {get; set; }
     }
 }

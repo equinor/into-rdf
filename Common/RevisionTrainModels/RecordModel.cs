@@ -1,14 +1,14 @@
 namespace Common.RevisionTrainModels
 {
-    public class NamedGraph 
+    public class RecordModels 
     {
-        public NamedGraph(Uri namedGraphUri, string revisionName, DateTime revisionDate)
+        public RecordModels(Uri recordUri, string revisionName, DateTime revisionDate)
         {
-            NamedGraphUri = namedGraphUri;
+            RecordUri = recordUri;
             RevisionName = revisionName;
             RevisionDate = revisionDate;
         }
-        public Uri NamedGraphUri {get; set; }
+        public Uri RecordUri {get; set; }
         public string RevisionName { get; set; }
         public DateTime RevisionDate { get; set; }
         public int RevisionNumber {get; set; }
