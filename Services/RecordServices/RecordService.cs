@@ -1,16 +1,10 @@
 using Common.Exceptions;
 using Common.GraphModels;
-using Common.RdfModels;
 using Common.RevisionTrainModels;
-using Common.Utils;
 using Services.FusekiServices;
 using Services.OntologyServices.OntologyService;
 using Services.TransformationServices.SpreadsheetTransformationServices;
 using Services.RevisionServices;
-using Services.Utils;
-using VDS.RDF;
-using System.Text;
-using VDS.RDF.Writing;
 
 namespace Services.RecordServices;
 
@@ -31,64 +25,32 @@ public class RecordService : IRecordService
         _fusekiService = fusekiService;
     }
 
-    public async Task<HttpResponseMessage> UploadExcel(RevisionTrainModel revisionTrain, ResultGraph recordContextResult, Stream content)
+    public string TransformExcel(RevisionTrainModel revisionTrain, Stream content)
     {
-        //var ontology = await _ontologyService.GetSourceOntologies(revisionTrain.TrainType);
-
         var transformationService = GetTransformationService(revisionTrain.TrainType);
-        var record = transformationService.Transform(revisionTrain, content);
 
-        var recordContextResponse = await _fusekiService.AddData(ServerKeys.Main, recordContextResult, "text/turtle");
-
-        var recordResultGraph = new ResultGraph(recordContextResult.Name, record, false);
-        var recordResponse = await _fusekiService.AddData(revisionTrain.TripleStore, recordResultGraph, "text/turtle");
-
-        return recordResponse;
+        return transformationService.Transform(revisionTrain, content);
     }
 
-    public ResultGraph CreateRecordContext(RevisionTrainModel train, string revisionName, DateTime revisionDate)
+    public async Task<HttpResponseMessage> Add(string server, ResultGraph record)
     {
-        var recordContext = new Graph();
-        var latestRevision = train.NamedGraphs.MaxBy(ng => ng.RevisionNumber);
+        return await _fusekiService.AddData(server, record, "text/turtle");
+    }
 
-        var revisionTrainNode = recordContext.CreateUriNode(train.TrainUri);
-        var hasRecordNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/splinter#hasRecord"));
+    public async Task<HttpResponseMessage> Delete(string server, Uri record)
+    {
+        return await _fusekiService.Update(server, GetDropRecordQuery(record.AbsoluteUri));
+    }
 
-        var graphPath = $"https://rdf.equinor.com/graph/{train.TripleStore}/{train.Name}";
-        var graphUri = new Uri($"{graphPath}/{revisionName}");
-        var graphNode = recordContext.CreateUriNode(graphUri);
-
-        recordContext.Assert(new Triple(revisionTrainNode, hasRecordNode, graphNode));
-
-        var RecordClassNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/ontology/record#Record"));
-        var typeOf = recordContext.CreateUriNode(RdfCommonProperties.CreateType());
-
-        recordContext.Assert(new Triple(graphNode, typeOf, RecordClassNode));
-
-        var hasRevisionNameNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/ontology/revision#hasRevisionName"));
-        var revisionNameNode = recordContext.CreateLiteralNode(revisionName); //, XmlSpecsHelper.XmlSchemaDataTypeString);
-
-        recordContext.Assert(new Triple(graphNode, hasRevisionNameNode, revisionNameNode));
-
-        var hasRevisionDateNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/ontology/revision#hasRevisionDate"));
-        var revisionDateNode = recordContext.CreateLiteralNode(DateFormatter.FormateToString(revisionDate)); //, XmlSpecsHelper.XmlSchemaDataTypeDateTime);
-
-        recordContext.Assert(new Triple(graphNode, hasRevisionDateNode, revisionDateNode));
-
-        var hasRevisionNumberNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/ontology/revision#hasRevisionNumber"));
-        var revisionNumberNode = recordContext.CreateLiteralNode($"{latestRevision?.RevisionNumber + 1 ?? 1}"); //, XmlSpecsHelper.XmlSchemaDataTypeInteger);
-
-        recordContext.Assert(new Triple(graphNode, hasRevisionNumberNode, revisionNumberNode));
-
-        if (latestRevision != null)
+    public async Task<HttpResponseMessage> Delete(string server, List<Uri> records)
+    {
+        string deleteAllQuery = string.Empty;
+        foreach (var r in records)
         {
-            var replacesNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/ontology/record#replaces"));
-            var replacesUriNode = recordContext.CreateUriNode(new Uri($"{graphPath}/{latestRevision.RevisionName}"));
-
-            recordContext.Assert(new Triple(graphNode, replacesNode, replacesUriNode));
+            deleteAllQuery += GetDropRecordQuery(r.AbsoluteUri); 
         }
 
-        return new ResultGraph(graphUri.AbsoluteUri, WriteGraphToString(recordContext), true);
+        return await _fusekiService.Update(server, deleteAllQuery);
     }
 
     private ISpreadsheetTransformationService GetTransformationService(string trainType)
@@ -97,11 +59,8 @@ public class RecordService : IRecordService
             throw new RevisionTrainValidationException($"A transformer of for train type {trainType} is not available.");
     }
 
-    private string WriteGraphToString(Graph graph)
+    private string GetDropRecordQuery(string record)
     {
-        using MemoryStream outputStream = new MemoryStream();
-        
-        graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new CompressingTurtleWriter());
-        return Encoding.UTF8.GetString(outputStream.ToArray());
+        return $"DROP GRAPH <{record}> ;";
     }
 }

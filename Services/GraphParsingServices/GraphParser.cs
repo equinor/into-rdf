@@ -17,7 +17,7 @@ public class GraphParser : IGraphParser
         var revisionTrainModel = ParseMainTrain(trainGraph);
         revisionTrainModel.TieContext = ParseTieContext(trainGraph);
         revisionTrainModel.SpreadsheetContext = ParseSpreadsheetContext(trainGraph);
-        revisionTrainModel.NamedGraphs = ParseNamedGraphs(trainGraph);
+        revisionTrainModel.Records = ParseNamedGraphs(trainGraph);
 
         return revisionTrainModel;
     }
@@ -104,9 +104,9 @@ public class GraphParser : IGraphParser
         return spreadsheetContext;
     }
 
-    private List<NamedGraph> ParseNamedGraphs(Graph trainGraph)
+    private List<RecordModels> ParseNamedGraphs(Graph trainGraph)
     {
-        List<NamedGraph> namedGraphs = new List<NamedGraph>();
+        List<RecordModels> namedGraphs = new List<RecordModels>();
 
         var recordNode = trainGraph.GetUriNode(new Uri("https://rdf.equinor.com/ontology/record#Record"));
         if (recordNode == null) { return namedGraphs; }
@@ -123,7 +123,7 @@ public class GraphParser : IGraphParser
             if (revisionDateNode == null) { continue; }
             var revisionDate = DateFormatter.FormateToDate(revisionDateNode.ToString());
 
-            var namedGraph = new NamedGraph(((UriNode)ngt.Subject).Uri, revisionName, revisionDate);
+            var namedGraph = new RecordModels(((UriNode)ngt.Subject).Uri, revisionName, revisionDate);
 
             var revisionNumberNode = GetObjectNodeFromTripleWithSubjectAndPredicate(trainGraph, ngt.Subject, new Uri("https://rdf.equinor.com/ontology/revision#hasRevisionNumber"));
             if (revisionNumberNode != null) { namedGraph.RevisionNumber = Int32.Parse(revisionNumberNode.ToString()); }

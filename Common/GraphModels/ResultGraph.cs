@@ -1,5 +1,3 @@
-using Common.Constants;
-
 namespace Common.GraphModels;
 public class ResultGraph
 {

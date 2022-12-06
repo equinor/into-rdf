@@ -5,7 +5,8 @@ namespace Services.RecordServices;
 
 public interface IRecordService
 {
-    Task<HttpResponseMessage> UploadExcel(RevisionTrainModel train, ResultGraph recordContext, Stream content);
-
-    ResultGraph CreateRecordContext(RevisionTrainModel train, string revisionName, DateTime revisionDate);
+    string TransformExcel(RevisionTrainModel train, Stream content);
+    Task<HttpResponseMessage> Add(string server, ResultGraph record);
+    Task<HttpResponseMessage> Delete(string server, Uri record);
+    Task<HttpResponseMessage> Delete(string server, List<Uri> records);
 }

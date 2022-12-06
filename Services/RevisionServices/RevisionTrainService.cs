@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Services.FusekiServices;
 using Services.ValidationServices.RevisionTrainValidationServices;
+using Services.Utils;
 using Common.Exceptions;
 using Common.GraphModels;
 using Common.Constants;
+using Common.RdfModels;
+using Common.RevisionTrainModels;
 using Common.Utils;
 using VDS.RDF;
-using VDS.RDF.Parsing;
 
 namespace Services.RevisionServices;
 
@@ -32,7 +34,7 @@ public class RevisionTrainService : IRevisionTrainService
         _server = ServerKeys.Main;
     }
 
-    public async Task<HttpResponseMessage> CreateRevisionTrain(HttpRequest request)
+    public async Task<HttpResponseMessage> AddRevisionTrain(HttpRequest request)
     {
         string revisionTrain;
         using (var stream = new StreamReader(request.Body))
@@ -40,6 +42,26 @@ public class RevisionTrainService : IRevisionTrainService
             revisionTrain = await stream.ReadToEndAsync();
         }
 
+        await ValidateTrain(revisionTrain);
+
+        var response = await _fusekiService.AddData(_server, new ResultGraph(GraphConstants.Default, revisionTrain), "text/turtle");
+        _logger.LogInformation("Successfully uploaded revision train");
+
+        return response;
+    }
+
+    public async Task<HttpResponseMessage> RestoreRevisionTrain(string revisionTrain)
+    {
+        await ValidateTrain(revisionTrain);
+
+        var response = await _fusekiService.AddData(_server, new ResultGraph(GraphConstants.Default, revisionTrain), "text/turtle");
+        _logger.LogInformation("Successfully uploaded revision train");
+
+        return response;
+    }
+
+    private async Task ValidateTrain(string revisionTrain)
+    {
         if (revisionTrain == string.Empty)
         {
             _logger.LogWarning("Failed to create revision train because the train is empty");
@@ -60,16 +82,11 @@ public class RevisionTrainService : IRevisionTrainService
             _logger.LogWarning($"Failed to upload revision train as a similarly named train already exists");
             throw new ConflictOnInsertException($"Failed to upload revision train as a similarly named train already exists");
         }
-
-        var response = await _fusekiService.AddData(_server, new ResultGraph(GraphConstants.Default, revisionTrain), "text/turtle");
-        _logger.LogInformation("Successfully uploaded revision train");
-
-        return response;
     }
 
-    public async Task<HttpResponseMessage> GetRevisionTrain(string name)
+    public async Task<HttpResponseMessage> GetRevisionTrainByName(string name)
     {
-        var trainExist = await _fusekiQueryService.Ask(_server, GetAskQuery(TripleContent.Object, name));
+        var trainExist = await _fusekiQueryService.Ask(_server, GraphSupportFunctions.GetAskQuery(TripleContent.Object, name));
 
         if (!trainExist)
         {
@@ -77,7 +94,57 @@ public class RevisionTrainService : IRevisionTrainService
             throw new FileNotFoundException($"Failed to get train with name {name} because it doesn't exist");
         }
 
-        var revisionTrainQuery = GetRevisionTrainQuery(name);
+        var revisionTrainQuery = GetRevisionTrainByNameQuery(name);
+        var response = await _fusekiService.Query(_server, revisionTrainQuery);
+
+        var graph = new Graph();
+        graph.LoadFromString(await response.Content.ReadAsStringAsync());
+
+        var trainNameNode = graph.CreateLiteralNode(name);
+        if (trainNameNode == null) { throw new FileNotFoundException($"Failed to get train with name {name}"); }
+
+        var trainTriple = graph.GetTriples(trainNameNode).First();
+        var trainUri = (UriNode) trainTriple.Subject;
+
+        return await GetRevisionTrainByUri(trainUri.Uri);
+    }
+
+    public async Task<HttpResponseMessage> GetRevisionTrainByRecord(Uri record)
+    {
+        var recordExist = await _fusekiQueryService.Ask(_server, GraphSupportFunctions.GetAskQuery(TripleContent.Subject, record.AbsoluteUri));
+
+        if (!recordExist)
+        {
+            _logger.LogWarning($"Failed to get revision train with record {record} because the record doesn't exist");
+            throw new FileNotFoundException($"Failed to get revision train with record {record} because the record doesn't exist");
+        }
+
+        var revisionTrainQuery = GetRevisionTrainByRecordQuery(record);
+        var response = await _fusekiService.Query(_server, revisionTrainQuery);
+
+        var graph = new Graph();
+        graph.LoadFromString(await response.Content.ReadAsStringAsync());
+
+        var recordUriNode = graph.CreateUriNode(record);
+        var trainTriples = graph.GetTriples(recordUriNode);
+        if (trainTriples.Count() != 1) { throw new FileNotFoundException($"Failed to get record {record}"); }
+
+        var trainUri = (UriNode) trainTriples.First().Subject;
+
+        return await GetRevisionTrainByUri(trainUri.Uri);
+    }
+
+    private async Task<HttpResponseMessage> GetRevisionTrainByUri(Uri trainUri)
+    {
+        var trainExist = await _fusekiQueryService.Ask(_server, GraphSupportFunctions.GetAskQuery(TripleContent.Subject, trainUri.AbsoluteUri));
+
+        if (!trainExist)
+        {
+            _logger.LogWarning($"Failed to get revision train with record {trainUri} because the record doesn't exist");
+            throw new FileNotFoundException($"Failed to get revision train with record {trainUri} because the record doesn't exist");
+        }
+
+        var revisionTrainQuery = GetRevisionTrainByUriQuery(trainUri);
         var response = await _fusekiService.Query(_server, revisionTrainQuery);
 
         return response;
@@ -93,25 +160,84 @@ public class RevisionTrainService : IRevisionTrainService
 
     public async Task<HttpResponseMessage> DeleteRevisionTrain(string name)
     {
-        var trainExist = await _fusekiQueryService.Ask(_server, GetAskQuery(TripleContent.Object, name));
+        var trainExist = await _fusekiQueryService.Ask(_server, GraphSupportFunctions.GetAskQuery(TripleContent.Object, name));
 
         if (!trainExist)
         {
-            _logger.LogWarning($"Failed to delete train because a train with name {name} doesn't exist");
-            throw new FileNotFoundException($"Failed to delete train because a train with name {name} doesn't exist");
+            var message = $"Failed to delete train because a train with name {name} doesn't exist";
+            _logger.LogWarning(message);
+            throw new ObjectNotFoundException(message);
         }
 
-        var response = await _fusekiService.Update(_server, GetDeleteRevisionTrain(name));
+        var response = await _fusekiService.Update(_server, GetDeleteRevisionTrainQuery(name));
 
         return response;
     }
 
-    public async Task<Graph> GetRevisionTrainGraph(string revisionTrainGraph)
+    public async Task<HttpResponseMessage> AddRecordContext(ResultGraph recordContext)
     {
-        Graph revisionTrain = new Graph();
-        var response = await GetRevisionTrain(revisionTrainGraph);
-        revisionTrain.LoadFromString(await response.Content.ReadAsStringAsync(), new TurtleParser());
-        return revisionTrain;
+        return await _fusekiService.AddData(ServerKeys.Main, recordContext, "text/turtle");
+    }
+
+    public ResultGraph CreateRecordContext(RevisionTrainModel train, string revisionName, DateTime revisionDate)
+    {
+        var recordContext = new Graph();
+        var latestRevision = train.Records.MaxBy(ng => ng.RevisionNumber);
+
+        var revisionTrainNode = recordContext.CreateUriNode(train.TrainUri);
+        var hasRecordNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/splinter#hasRecord"));
+
+        var graphPath = $"https://rdf.equinor.com/graph/{train.TripleStore}/{train.Name}";
+        var graphUri = new Uri($"{graphPath}/{revisionName}");
+        var graphNode = recordContext.CreateUriNode(graphUri);
+
+        recordContext.Assert(new Triple(revisionTrainNode, hasRecordNode, graphNode));
+
+        var RecordClassNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/ontology/record#Record"));
+        var typeOf = recordContext.CreateUriNode(RdfCommonProperties.CreateType());
+
+        recordContext.Assert(new Triple(graphNode, typeOf, RecordClassNode));
+
+        var hasRevisionNameNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/ontology/revision#hasRevisionName"));
+        var revisionNameNode = recordContext.CreateLiteralNode(revisionName); //, XmlSpecsHelper.XmlSchemaDataTypeString);
+
+        recordContext.Assert(new Triple(graphNode, hasRevisionNameNode, revisionNameNode));
+
+        var hasRevisionDateNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/ontology/revision#hasRevisionDate"));
+        var revisionDateNode = recordContext.CreateLiteralNode(revisionDate.ToString()); //, XmlSpecsHelper.XmlSchemaDataTypeDateTime);
+
+        recordContext.Assert(new Triple(graphNode, hasRevisionDateNode, revisionDateNode));
+
+        var hasRevisionNumberNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/ontology/revision#hasRevisionNumber"));
+        var revisionNumberNode = recordContext.CreateLiteralNode($"{latestRevision?.RevisionNumber + 1 ?? 1}"); //, XmlSpecsHelper.XmlSchemaDataTypeInteger);
+
+        recordContext.Assert(new Triple(graphNode, hasRevisionNumberNode, revisionNumberNode));
+
+        if (latestRevision != null)
+        {
+            var replacesNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/ontology/record#replaces"));
+            var replacesUriNode = recordContext.CreateUriNode(new Uri($"{graphPath}/{latestRevision.RevisionName}"));
+
+            recordContext.Assert(new Triple(graphNode, replacesNode, replacesUriNode));
+        }
+
+        return new ResultGraph(graphUri.AbsoluteUri, GraphSupportFunctions.WriteGraphToString(recordContext), true);
+    }
+
+    public async Task<HttpResponseMessage> DeleteRecordContext(Uri record)
+    {
+        var recordExist = await _fusekiQueryService.Ask(_server, GraphSupportFunctions.GetAskQuery(TripleContent.Subject, record.AbsoluteUri));
+
+        if (!recordExist)
+        {
+            var message = $"Failed to delete record context because a record with identifier {record} doesn't exist";
+            _logger.LogWarning(message);
+            throw new ObjectNotFoundException(message);
+        }
+
+        var response = await _fusekiService.Update(_server, GetDeleteRecordContextQuery(record));
+
+        return response;
     }
 
     private async Task<bool> RevisionTrainExist(string revisionTrain)
@@ -121,8 +247,8 @@ public class RevisionTrainService : IRevisionTrainService
         var trainIri = trainGraph.GetTriplesWithObject(trainGraph.CreateUriNode(new Uri("https://rdf.equinor.com/splinter#RevisionTrain"))).Single();
         var trainName = trainGraph.GetTriplesWithPredicate(trainGraph.CreateUriNode(new Uri("https://rdf.equinor.com/splinter#name"))).Single();
 
-        var trainExist = await _fusekiQueryService.Ask(_server, GetAskQuery(TripleContent.Subject, trainIri.Subject.ToString()));
-        var trainNameExist = await _fusekiQueryService.Ask(_server, GetAskQuery(TripleContent.Object, trainName.Object.ToString()));
+        var trainExist = await _fusekiQueryService.Ask(_server, GraphSupportFunctions.GetAskQuery(TripleContent.Subject, trainIri.Subject.ToString()));
+        var trainNameExist = await _fusekiQueryService.Ask(_server, GraphSupportFunctions.GetAskQuery(TripleContent.Object, trainName.Object.ToString()));
 
         if (trainExist || trainNameExist)
         {
@@ -136,7 +262,9 @@ public class RevisionTrainService : IRevisionTrainService
         return false;
     }
 
-    private string GetRevisionTrainQuery(string name)
+
+
+    private string GetRevisionTrainByRecordQuery(Uri record)
     {
         var query =
         @$"
@@ -144,13 +272,50 @@ public class RevisionTrainService : IRevisionTrainService
 
         CONSTRUCT 
         {{
-            ?train ?trainProp ?trainValue .
+            ?train splinter:hasRecord <{record}> .  
+        }}
+        WHERE
+        {{
+            ?train splinter:hasRecord <{record}> . 
+        }}
+        ";
+
+        return query;
+    }
+
+    private string GetRevisionTrainByNameQuery(string name)
+    {
+        var query =
+        @$"
+        prefix splinter: <https://rdf.equinor.com/splinter#>
+
+        CONSTRUCT 
+        {{
+            ?train splinter:name '{name}' .
+        }}
+        WHERE
+        {{
+            ?train splinter:name '{name}' .
+        }}
+        ";
+
+        return query;
+    }
+
+    private string GetRevisionTrainByUriQuery(Uri uri)
+    {
+        var query =
+        @$"
+        prefix splinter: <https://rdf.equinor.com/splinter#>
+
+        CONSTRUCT 
+        {{
+            <{uri}> ?trainProp ?trainValue .
             ?trainValue ?contextProp ?contextValue . 
         }}
         WHERE
         {{
-            ?train a splinter:RevisionTrain ;
-                splinter:name '{name}' ;
+            <{uri}> a splinter:RevisionTrain ;
                 ?trainProp ?trainValue .
             OPTIONAL {{?trainValue ?contextProp ?contextValue .}} 
         }}
@@ -181,37 +346,7 @@ public class RevisionTrainService : IRevisionTrainService
         return query;
     }
 
-    private string GetAskQuery(TripleContent tripleContent, string name)
-    {
-        var pattern = string.Empty;
-        switch (tripleContent)
-        {
-            case TripleContent.Subject:
-                pattern = $"<{name}> ?p ?o .";
-                break;
-            case TripleContent.Predicate:
-                pattern = $"?s <{name}> ?o .";
-                break;
-            case TripleContent.Object:
-                pattern = $"?s ?p '{name}' .";
-                break;
-            default:
-                _logger.LogWarning($"Failed to create Ask pattern for train {name}");
-                break;
-        }
-
-        var query = 
-        @$"
-        prefix splinter: <https://rdf.equinor.com/splinter#>
-        ASK 
-        {{
-            {pattern}
-        }}";
-
-        return query;
-    }
-
-    private string GetDeleteRevisionTrain(string name)
+    private string GetDeleteRevisionTrainQuery(string name)
     {
         var query = 
         @$"
@@ -233,6 +368,25 @@ public class RevisionTrainService : IRevisionTrainService
             ?context ?contextProperty ?obj2 .
         }}
         ";
+
+        return query;
+    }
+
+    private string GetDeleteRecordContextQuery(Uri recordContextUri)
+    {
+        var query = 
+        @$"
+        prefix splinter: <https://rdf.equinor.com/splinter#>
+        DELETE 
+        {{
+            ?train splinter:hasRecord <{recordContextUri}> .
+            <{recordContextUri}> ?p ?o .
+        }}
+        WHERE 
+        {{
+            ?train splinter:hasRecord <{recordContextUri}> .
+            <{recordContextUri}> ?p ?o .
+        }}";
 
         return query;
     }

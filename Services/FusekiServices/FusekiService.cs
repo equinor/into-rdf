@@ -1,6 +1,5 @@
 ﻿using System.Net.Http.Headers;
 using Common.AppsettingsModels;
-using Common.Constants;
 using Common.GraphModels;
 using Common.Utils;
 using Microsoft.Extensions.Configuration;
@@ -34,7 +33,7 @@ public class FusekiService : IFusekiService
     {
         VerifyServer(server);
         var response = await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options 
-            => GetDownStreamWebApiOptionsForUpdate(options, sparql, new List<string> { "application/xml"}));
+            => GetDownStreamWebApiOptionsForUpdate(options, sparql, new List<string> { "application/html"}));
 
         return response;
     }

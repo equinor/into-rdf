@@ -19,9 +19,11 @@ public static class SetupExceptionHandling
                 case FusekiException:
                 case ShapeValidationException:
                 case RevisionValidationException:
+                case RevisionTrainValidationException:
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
                     break;
                 case FileNotFoundException:
+                case ObjectNotFoundException:
                     context.Response.StatusCode =StatusCodes.Status404NotFound;
                     break;
                 case UnsupportedContentTypeException:
@@ -30,9 +32,7 @@ public static class SetupExceptionHandling
                 case ConflictOnInsertException:
                     context.Response.StatusCode = StatusCodes.Status409Conflict;
                     break;
-                case RevisionTrainValidationException:
-                    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                    break;
+
                 case InvalidOperationException:
                 default:
                     context.Response.StatusCode = StatusCodes.Status500InternalServerError;
