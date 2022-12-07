@@ -204,7 +204,7 @@ public class RevisionTrainService : IRevisionTrainService
         recordContext.Assert(new Triple(graphNode, hasRevisionNameNode, revisionNameNode));
 
         var hasRevisionDateNode = recordContext.CreateUriNode(new Uri($"https://rdf.equinor.com/ontology/revision#hasRevisionDate"));
-        var revisionDateNode = recordContext.CreateLiteralNode(revisionDate.ToString()); //, XmlSpecsHelper.XmlSchemaDataTypeDateTime);
+        var revisionDateNode = recordContext.CreateLiteralNode(DateFormatter.FormateToString(revisionDate)); //, XmlSpecsHelper.XmlSchemaDataTypeDateTime);
 
         recordContext.Assert(new Triple(graphNode, hasRevisionDateNode, revisionDateNode));
 
@@ -362,7 +362,7 @@ public class RevisionTrainService : IRevisionTrainService
         WHERE
         {{
             ?train splinter:name '{name}' ;
-                (splinter:hasTieContext | splinter:hasSpreadsheetContext) ?context .
+                (splinter:hasTieContext | splinter:hasSpreadsheetContext | splinter:hasRecord) ?context .
 
             ?train ?trainProperty ?obj1 .
             ?context ?contextProperty ?obj2 .
