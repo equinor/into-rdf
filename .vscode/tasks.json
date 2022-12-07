@@ -37,6 +37,36 @@
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
-        }
+        },
+        {
+            "label": "run tests",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+              "test",
+              "/property:GenerateFullPaths=true",
+              "/consoleloggerparameters:NoSummary"
+            ],
+            "options": {
+              "cwd": "${fileDirname}",
+            },
+            "problemMatcher": "$msCompile"
+          },    {
+            "label": "debug tests",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+              "test",
+              "/property:GenerateFullPaths=true",
+              "/consoleloggerparameters:NoSummary"
+            ],
+            "options": {
+              "cwd": "${fileDirname}",
+              "env": {
+                "VSTEST_HOST_DEBUG": "1"
+              }
+            },
+            "problemMatcher": "$msCompile"
+          }
     ]
 }

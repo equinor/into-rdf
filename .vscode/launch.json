@@ -28,6 +28,18 @@
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"
+        },
+        {
+            "name": "Api.Tests",
+            "type": "coreclr",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Api.Tests/bin/Debug/net7.0/Api.Tests.dll",
+            "args": ["test"],
+            "cwd": "${workspaceFolder}/Api.Tests",
+            "request": "launch", // <--- this is the magic
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
         }
     ]
 }

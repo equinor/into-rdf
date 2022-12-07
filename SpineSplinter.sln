@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TieMelConsumer", "TieMelCon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services.Tests", "Services.Tests\Services.Tests.csproj", "{BA5EE965-EDCF-4D5A-85A9-D1E4063C44D6}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Api.Tests", "Api.Tests\Api.Tests.fsproj", "{8CBDE3D1-6531-45C7-9FE3-37D7C316E463}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{BA5EE965-EDCF-4D5A-85A9-D1E4063C44D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA5EE965-EDCF-4D5A-85A9-D1E4063C44D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA5EE965-EDCF-4D5A-85A9-D1E4063C44D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CBDE3D1-6531-45C7-9FE3-37D7C316E463}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CBDE3D1-6531-45C7-9FE3-37D7C316E463}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CBDE3D1-6531-45C7-9FE3-37D7C316E463}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CBDE3D1-6531-45C7-9FE3-37D7C316E463}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

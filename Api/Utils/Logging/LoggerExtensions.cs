@@ -8,7 +8,7 @@ namespace Common.Utils
 {
     public static class LoggerExtensions
     {
-        public static void ConfigureBaseLogging(this LoggerConfiguration loggerConfiguration,
+        public static void ConfigureBaseLogging(this LoggerConfiguration logConfiguration,
             HostBuilderContext context)
         {
             var logLevel = context.HostingEnvironment.IsProduction()
@@ -23,7 +23,7 @@ namespace Common.Utils
                 throw new Exception("Fatal: Unable to get assembly info when configuring logging");
             }
 
-            loggerConfiguration
+            logConfiguration
                 .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft", logLevel)
                 .MinimumLevel.Override("System", logLevel)

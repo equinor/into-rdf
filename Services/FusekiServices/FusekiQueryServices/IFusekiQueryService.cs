@@ -1,5 +1,3 @@
-using Common.FusekiModels;
-
 namespace Services.FusekiServices;
 
 public interface IFusekiQueryService

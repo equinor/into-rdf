@@ -1,19 +1,7 @@
-﻿
-using Azure.Storage.Blobs.Models;
-using Common.Constants;
+﻿using Common.Constants;
 using Common.GraphModels;
-using Common.ProvenanceModels;
-using Common.SpreadsheetModels;
-using Common.Utils;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Services.FusekiServices;
-using Services.OntologyServices.OntologyService;
-using Services.ProvenanceServices;
-using Services.TieMessageServices;
-using Services.TransformationServices.SpreadsheetTransformationServices;
-using Services.TransformationServices.XMLTransformationServices;
-using System.Net;
 
 namespace Services.RdfServices
 {
@@ -33,7 +21,7 @@ namespace Services.RdfServices
             return await _fusekiService.AddData(server, new ResultGraph(GraphConstants.Default, data), contentType);
         }
 
-        public async Task<HttpResponseMessage> QueryFusekiAsUser(string server, string query)
+        public async Task<HttpResponseMessage> QueryFusekiAsUser(string server, string query, IEnumerable<string?>? accepts = null)
         {
             return await _fusekiService.Query(server, query);
         }

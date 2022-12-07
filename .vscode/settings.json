@@ -6,5 +6,6 @@
     "azureFunctions.preDeployTask": "publish (functions)",
     "cSpell.words": [
         "Shipweight"
-    ]
+    ],
+    "FSharp.inlayHints.typeAnnotations": false
 }

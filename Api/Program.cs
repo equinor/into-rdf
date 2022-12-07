@@ -1,56 +1,44 @@
 using Api;
-using Api.Utils.Cors;
-using Api.Utils.Setups;
-using Api.Utils.Swagger;
-using Common.Utils;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Identity.Web;
-using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog((context, services, logConfiguration) =>
-{
-    logConfiguration.ConfigureBaseLogging(context);
-    logConfiguration.AddApplicationInsightsLogging(services);
-});
+// Serilog and ApplicationInsights
+builder.Host.AddLogging();
 
-// Add services to the container.
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
-    .EnableTokenAcquisitionToCallDownstreamApi()
-    .AddFusekiApis(builder.Configuration)
-    .AddDownstreamWebApi(ApiKeys.CommonLib, builder.Configuration.GetSection(ApiKeys.CommonLib))
-    .AddInMemoryTokenCaches();
+// Add JWT auth and downstreamAPI token propagation
+builder.Services.AddMSFTAuthentication(builder.Configuration);
 
-builder.Services.AddApplicationInsightsTelemetry();
+// Regular aspnetcore authorization w/ additional fallback to deny access to
+// routes that do not have explicit authorization requirements
+builder.Services.AddFallbackAuthorization();
 
-builder.SetupCustomSwagger();
-
-builder.Services.AddControllers();
-builder.Services.AddMvc();
+// Add swagger API-doc autogen service w/ oauth2 auth flow configuration
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddServices();
-builder.Services.SetupAuthorization();
-builder.Services.AddApplicationInsightsTelemetry();
-builder.SetupKeyVault();
+builder.Services.AddSwagger(builder.Configuration);
+
+// Add domain services for API logic
+builder.Services.AddAPIServices();
+
+// Add MVC Controllers & Minimal API endpoints
+builder.Services.AddAPIEndpoints();
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-app.SetupCustomSwaggerUi(builder.Configuration);
+// Configure Swagger endpoints and auth
+app.UseSwaggerWithUI(app.Configuration);
+// Configure CORS from appsettings
+app.UseCorsFromAppsettings(app.Configuration, app.Environment);
 
-app.SetupCors(builder);
-
+// Make extra sure everything is on the up'n'up
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
+
 app.UseAuthorization();
 
-app.AddRevisionTrainEndpoints();
-app.AddRecordEndpoints();
-app.AddExceptionHandling();
-app.MapControllers();
+app.UseExceptionHandling();
+
+app.MapAPIEndpoints();
 
 app.Run();
+

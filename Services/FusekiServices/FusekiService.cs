@@ -18,11 +18,12 @@ public class FusekiService : IFusekiService
         _fusekis = config.GetSection(ApiKeys.Servers).Get<List<RdfServer>>().Select(f => f.Name).ToList();
     }
 
-    public async Task<HttpResponseMessage> Query(string server, string sparql)
+    public async Task<HttpResponseMessage> Query(string server, string sparql, IEnumerable<string?>? accepts = null)
     {
+        accepts ??= new []{ "text/turtle", "application/sparql-results+json" };
         VerifyServer(server);
         var response = await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options 
-            => GetDownStreamWebApiOptionsForQuery(options, sparql, new List<string> { "text/turtle", "application/sparql-results+json" }));
+            => GetDownStreamWebApiOptionsForQuery(options, sparql, accepts));
 
         await FusekiUtils.ValidateResponse(response);
 
@@ -71,7 +72,7 @@ public class FusekiService : IFusekiService
         return options;
     }
 
-    private DownstreamWebApiOptions GetDownStreamWebApiOptionsForQuery(DownstreamWebApiOptions options, string sparql, List<string> accepts)
+    private DownstreamWebApiOptions GetDownStreamWebApiOptionsForQuery(DownstreamWebApiOptions options, string sparql, IEnumerable<string?> accepts)
     {
         options.HttpMethod = HttpMethod.Post;
         options.RelativePath = "ds/query";
