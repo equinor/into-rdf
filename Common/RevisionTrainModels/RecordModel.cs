@@ -1,8 +1,8 @@
 namespace Common.RevisionTrainModels
 {
-    public class RecordModels 
+    public class RecordModel 
     {
-        public RecordModels(Uri recordUri, string revisionName, DateTime revisionDate)
+        public RecordModel(Uri recordUri, string revisionName, DateTime revisionDate)
         {
             RecordUri = recordUri;
             RevisionName = revisionName;

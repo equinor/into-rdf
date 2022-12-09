@@ -1,8 +1,5 @@
 ﻿using Common.GraphModels;
 using Common.ProvenanceModels;
-using Services.CommonlibServices;
-using Services.OntologyServices.OntologyService;
-using Services.RdfServices;
 using Services.TransformationServices.RdfTransformationServices;
 using System.Data;
 using VDS.RDF;
