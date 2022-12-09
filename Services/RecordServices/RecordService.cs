@@ -7,9 +7,11 @@ using Repositories.RecordRepository;
 using Repositories.RevisionTrainRepository;
 using Services.FusekiServices;
 using Services.GraphParserServices;
+using Services.TransformationServices.SourceToOntologyConversionService;
 using Services.TransformationServices.SpreadsheetTransformationServices;
 using Services.RevisionServices;
 using Services.Utils;
+using VDS.RDF;
 
 namespace Services.RecordServices;
 
@@ -23,6 +25,7 @@ public class RecordService : IRecordService
     private readonly IRecordRepository _recordRepository;
     private readonly IRevisionTrainRepository _revisionTrainRepository;
     private readonly IOntologyRepository _ontologyRepository;
+    private readonly ISourceToOntologyConversionService _sourceConversionService;
     public RecordService(IRevisionTrainService revisionTrainService,
         IRevisionService revisionService,
         IEnumerable<ISpreadsheetTransformationService> spreadsheetTransformationService,
@@ -30,7 +33,8 @@ public class RecordService : IRecordService
         IGraphParser graphParser,
         IRecordRepository recordRepository,
         IRevisionTrainRepository revisionTrainRepository,
-        IOntologyRepository ontologyRepository)
+        IOntologyRepository ontologyRepository,
+        ISourceToOntologyConversionService sourceToOntologyConversion )
     {
         _revisionTrainService = revisionTrainService;
         _revisionService = revisionService;
@@ -40,9 +44,10 @@ public class RecordService : IRecordService
         _recordRepository = recordRepository;
         _revisionTrainRepository = revisionTrainRepository;
         _ontologyRepository = ontologyRepository;
+        _sourceConversionService = sourceToOntologyConversion;
     }
 
-    public string TransformExcel(RevisionTrainModel revisionTrain, Stream content)
+    public Graph TransformExcel(RevisionTrainModel revisionTrain, Stream content)
     {
         var transformationService = GetTransformationService(revisionTrain.TrainType);
 
@@ -58,7 +63,7 @@ public class RecordService : IRecordService
 
         _revisionService.ValidateRevision(revisionTrainModel, recordInput.RevisionName, date);
 
-        var transformed = String.Empty;
+        var transformed = new Graph();
 
         switch (recordInput.ContentType)
         {
@@ -74,19 +79,21 @@ public class RecordService : IRecordService
                         Supported content types:
                             AML: application/AML,
                             Excel: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
-                            RDF: text/turtle
+                            RDF: text/turtlec
                             ");
         }
 
         var ontologyGraph = await _ontologyRepository.Get(ServerKeys.Main, revisionTrainModel.TrainType);
-        //TODO - Next step SourceToOntologyConversion
+        
+        var converted = ontologyGraph.IsEmpty ? transformed : _sourceConversionService.ConvertSourceToOntology(transformed, ontologyGraph);
+        var convertedString = GraphSupportFunctions.WriteGraphToString(converted);
 
         var recordContext = _revisionTrainService.CreateRecordContext(revisionTrainModel, recordInput.RevisionName, date);
 
         await _revisionTrainRepository.AddRecordContext(recordContext);
         try
         {
-            await _recordRepository.Add(revisionTrainModel.TripleStore, new ResultGraph(recordContext.Name, transformed));
+            await _recordRepository.Add(revisionTrainModel.TripleStore, new ResultGraph(recordContext.Name, convertedString));
         }
         catch
         {

@@ -21,7 +21,7 @@ namespace Services.TransformationServices.SpreadsheetTransformationServices;
         _dataSource = DataSource.LineList;
     }
 
-    public string Transform(RevisionTrainModel revisionTrain, Stream excelStream)
+    public Graph Transform(RevisionTrainModel revisionTrain, Stream excelStream)
     {
         throw new NotImplementedException();
     }

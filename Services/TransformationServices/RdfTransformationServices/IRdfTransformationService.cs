@@ -8,7 +8,7 @@ namespace Services.TransformationServices.RdfTransformationServices;
 
 public interface IRdfTransformationService
 {
-    public ResultGraph Transform(Provenance provenance, Graph ontologyGraph, DataTable inputData);
+    ResultGraph Transform(Provenance provenance, Graph ontologyGraph, DataTable inputData);
 
-    public string Transform(RevisionTrainModel revisionTrainModel, DataTable inputData);
+    Graph Transform(RevisionTrainModel revisionTrainModel, DataTable inputData);
 }

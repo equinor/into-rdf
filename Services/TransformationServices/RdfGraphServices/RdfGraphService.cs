@@ -39,15 +39,6 @@ public class RdfGraphService : IRdfGraphService
         _graph.Merge(AssertRawData(dataTable));
     }
 
-    public void AssertDataTable(DataTable dataTable, Graph ontologyGraph)
-    {
-        _graph.Merge(AssertRawData(dataTable));
-        if (dataTable.TableName == "InputData")
-        {
-            _graph.Merge(AssertOntologyConvertedData(dataTable, ontologyGraph));
-        }
-    }
-
     public ResultGraph GetResultGraph(string datasource)
     {   
         //TODO - The test against datasource is to ensure that MEL is still posted on the default graph.
@@ -64,6 +55,11 @@ public class RdfGraphService : IRdfGraphService
         
         _graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new CompressingTurtleWriter());
         return Encoding.UTF8.GetString(outputStream.ToArray());
+    }
+
+    public Graph GetGraph()
+    {
+        return _graph;
     }
 
     private string GetGraphName()
@@ -102,18 +98,6 @@ public class RdfGraphService : IRdfGraphService
                 graph.Assert(new Triple(rdfSubject, rdfPredicate, rdfObject));
             }
         }
-        return graph;
-    }
-
-    private Graph AssertOntologyConvertedData(DataTable dataTable, Graph ontologyGraph)
-    {        
-        Graph graph = new Graph();
-        if (!ontologyGraph.IsEmpty)
-        {
-            _sourceVocabularyConversionService.ConvertSourceToOntology(dataTable, ontologyGraph);
-            graph = _sourceVocabularyConversionService.GetGraph();
-        }
-
         return graph;
     }
 

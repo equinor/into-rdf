@@ -1,6 +1,7 @@
 ﻿using Common.ProvenanceModels;
 using Services.TransformationServices.SpreadsheetTransformationServices;
 using Services.GraphParserServices;
+using Services.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -42,12 +43,13 @@ namespace Services.Tests
             var trainRevisionModel = _graphParser.ParseRevisionTrain(trainContent);
 
             var resultGraph = melTransformationService.Transform(trainRevisionModel, stream);
+            var result = GraphSupportFunctions.WriteGraphToString(resultGraph);
 
             Assert.NotNull(resultGraph);
 
             var graph = new Graph();
             var parser = new TurtleParser();
-            parser.Load(graph, new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(resultGraph))));
+            parser.Load(graph, new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(result))));
 
             //Actual Data
             rdfTestUtils.AssertTripleAsserted(
