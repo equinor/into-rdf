@@ -12,7 +12,5 @@ public interface IRevisionTrainService
     Task<HttpResponseMessage> GetRevisionTrainByRecord(Uri record);
     Task<HttpResponseMessage> GetAllRevisionTrains();
     Task<HttpResponseMessage> DeleteRevisionTrain(string name);
-    Task<HttpResponseMessage> AddRecordContext(ResultGraph context);
     ResultGraph CreateRecordContext(RevisionTrainModel train, string revisionName, DateTime revisionDate);
-    Task<HttpResponseMessage> DeleteRecordContext(Uri record);    
 }

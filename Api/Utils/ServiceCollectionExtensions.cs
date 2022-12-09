@@ -150,6 +150,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAPIServices(this IServiceCollection services)
     {
         services.AddSplinterServices();
+        services.AddSplinterRepositories();
         return services;
     }
 

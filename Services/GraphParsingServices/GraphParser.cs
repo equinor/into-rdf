@@ -104,9 +104,9 @@ public class GraphParser : IGraphParser
         return spreadsheetContext;
     }
 
-    private List<RecordModels> ParseNamedGraphs(Graph trainGraph)
+    private List<RecordModel> ParseNamedGraphs(Graph trainGraph)
     {
-        List<RecordModels> namedGraphs = new List<RecordModels>();
+        List<RecordModel> namedGraphs = new List<RecordModel>();
 
         var recordNode = trainGraph.GetUriNode(new Uri("https://rdf.equinor.com/ontology/record#Record"));
         if (recordNode == null) { return namedGraphs; }
@@ -123,7 +123,7 @@ public class GraphParser : IGraphParser
             if (revisionDateNode == null) { continue; }
             var revisionDate = DateFormatter.FormateToDate(revisionDateNode.ToString());
 
-            var namedGraph = new RecordModels(((UriNode)ngt.Subject).Uri, revisionName, revisionDate);
+            var namedGraph = new RecordModel(((UriNode)ngt.Subject).Uri, revisionName, revisionDate);
 
             var revisionNumberNode = GetObjectNodeFromTripleWithSubjectAndPredicate(trainGraph, ngt.Subject, new Uri("https://rdf.equinor.com/ontology/revision#hasRevisionNumber"));
             if (revisionNumberNode != null) { namedGraph.RevisionNumber = Int32.Parse(revisionNumberNode.ToString()); }

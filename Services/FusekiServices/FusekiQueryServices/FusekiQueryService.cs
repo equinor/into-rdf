@@ -2,6 +2,8 @@ using Common.FusekiModels;
 using Common.Utils;
 using Microsoft.Extensions.Logging;
 using Services.FusekiMappers;
+using VDS.RDF;
+using VDS.RDF.Parsing;
 
 namespace Services.FusekiServices;
 
@@ -21,6 +23,22 @@ public class FusekiQueryService : IFusekiQueryService
         var result = FusekiResponseToPropsMapper.MapResponse<T>(await Select(server, sparql));
 
         return result;
+    }
+
+    public async Task<Graph> Construct(string server, string query)
+    {
+        var result = await _fusekiService.Query(server, query);
+
+        _logger.LogInformation(result != null ? $"Successfully retrieved ontologies" : $"Failed to retrieve ontologies");
+
+        var resultSerialization = result != null ? await FusekiUtils.SerializeResponse(result) : string.Empty;
+        
+        Graph graph = new Graph();
+        if (resultSerialization != string.Empty)
+        {
+            graph.LoadFromString(resultSerialization, new TurtleParser());
+        }
+        return graph;
     }
 
     private async Task<FusekiSelectResponse> Select(string server, string sparql)

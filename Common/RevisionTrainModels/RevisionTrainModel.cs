@@ -8,7 +8,7 @@
             Name = name;
             TripleStore = tripleStore;
             TrainType = trainType;
-            Records = new List<RecordModels>();
+            Records = new List<RecordModel>();
         }
 
         public Uri TrainUri { get; set; }
@@ -17,6 +17,6 @@
         public string TrainType { get; set; }
         public TieContext? TieContext { get; set; }
         public SpreadsheetContext? SpreadsheetContext { get; set; }
-        public List<RecordModels> Records {get; set; }
+        public List<RecordModel> Records {get; set; }
     }
 }

@@ -174,11 +174,6 @@ public class RevisionTrainService : IRevisionTrainService
         return response;
     }
 
-    public async Task<HttpResponseMessage> AddRecordContext(ResultGraph recordContext)
-    {
-        return await _fusekiService.AddData(ServerKeys.Main, recordContext, "text/turtle");
-    }
-
     public ResultGraph CreateRecordContext(RevisionTrainModel train, string revisionName, DateTime revisionDate)
     {
         var recordContext = new Graph();
@@ -222,22 +217,6 @@ public class RevisionTrainService : IRevisionTrainService
         }
 
         return new ResultGraph(graphUri.AbsoluteUri, GraphSupportFunctions.WriteGraphToString(recordContext), true);
-    }
-
-    public async Task<HttpResponseMessage> DeleteRecordContext(Uri record)
-    {
-        var recordExist = await _fusekiQueryService.Ask(_server, GraphSupportFunctions.GetAskQuery(TripleContent.Subject, record.AbsoluteUri));
-
-        if (!recordExist)
-        {
-            var message = $"Failed to delete record context because a record with identifier {record} doesn't exist";
-            _logger.LogWarning(message);
-            throw new ObjectNotFoundException(message);
-        }
-
-        var response = await _fusekiService.Update(_server, GetDeleteRecordContextQuery(record));
-
-        return response;
     }
 
     private async Task<bool> RevisionTrainExist(string revisionTrain)
@@ -368,25 +347,6 @@ public class RevisionTrainService : IRevisionTrainService
             ?context ?contextProperty ?obj2 .
         }}
         ";
-
-        return query;
-    }
-
-    private string GetDeleteRecordContextQuery(Uri recordContextUri)
-    {
-        var query = 
-        @$"
-        prefix splinter: <https://rdf.equinor.com/splinter#>
-        DELETE 
-        {{
-            ?train splinter:hasRecord <{recordContextUri}> .
-            <{recordContextUri}> ?p ?o .
-        }}
-        WHERE 
-        {{
-            ?train splinter:hasRecord <{recordContextUri}> .
-            <{recordContextUri}> ?p ?o .
-        }}";
 
         return query;
     }

@@ -1,13 +1,13 @@
 using Api.Utils.Bindings;
 using Common.Exceptions;
 using Common.GraphModels;
+using Common.RevisionTrainModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Repositories.RevisionTrainRepository;
 using Services.GraphParserServices;
 using Services.RecordServices;
 using Services.RevisionServices;
-using Services.Utils;
-using VDS.RDF;
 
 namespace Api;
 
@@ -17,7 +17,7 @@ public static class RouteBuilderExtensions
 
     public static B MapRevisionTrainEndpoints<B>(this B app)
     where B : IEndpointRouteBuilder
-   {
+    {
         app.MapPost("revision-trains", [Authorize] async (HttpRequest request, HttpContext context, [FromServices] IRevisionTrainService revisionTrainService)
             =>
             {
@@ -93,8 +93,7 @@ public static class RouteBuilderExtensions
             .WithTags(trainTag);
         return app;
     }
-    private static readonly string[] namedGraphTag = { "Record" };
-    
+
     private static readonly string[] recordTag = { "Record" };
     public static B MapRecordEndpoints<B>(this B app)
     where B : IEndpointRouteBuilder
@@ -105,64 +104,27 @@ public static class RouteBuilderExtensions
             string revisionDate,
             HttpContext context,
             FileBinding fileBinding,
-            [FromServices] IRecordService recordService,
-            [FromServices] IRevisionTrainService revisionTrainService,
-            [FromServices] IGraphParser graphParser,
-            [FromServices] IRevisionService revisionService)
+            [FromServices] IRecordService recordService)
             =>
         {
             if (fileBinding.File is null) throw new InvalidOperationException("No file");
 
-            var trainResponse = await revisionTrainService.GetRevisionTrainByName(revisionTrainName);
-            var revisionTrain = await trainResponse.Content.ReadAsStringAsync();
-            var revisionTrainModel = graphParser.ParseRevisionTrain(revisionTrain);
-            DateTime date = DateFormatter.FormateToDate(revisionDate);
+            var recordInput = new RecordInputModel(
+                revisionTrainName,
+                revision,
+                revisionDate,
+                fileBinding.File.OpenReadStream(),
+                fileBinding.File.ContentType);
 
-            revisionService.ValidateRevision(revisionTrainModel, revision, date);
+            var response = await recordService.Add(recordInput);
 
-            var transformed = String.Empty;
-
-            switch (fileBinding.File.ContentType)
-            {
-                case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                    transformed = recordService.TransformExcel(revisionTrainModel, fileBinding.File.OpenReadStream());
-                    break;
-                case "application/AML":
-                    throw new NotImplementedException("Splinter will soon have AML support");
-                case "text/turtle":
-                    throw new NotImplementedException("WHAT? Isn't Splinter handling RDF yet? Ehhh, no");
-                default:
-                    throw new UnsupportedContentTypeException(@$"Unsupported Media Type for IFormFile {fileBinding.File.ContentType}.
-                        Supported content types:
-                            AML: application/AML,
-                            Excel: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
-                            RDF: text/turtle
-                            ");
-            }
-
-            var recordContext = revisionTrainService.CreateRecordContext(revisionTrainModel, revision, date);
-            var contextResponse = await revisionTrainService.AddRecordContext(recordContext);
-
-            if (!contextResponse.IsSuccessStatusCode) { throw new InvalidOperationException($"Failed to add record context {recordContext.Content}"); }
-            
-            var recordResponse = await recordService.Add(revisionTrainModel.TripleStore, new ResultGraph(recordContext.Name, transformed));
-
-            if (!recordResponse.IsSuccessStatusCode)
-            {
-                var restore = await revisionTrainService.DeleteRecordContext(new Uri(recordContext.Name));
-
-                var message = await recordResponse.Content.ReadAsStringAsync();
-                var restoreMessage = restore.IsSuccessStatusCode ? "WARNING: Record context is successfully restored" : "ERROR: Failed to restore record context";
-                throw new InvalidOperationException($"{restoreMessage}, but failed to add record {recordContext.Name} because {message}.");
-            }
-
-            SetContextContentType(context, recordResponse);
-            return await recordResponse.Content.ReadAsStringAsync();
+            return Results.Created(context.Request.Path, response);
         }
             )
             .Accepts<FileBinding>("multipart/form-data")
-            .Produces<string>(StatusCodes.Status200OK, "application/json")
+            .Produces(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status500InternalServerError)
             .WithTags(recordTag);
 
         app.MapDelete("record", [Authorize] async (
@@ -171,7 +133,8 @@ public static class RouteBuilderExtensions
             [FromServices] IRecordService recordService,
             [FromServices] IRevisionTrainService revisionTrainService,
             [FromServices] IGraphParser graphParser,
-            [FromServices] IRevisionService revisionService)
+            [FromServices] IRevisionService revisionService,
+            [FromServices] IRevisionTrainRepository revisionTrainRepository)
             =>
         {
             var recordUri = new Uri(record);
@@ -185,24 +148,22 @@ public static class RouteBuilderExtensions
 
             if (latestRecord.RecordUri != recordUri) { throw new InvalidOperationException($"Failed to delete record {recordUri.AbsoluteUri}. The latest revision {latestRecord.RecordUri} must be deleted first"); }
 
-            var responseTrain = await revisionTrainService.DeleteRecordContext(latestRecord.RecordUri);
-
-            if (!responseTrain.IsSuccessStatusCode){ throw new InvalidOperationException($"Failed to delete record {recordUri.AbsoluteUri}, because the record context couldn't be removed");}
-
-            var responseRecord = await recordService.Delete(revisionTrainModel.TripleStore, latestRecord.RecordUri);
-
-            if (!responseRecord.IsSuccessStatusCode)
+            await revisionTrainRepository.DeleteRecordContext(latestRecord.RecordUri);
+            try
             {
-                var restore = await revisionTrainService.AddRecordContext(new ResultGraph(recordUri.AbsoluteUri, revisionTrain, true));
-
-                var message = await responseRecord.Content.ReadAsStringAsync();
-                var restoreMessage = restore.IsSuccessStatusCode ? "WARNING: Record context is successfully restored" : "ERROR: Failed to restore record context";
-                throw new InvalidOperationException($"{restoreMessage}, but failed to delete record {record} because {message}.");
+                await recordService.Delete(revisionTrainModel.TripleStore, latestRecord.RecordUri);
+            }
+            catch
+            {
+                await revisionTrainRepository.AddRecordContext(new ResultGraph(recordUri.AbsoluteUri, revisionTrain, true));
+                throw;
             }
 
-            return await responseRecord.Content.ReadAsStringAsync();
+            return Results.NoContent();
         })
-         .Produces<string>(StatusCodes.Status200OK, "application/html")
+         .Produces(StatusCodes.Status204NoContent)
+         .Produces(StatusCodes.Status400BadRequest)
+         .Produces(StatusCodes.Status500InternalServerError)
          .WithTags(recordTag);
         return app;
     }
@@ -222,5 +183,4 @@ public static class RouteBuilderExtensions
             context.Response.ContentType = response.Content.Headers?.ContentType?.ToString() ?? "text/turtle";
         }
     }
-
 }

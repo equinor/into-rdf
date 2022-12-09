@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Services.DomReaderServices.ExcelDomReaderServices;
 using Services.FusekiServices;
-using Services.OntologyServices.OntologyService;
 using Services.RecordServices;
 using Services.GraphParserServices;
 using Services.ProvenanceServices;
@@ -21,6 +20,9 @@ using Services.CommonlibServices;
 using Services.CommonLibToRdfServices;
 using Services.RevisionServices;
 using Services.ValidationServices.RevisionTrainValidationServices;
+using Repositories.OntologyRepository;
+using Repositories.RecordRepository;
+using Repositories.RevisionTrainRepository;
 
 namespace Services.DependencyInjection;
 public static class SetupServices
@@ -36,7 +38,6 @@ public static class SetupServices
         services.AddScoped<IRdfPreprocessingService, RdfPreprocessingService>();
         services.AddScoped<IRdfService, RdfService>();
         services.AddScoped<IXmlRdfService, XmlRdfService>();
-        services.AddScoped<IOntologyService, OntologyService>();
         services.AddScoped<IRdfTableBuilderFactory, RdfTableBuilderFactory>();
         services.AddScoped<IRdfTableBuilderService, ExcelRdfTableBuilderService>();
         services.AddScoped<IRdfTableBuilderService, ShipweightRdfTableBuilderService>();
@@ -55,8 +56,16 @@ public static class SetupServices
         services.AddScoped<IRevisionTrainValidator, RevisionTrainValidator>();
         services.AddScoped<IRecordService, RecordService>();
         services.AddScoped<IGraphParser, GraphParser>();
-        services.AddScoped<IRevisionService, RevisionService>();
-        
+        services.AddScoped<IRevisionService, RevisionService>();        
+        return services;
+    }
+
+    public static IServiceCollection AddSplinterRepositories(this IServiceCollection services)
+    {
+        services.AddTransient<IOntologyRepository, OntologyRepository>();
+        services.AddTransient<IRecordRepository, RecordRepository>();
+        services.AddTransient<IRevisionTrainRepository, RevisionTrainRepository>();
+
         return services;
     }
 

@@ -1,9 +1,10 @@
 ﻿using Common.GraphModels;
 using Common.ProvenanceModels;
+using Common.Utils;
 using Services.CommonlibServices;
 using Services.FusekiServices;
-using Services.OntologyServices.OntologyService;
 using Services.ProvenanceServices;
+using Repositories.OntologyRepository;
 
 namespace Services.CommonLibToRdfServices;
 
@@ -11,15 +12,15 @@ public class CommonLibToRdfService : ICommonLibToRdfService
 {
     private readonly ICommonLibService _commonLibService;
     private readonly ICommonLibTransformationService _commonLibTransformationService;
-    private readonly IOntologyService _ontologyService;
+    private readonly IOntologyRepository _ontologyRepository;
     private readonly IFusekiService _fusekiService;
     private readonly IProvenanceService _provenanceService;
 
-    public CommonLibToRdfService(ICommonLibService commonLibService, ICommonLibTransformationService commonLibTransformationService, IOntologyService ontologyService, IFusekiService fusekiService, IProvenanceService provenanceService)
+    public CommonLibToRdfService(ICommonLibService commonLibService, ICommonLibTransformationService commonLibTransformationService, IOntologyRepository ontologyRepository, IFusekiService fusekiService, IProvenanceService provenanceService)
     {
         _commonLibService = commonLibService;
         _commonLibTransformationService = commonLibTransformationService;
-        _ontologyService = ontologyService;
+        _ontologyRepository = ontologyRepository;
         _fusekiService = fusekiService;
         _provenanceService = provenanceService;
     }
@@ -45,7 +46,7 @@ public class CommonLibToRdfService : ICommonLibToRdfService
 
         if (provenance.RevisionStatus is not RevisionStatus.New or RevisionStatus.Update) return null;
 
-        var ontology = await _ontologyService.GetSourceOntologies(lowercaseLibrary);
+        var ontology = await _ontologyRepository.Get(ServerKeys.Main, lowercaseLibrary);
         var resultGraph = _commonLibTransformationService.Transform(provenance, ontology, records);
         await _fusekiService.AddData(server, resultGraph, "text/turtle");
         return resultGraph;

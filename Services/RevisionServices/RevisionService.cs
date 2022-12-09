@@ -12,7 +12,7 @@ public class RevisionService : IRevisionService
         if (existingRevisions.Count() > 0)
         {
             var exists = existingRevisions.Any(ng => ng.RevisionName == revision);
-            if (exists == true) { throw new RevisionValidationException($"A revision with name {revision} exists already for train {revisionTrain.Name}"); }
+            if (exists == true) { throw new RevisionValidationException($"A revision named {revision} exists already for train {revisionTrain.Name}"); }
 
             var latestRevision = revisionTrain.Records.MaxBy(ng => ng.RevisionNumber);
             if (latestRevision == null) { throw new InvalidOperationException($"Failed to retrieve latest revision for revision train {revisionTrain.Name}"); }
