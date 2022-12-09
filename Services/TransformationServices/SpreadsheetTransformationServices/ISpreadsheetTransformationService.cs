@@ -9,6 +9,6 @@ namespace Services.TransformationServices.SpreadsheetTransformationServices;
 
 public interface ISpreadsheetTransformationService
 {
-    string Transform(RevisionTrainModel revisionTrain, Stream content);
+    Graph Transform(RevisionTrainModel revisionTrain, Stream content);
     string GetDataSource();
 }

@@ -4,22 +4,22 @@
 
 <https://rdf.equinor.com/revision-train/C277-SI-Z-LA-00002> a splinter:RevisionTrain ;
     splinter:name "C277-SI-Z-LA-00002" ;
-    splinter:tripleStore "wisting" ;
-    splinter:trainType "mel";
+    splinter:tripleStore "test" ;
+    splinter:trainType "linelist";
     splinter:hasTieContext <https://rdf.equinor.com/revision-train/C277-SI-Z-LA-00002_TieContext> ;
     splinter:hasSpreadsheetContext <https://rdf.equinor.com/revision-train/C277-SI-Z-LA-00002_SpreadsheetContext> .
 
 <https://rdf.equinor.com/revision-train/C277-SI-Z-LA-00002_TieContext> a splinter:TieContext ;
-    commonlib:facilityName "WIST" ;
+    commonlib:facilityName "test" ;
     commonlib:objectName "C277-SI-Z-LA-00002" ;
     commonlib:contractNumber "4504074279" ;
     commonlib:projectCode "L.O537C.001" ;
     commonlib:contractorCode "SI" ;
-    commonlib:documentTitle "MASTER EQUIPMENT LIST - MEL" .
+    commonlib:documentTitle "TEST" .
 
 <https://rdf.equinor.com/revision-train/C277-SI-Z-LA-00002_SpreadsheetContext> a splinter:SpreadsheetContext ;
-    spreadsheet:sheetName "MEL SE Main Equipment" ;
+    spreadsheet:sheetName "Test" ;
     spreadsheet:headerRow 6 ;
     spreadsheet:dataStartRow 8 ;
     spreadsheet:startColumn 1 ;
-    spreadsheet:identityColumn "Tag Number" .
+    spreadsheet:identityColumn "Line%20number" .

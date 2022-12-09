@@ -31,14 +31,14 @@ public class RdfTransformationService : IRdfTransformationService
         foreach (DataTable table in rdfDataSet.Tables)
         {
             _logger.LogDebug("<RdfTransformer> - Transform: Asserting data from table: {tableName}", table.TableName);
-            _rdfGraphService.AssertDataTable(table, ontologyGraph);
+            _rdfGraphService.AssertDataTable(table);
             _logger.LogDebug("<RdfTransformer> - Transform: Asserted data from table: {tableName}", table.TableName);
         }
 
         return _rdfGraphService.GetResultGraph(provenance.DataSource);
     }
 
-    public string Transform(RevisionTrainModel revisionTrain, DataTable data)
+    public Graph Transform(RevisionTrainModel revisionTrain, DataTable data)
     {
         var rdfDataSet = _rdfPreprocessor.CreateRdfTable(revisionTrain, data);
 
@@ -49,6 +49,6 @@ public class RdfTransformationService : IRdfTransformationService
             _logger.LogDebug("<RdfTransformer> - Transform: Asserted data from table: {tableName}", table.TableName);
         }
 
-        return _rdfGraphService.WriteGraphToString();
+        return _rdfGraphService.GetGraph();
     }
 }

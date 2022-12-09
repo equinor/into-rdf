@@ -13,23 +13,24 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
 
     public SourceToOntologyConversionService(ILogger<SourceToOntologyConversionService> logger)
     {
-        _graph = InitializeGraph();
+        _graph = new Graph();
         _logger = logger;
     }
 
     private Graph InitializeGraph()
     {
-        var graph = new Graph();
+        _graph = new Graph();
         foreach (var pair in RdfPrefixes.Prefix2Uri)
         {
-            graph.NamespaceMap.AddNamespace(pair.Key, pair.Value);
+            _graph.NamespaceMap.AddNamespace(pair.Key, pair.Value);
         }
 
-        return graph;
+        return _graph;
     }
 
-    public void ConvertSourceToOntology(DataTable data, Graph ontologyGraph)
+    public Graph ConvertSourceToOntology(Graph sourceGraph, Graph ontologyGraph)
     {
+        InitializeGraph();
         var ontologyNamespaces = GetOntologyNamespace(ontologyGraph);
 
         foreach (var ns in ontologyNamespaces)
@@ -37,39 +38,32 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
             _graph.NamespaceMap.AddNamespace(ns.Key, new Uri(ns.Value));
         }
 
-        foreach (DataRow row in data.Rows)
+        var tripleCollection = sourceGraph.Triples;
+
+        foreach (var triple in tripleCollection)
         {
-            var rowIndividual = _graph.CreateUriNode((Uri)row["id"]);
-            AssertOwlNamedIndividual(rowIndividual);
+            var superPredicates = GetSuperPredicates(ontologyGraph, triple.Predicate);
 
-            foreach (DataColumn header in data.Columns)
+            if (superPredicates.Count() == 0)
             {
-                if (header.ColumnName == "id" || IsNull(row[header]))
-                {
-                    continue;
-                }
+                AssertTriple(triple.Subject, triple.Predicate, triple.Object);
+            }
 
-                var cellValue = row[header]?.ToString() ?? "";
-                var headerPredicate = ontologyGraph.CreateUriNode(new Uri(header.ToString()));
-
-                //Normally, header predicates only have a single super predicate, but we want to allow for several.
-                //Example: <https://rdf.equinor.com/source/linelist#Wall%20thk.> rdfs:subPropertyOf :hasWallThicknessQuantity .
-                var superPredicates = GetSuperPredicates(ontologyGraph, headerPredicate);
-
-                foreach (var superPredicate in superPredicates)
-                {
-                    TraversePredicate(ontologyGraph, rowIndividual, rowIndividual, superPredicate, cellValue);
-                }
+            foreach (var superPredicate in superPredicates)
+            {
+                TraversePredicate(ontologyGraph, triple.Subject, triple.Subject, superPredicate, triple.Object);
             }
         }
+
+        return GetGraph();
     }
 
-    public Graph GetGraph()
+    private Graph GetGraph()
     {
         return _graph;
     }
 
-    private void TraversePredicate(Graph ontologyGraph, INode baseSubjectIndividual, INode subjectIndividual, INode predicate, string cellValue)
+    private void TraversePredicate(Graph ontologyGraph, INode baseSubjectIndividual, INode subjectIndividual, INode predicate, INode objectIndividual)
     {
         if (HasSuperPredicate(ontologyGraph, predicate, RdfCommonProperties.CreateHasPhysicalQuantity()))
         {
@@ -78,7 +72,7 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
             {
                 AssertRangesAsCustomProperty(baseSubjectIndividual, subjectIndividual, rangeOfPredicate, _graph.CreateUriNode(RdfCommonProperties.CreateHasPhysicalQuantity()));
 
-                TraversePredicatesWithDomain(ontologyGraph, baseSubjectIndividual, subjectIndividual, rangeOfPredicate, cellValue);
+                TraversePredicatesWithDomain(ontologyGraph, baseSubjectIndividual, rangeOfPredicate, objectIndividual);
             }
         }
         else if (HasSuperPredicate(ontologyGraph, predicate, RdfCommonProperties.CreateQuantityQualifiedAs()))
@@ -88,7 +82,7 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
             {
                 AssertRangesAsCustomProperty(baseSubjectIndividual, subjectIndividual, rangeOfPredicate, _graph.CreateUriNode(RdfCommonProperties.CreateQuantityQualifiedAs()));
 
-                TraversePredicatesWithDomain(ontologyGraph, baseSubjectIndividual, subjectIndividual, rangeOfPredicate, cellValue);
+                TraversePredicatesWithDomain(ontologyGraph, baseSubjectIndividual, rangeOfPredicate, objectIndividual);
             }
         }
         else if (HasSuperPredicate(ontologyGraph, predicate, RdfCommonProperties.CreateDatumUOM()))
@@ -97,15 +91,16 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
         }
         else if (HasSuperPredicate(ontologyGraph, predicate, RdfCommonProperties.CreateDatumValue()))
         {
-            AssertDatumValue(ontologyGraph, subjectIndividual, predicate, cellValue);
+            AssertDatumValue(ontologyGraph, subjectIndividual, predicate, objectIndividual);
         }
         else if (HasSuperPredicate(ontologyGraph, predicate, RdfCommonProperties.CreateObjectProperty()))
         {
-            //TODO - TO BE IMPLEMENTED WHEN KRAFLA LINE LIST IS COVERED BY ONTOLOGY 
+            //TODO - TO BE IMPLEMENTED WHEN KRAFLA LINE LIST IS COVERED BY ONTOLOGY
+            AssertObjectIndividual(subjectIndividual, predicate, objectIndividual);
         }
         else if (HasSuperPredicate(ontologyGraph, predicate, RdfCommonProperties.CreateDatatypeProperty()))
         {
-            AssertValue(ontologyGraph, subjectIndividual, predicate, cellValue);
+            AssertValue(ontologyGraph, subjectIndividual, predicate, objectIndividual);
         }
     }
 
@@ -162,7 +157,7 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
         return predicatesWithDomain;
     }
 
-    private void TraversePredicatesWithDomain(Graph ontologyGraph, INode baseSubjectIndividual, INode subjectIndividual, INode domainObject, string cellValue)
+    private void TraversePredicatesWithDomain(Graph ontologyGraph, INode baseSubjectIndividual, INode domainObject, INode objectIndividual)
     {
         var nextSubjectIndividual = CreateIndividualWithTypeSuffix(baseSubjectIndividual, domainObject);
 
@@ -175,13 +170,19 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
 
         foreach (var predicateWithDomain in predicatesWithDomain)
         {
-            TraversePredicate(ontologyGraph, baseSubjectIndividual, nextSubjectIndividual, predicateWithDomain, cellValue);
+            TraversePredicate(ontologyGraph, baseSubjectIndividual, nextSubjectIndividual, predicateWithDomain, objectIndividual);
         }
     }
 
     private string GetUriFragment(INode node)
     {
         return node.ToString().Split("#")[1];
+    }
+
+    private string GetUriPath(INode node)
+    {
+        var index = node.ToString().LastIndexOf("/");
+        return node.ToString()[..index];
     }
 
     private void AssertOwlNamedIndividual(INode individual)
@@ -212,45 +213,45 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
         AssertProperty(subjectIndividual, customPredicate, objectIndividual);
     }
 
-    private void AssertDatumValue(Graph ontologyGraph, INode subjectIndividual, INode predicate, string cellValue)
+    private void AssertDatumValue(Graph ontologyGraph, INode subjectIndividual, INode predicate, INode objectIndividual)
     {
         var datatypesOfPredicate = GetRangesFromPredicate(ontologyGraph, predicate);
 
         if (datatypesOfPredicate.Count() != 1)
         {
             _logger.LogWarning($"Wrong number ({datatypesOfPredicate.Count()}) of datatypes for predicate {predicate}");
-            AssertValueWithoutDatatype(subjectIndividual, _graph.CreateUriNode(RdfCommonProperties.CreateDatumValue()), cellValue);
+            AssertValueWithoutDatatype(subjectIndividual, _graph.CreateUriNode(RdfCommonProperties.CreateDatumValue()), objectIndividual);
             return;
         }
 
         var datatype = datatypesOfPredicate.First();
-        AssertValueWithDatatype(subjectIndividual, _graph.CreateUriNode(RdfCommonProperties.CreateDatumValue()), datatype, cellValue);
+        AssertValueWithDatatype(subjectIndividual, _graph.CreateUriNode(RdfCommonProperties.CreateDatumValue()), datatype, objectIndividual);
     }
 
-    private void AssertValue(Graph ontologyGraph, INode subjectIndividual, INode predicate, string cellValue)
+    private void AssertValue(Graph ontologyGraph, INode subjectIndividual, INode predicate, INode objectIndividual)
     {
         var datatypesOfPredicate = GetRangesFromPredicate(ontologyGraph, predicate);
 
         if (datatypesOfPredicate.Count() != 1)
         {
             _logger.LogDebug($"Wrong number ({datatypesOfPredicate.Count()}) of datatypes for predicate {predicate}");
-            AssertValueWithoutDatatype(subjectIndividual, predicate, cellValue);
+            AssertValueWithoutDatatype(subjectIndividual, predicate, objectIndividual);
             return;
         }
 
         var datatype = datatypesOfPredicate.First();
-        AssertValueWithDatatype(subjectIndividual, predicate, datatype, cellValue);
+        AssertValueWithDatatype(subjectIndividual, predicate, datatype, objectIndividual);
     }
 
-    private void AssertValueWithDatatype(INode subjectIndividual, INode predicate, INode datatype, string cellValue)
+    private void AssertValueWithDatatype(INode subjectIndividual, INode predicate, INode datatype, INode objectIndividual)
     {
-        var typedValueLiteral = _graph.CreateLiteralNode(cellValue.ToString(), new Uri(datatype.ToString()));
+        var typedValueLiteral = _graph.CreateLiteralNode(objectIndividual.ToString(), new Uri(datatype.ToString()));
         AssertTriple(subjectIndividual, predicate, typedValueLiteral);
     }
 
-    private void AssertValueWithoutDatatype(INode subjectIndividual, INode predicate, string cellValue)
+    private void AssertValueWithoutDatatype(INode subjectIndividual, INode predicate, INode objectIndividual)
     {
-        AssertTriple(subjectIndividual, predicate, _graph.CreateLiteralNode(cellValue.ToString()));
+        AssertTriple(subjectIndividual, predicate, objectIndividual);
     }
 
     private void AssertUomProperty(Graph ontologyGraph, INode subjectIndividual, INode predicate)
@@ -265,6 +266,13 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
 
         var uom = uomsOfPredicate.First();
         AssertProperty(subjectIndividual, _graph.CreateUriNode(RdfCommonProperties.CreateDatumUOM()), uom);
+    }
+
+    private void AssertObjectIndividual(INode subjectIndividual, INode predicate, INode objectIndividual)
+    {
+        var path = GetUriPath(subjectIndividual);
+        var objectUriNode = _graph.CreateUriNode(new Uri(path + objectIndividual.ToString()));
+        AssertTriple(subjectIndividual, predicate, objectUriNode);
     }
 
     private void AssertTriple(INode subjectIndividual, INode predicate, INode rangeIndividual)

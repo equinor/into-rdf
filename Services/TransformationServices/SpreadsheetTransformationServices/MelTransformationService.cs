@@ -25,7 +25,7 @@ public class MelTransformationService : ISpreadsheetTransformationService
         _dataSource = DataSource.Mel;
     }
 
-    public string Transform(RevisionTrainModel revisionTrain, Stream content)
+    public Graph Transform(RevisionTrainModel revisionTrain, Stream content)
     {
         if(revisionTrain.SpreadsheetContext == null) { throw new InvalidOperationException("Missing spreadsheet context"); }
         _logger.LogInformation("<MelTransformer> - Transform: Starting parsing of spreadsheet data");

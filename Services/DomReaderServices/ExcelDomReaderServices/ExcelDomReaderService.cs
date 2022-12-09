@@ -89,6 +89,11 @@ public class ExcelDomReaderService : IExcelDomReaderService
         {
             var identityIndex = headerRow.FindIndex(x => x == identityColumn);
 
+            if (identityIndex == - 1)
+            {
+                throw new InvalidOperationException("Failed to find specified identity column: {identityColumn}");
+            }
+
             if (descendants.Count() < identityIndex)
             {
                 return false;

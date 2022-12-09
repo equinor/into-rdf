@@ -5,7 +5,5 @@ namespace Services.TransformationServices.SourceToOntologyConversionService;
 
 public interface ISourceToOntologyConversionService
 {
-     void ConvertSourceToOntology(DataTable data, Graph ontologyGraph);
-
-     Graph GetGraph();
+     Graph ConvertSourceToOntology(Graph sourceGraph, Graph ontologyGraph);
 }
