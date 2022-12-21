@@ -198,4 +198,4 @@ Developing applications with data from Splinter is a two-step rocket.
 <span style="color:green">Note 2:</span> These queries work in the current dev environment, but must be updated when (and if) the suggested changes in this description survives.
 
 ## Splinter Developer
-For information on how to run Splinter locally see [README.md](README.md)
+For information on how to run Splinter locally see [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md)
