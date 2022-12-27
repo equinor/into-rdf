@@ -86,23 +86,24 @@ Similar to the provenance context case there will be need for several sub contex
 #### Transformation Context
 The transformation context is currently not in use, but it will be a useful tool to configure transformation. Suggested configurations are:
 
-    <https://rdf.equinor.com/revision-train/C277-AS-P-LA-00016_TransformationContext> a splinter:TransformationContext ;
-        splinter:useOntology <https://rdf.equinor.com/main/record/lineOntology/v1> ;
-        splinter:useOntology <https://rdf.equinor.com/main/record/lineVocabulary/v1> ;
-                splinter:objectPathSegment [c
-                splinter:target "Line Number" ;
-                splinter:segment "tag" . 
-                ] ;
-        splinter:objectPathSegment [
-                splinter:target "To Line" ;
-                splinter:segment "tag" . 
-                ] ;
-         splinter:objectPathSegment [
-                splinter:target "From Line" ;
-                splinter:segment "tag" . 
-                ] ;
-        splinter:detailLevel "basic" . 
-
+```
+<https://rdf.equinor.com/revision-train/C277-AS-P-LA-00016_TransformationContext> a splinter:TransformationContext ;
+    splinter:useOntology <https://rdf.equinor.com/main/record/lineOntology/v1> ;
+    splinter:useOntology <https://rdf.equinor.com/main/record/lineVocabulary/v1> ;
+    splinter:objectPathSegment [
+        splinter:target "Line Number" ;
+        splinter:segment "tag" .
+    ] ;
+    splinter:objectPathSegment [
+        splinter:target "To Line" ;
+        splinter:segment "tag" .
+    ] ;
+    splinter:objectPathSegment [
+        splinter:target "From Line" ;
+        splinter:segment "tag" .
+    ] ;
+    splinter:detailLevel "basic" .
+```
 Currently the existing versions of a set of vocabularies and ontologies are used based on the incoming data. With **splinter:useOntology** it becomes explicitly stated what version of what ontology the transformation will use. This makes it easy to upgrade to new ontology versions, but, at the same time, provides the full flexibility to use older versions if necessary. 
 
 In some cases, it is considered beneficial to create individuals instead of literals. An example is the line list, where we have relationships like "ToLine" and "FromLine". We would like to be able to create these individuals in a consistent way. This is done by specifying the target predicate and provide an addition the the Iri path. From the transformation context above we'll get
