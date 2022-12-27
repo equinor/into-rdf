@@ -2,7 +2,7 @@ using Common.ProvenanceModels;
 using Services.TransformationServices.SourceToOntologyConversionService;
 using Services.TransformationServices.RdfTransformationServices;
 using Services.GraphParserServices;
-using Services.Utils;
+using Common.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;

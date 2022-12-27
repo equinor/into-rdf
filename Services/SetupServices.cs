@@ -43,8 +43,7 @@ public static class SetupServices
         services.AddScoped<IRdfTableBuilderService, ShipweightRdfTableBuilderService>();
         services.AddScoped<IRdfTableBuilderService, CommonLibTableBuilderService>();
         services.AddScoped<IRdfTransformationService, RdfTransformationService>();
-        services.AddScoped<ISpreadsheetTransformationService, LineListTransformationService>();
-        services.AddScoped<ISpreadsheetTransformationService, MelTransformationService>();
+        services.AddScoped<ISpreadsheetTransformationService, SpreadsheetTransformationService>();
         services.AddScoped<ISourceToOntologyConversionService, SourceToOntologyConversionService>();
         services.AddScoped<IXMLTransformationService, AmlTransformationService>();
         services.AddScoped<AmlToRdfConverter>();
