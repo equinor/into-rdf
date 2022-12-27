@@ -81,7 +81,9 @@ public static class AppBuilderExtensions
                 case ConflictOnInsertException:
                     context.Response.StatusCode = StatusCodes.Status409Conflict;
                     break;
-
+                case BadGatewayException:
+                    context.Response.StatusCode = StatusCodes.Status502BadGateway;
+                    break;
                 case InvalidOperationException:
                 default:
                     context.Response.StatusCode = StatusCodes.Status500InternalServerError;

@@ -1,13 +1,10 @@
 using Api.Utils.Bindings;
-using Common.Exceptions;
-using Common.GraphModels;
 using Common.RevisionTrainModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Repositories.RevisionTrainRepository;
-using Services.GraphParserServices;
 using Services.RecordServices;
 using Services.RevisionServices;
+using System.Text;
 
 namespace Api;
 
@@ -21,75 +18,54 @@ public static class RouteBuilderExtensions
         app.MapPost("revision-trains", [Authorize] async (HttpRequest request, HttpContext context, [FromServices] IRevisionTrainService revisionTrainService)
             =>
             {
-                var response = await revisionTrainService.AddRevisionTrain(request);
-                SetContextContentType(context, response);
-                return await response.Content.ReadAsStringAsync();
+                var revisionTrain = await ReadStreamAsync(request.Body);
+                var response = await revisionTrainService.Add(revisionTrain);
+                return Results.Created(context.Request.Path, response);
             })
             .Accepts<string>("text/turtle; charset=UTF-8")
-            .Produces<string>(
-                StatusCodes.Status200OK
-            )
+            .Produces(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status409Conflict)
+            .Produces(StatusCodes.Status500InternalServerError)
+            .Produces(StatusCodes.Status502BadGateway)
             .WithTags(trainTag);
 
-        app.MapGet("revision-trains/{id}", [Authorize] async (string id, HttpContext context, [FromServices] IRevisionTrainService revisionTrainService)
+        app.MapGet("revision-trains/{id}", [Authorize] async (string id, [FromServices] IRevisionTrainService revisionTrainService)
             =>
             {
-                var response = await revisionTrainService.GetRevisionTrainByName(id);
-                SetContextContentType(context, response);
-                return await response.Content.ReadAsStringAsync();
+                var response = await revisionTrainService.GetByName(id);
+                return Results.Text(response, "text/turtle", Encoding.UTF8);
             })
-            .Produces<string>(
-                StatusCodes.Status200OK
-            )
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status500InternalServerError)
+            .Produces(StatusCodes.Status502BadGateway)
             .WithTags(trainTag);
 
-        app.MapGet("revision-trains/", [Authorize] async (HttpContext context, [FromServices] IRevisionTrainService revisionTrainService)
+        app.MapGet("revision-trains/", [Authorize] async ([FromServices] IRevisionTrainService revisionTrainService)
             =>
             {
-                var response = await revisionTrainService.GetAllRevisionTrains();
-                SetContextContentType(context, response);
-                return await response.Content.ReadAsStringAsync();
+                var response = await revisionTrainService.GetAll();
+                return Results.Text(response, "text/turtle", Encoding.UTF8);
             })
-            .Produces<string>(
-                StatusCodes.Status200OK
-            )
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status500InternalServerError)
+            .Produces(StatusCodes.Status502BadGateway)
             .WithTags(trainTag);
 
-        app.MapDelete("revision-trains/{id}", [Authorize] async (
-            string id,
-            HttpContext context,
-            [FromServices] IRevisionTrainService revisionTrainService,
-            [FromServices] IRecordService recordService,
-            [FromServices] IGraphParser graphParser)
+        app.MapDelete("revision-trains/", [Authorize] async (string name, [FromServices] IRevisionTrainService revisionTrainService)
             =>
             {
-                var train = await revisionTrainService.GetRevisionTrainByName(id);
-                var revisionTrain = await train.Content.ReadAsStringAsync();
-                var revisionTrainModel = graphParser.ParseRevisionTrain(revisionTrain);
-
-                var records = revisionTrainModel.Records.Select(r => r.RecordUri).ToList();
-
-                var responseTrain = await revisionTrainService.DeleteRevisionTrain(id);
-
-                if (!responseTrain.IsSuccessStatusCode) { throw new InvalidOperationException($"Failed to delete revision train {revisionTrainModel.Name}"); }
-
-                var responseRecord = await recordService.Delete(revisionTrainModel.TripleStore, records);
-
-                if (!responseRecord.IsSuccessStatusCode)
-                {
-                    var restore = await revisionTrainService.RestoreRevisionTrain(revisionTrain);
-
-                    var message = await responseRecord.Content.ReadAsStringAsync();
-                    var restoreMessage = restore.IsSuccessStatusCode ? "WARNING: Revision train is successfully restored" : "ERROR: Failed to restore revision train";
-                    throw new InvalidOperationException($"{restoreMessage}, failed to delete the train's records because {message}.");
-                }
-
-                SetContextContentType(context, responseTrain);
-                return await responseTrain.Content.ReadAsStringAsync();
+                await revisionTrainService.Delete(name);
+                return Results.NoContent();
             })
-            .Produces<string>(
-                StatusCodes.Status200OK
-            )
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status500InternalServerError)
+            .Produces(StatusCodes.Status502BadGateway)
             .WithTags(trainTag);
         return app;
     }
@@ -106,81 +82,84 @@ public static class RouteBuilderExtensions
             FileBinding fileBinding,
             [FromServices] IRecordService recordService)
             =>
-        {
-            if (fileBinding.File is null) throw new InvalidOperationException("No file");
+            {
+                if (fileBinding.File is null) throw new InvalidOperationException("No file");
 
-            var recordInput = new RecordInputModel(
-                revisionTrainName,
-                revision,
-                revisionDate,
-                fileBinding.File.OpenReadStream(),
-                fileBinding.File.ContentType);
+                var recordInput = new RecordInputModel(
+                    revisionTrainName,
+                    revision,
+                    revisionDate,
+                    fileBinding.File.OpenReadStream(),
+                    fileBinding.File.ContentType);
 
-            var response = await recordService.Add(recordInput);
+                var response = await recordService.Add(recordInput);
 
-            return Results.Created(context.Request.Path, response);
-        }
-            )
+                return Results.Created(context.Request.Path, response);
+            })
             .Accepts<FileBinding>("multipart/form-data")
             .Produces(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status409Conflict)
             .Produces(StatusCodes.Status500InternalServerError)
+            .Produces(StatusCodes.Status502BadGateway)
             .WithTags(recordTag);
 
-        app.MapDelete("record", [Authorize] async (
-            string record,
-            HttpContext context,
-            [FromServices] IRecordService recordService,
-            [FromServices] IRevisionTrainService revisionTrainService,
-            [FromServices] IGraphParser graphParser,
-            [FromServices] IRevisionService revisionService,
-            [FromServices] IRevisionTrainRepository revisionTrainRepository)
+        app.MapDelete("record", [Authorize] async (string record, [FromServices] IRecordService recordService)
             =>
-        {
-            var recordUri = new Uri(record);
-            var trainResponse = await revisionTrainService.GetRevisionTrainByRecord(recordUri);
-            var revisionTrain = await trainResponse.Content.ReadAsStringAsync();
-            var revisionTrainModel = graphParser.ParseRevisionTrain(revisionTrain);
-
-            var latestRecord = revisionTrainModel.Records.MaxBy(rec => rec.RevisionNumber);
-
-            if (latestRecord == null) { throw new ObjectNotFoundException($"Failed to delete record {recordUri.AbsoluteUri} because it doesn't exist."); }
-
-            if (latestRecord.RecordUri != recordUri) { throw new InvalidOperationException($"Failed to delete record {recordUri.AbsoluteUri}. The latest revision {latestRecord.RecordUri} must be deleted first"); }
-
-            await revisionTrainRepository.DeleteRecordContext(latestRecord.RecordUri);
-            try
             {
-                await recordService.Delete(revisionTrainModel.TripleStore, latestRecord.RecordUri);
-            }
-            catch
-            {
-                await revisionTrainRepository.AddRecordContext(new ResultGraph(recordUri.AbsoluteUri, revisionTrain, true));
-                throw;
-            }
+                await recordService.Delete(new Uri(record));
+                return Results.NoContent();
+            })
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status500InternalServerError)
+            .Produces(StatusCodes.Status502BadGateway)
+            .WithTags(recordTag);
 
-            return Results.NoContent();
-        })
-         .Produces(StatusCodes.Status204NoContent)
-         .Produces(StatusCodes.Status400BadRequest)
-         .Produces(StatusCodes.Status500InternalServerError)
-         .WithTags(recordTag);
         return app;
     }
+
+    private static readonly string[] transformationTag = { "Rdf transformation" };
+    public static B MapTransformationEndpoints<B>(this B app)
+    where B : IEndpointRouteBuilder
+    {
+        app.MapPost("transform", [Authorize] async (
+            string revisionTrainName,
+            FileBinding fileBinding,
+            [FromServices] IRecordService recordService)
+            =>
+            {
+                if (fileBinding.File is null) throw new InvalidOperationException("No file");
+
+                var response = await recordService.Transform(revisionTrainName, fileBinding.File.OpenReadStream(), fileBinding.File.ContentType);
+                return Results.Text(response, "text/turtle", Encoding.UTF8);
+            })
+            .Accepts<FileBinding>("multipart/form-data")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status500InternalServerError)
+            .WithTags(transformationTag);
+
+        return app;
+    }
+
     public static B MapAPIEndpoints<B>(this B app)
     where B : IEndpointRouteBuilder
     {
         app.MapRevisionTrainEndpoints();
         app.MapRecordEndpoints();
+        app.MapTransformationEndpoints();
         app.MapControllers();
         return app;
     }
 
-    private static void SetContextContentType(HttpContext context, HttpResponseMessage response)
+    private async static Task<string> ReadStreamAsync(Stream content)
     {
-        if (context != null && context.Response != null)
+        var result = string.Empty;
+        using (var streamReader = new StreamReader(content))
         {
-            context.Response.ContentType = response.Content.Headers?.ContentType?.ToString() ?? "text/turtle";
+            result = await streamReader.ReadToEndAsync();
         }
+        return result;
     }
 }

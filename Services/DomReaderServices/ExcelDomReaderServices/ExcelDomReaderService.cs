@@ -18,16 +18,16 @@ public class ExcelDomReaderService : IExcelDomReaderService
     {
         _logger = logger;
     }
-    
-    public DataTable GetSpreadsheetData( Stream excelFile, SpreadsheetContext spreadsheetContext)
+
+    public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetContext spreadsheetContext)
     {
         if (spreadsheetContext.SheetName == null) throw new InvalidOperationException("Failed to transform spreadsheet. Missing spreadsheet name in SpreadsheetContext");
-        
+
         var doc = SpreadsheetDocument.Open(excelFile, false);
         var workbookPart = doc.WorkbookPart ?? throw new ArgumentNullException("The file does not contain a workbook");
         var worksheetPart = GetWorksheetPart(doc, spreadsheetContext.SheetName);
 
-       var headerRow = GetHeaderRow(worksheetPart, workbookPart, spreadsheetContext);
+        var headerRow = GetHeaderRow(worksheetPart, workbookPart, spreadsheetContext);
 
         _logger.LogDebug("<ExcelDomReaderService> - GetSpreadsheetData: - Created header row with {nbOfColumns} columns", headerRow.Count);
 
@@ -89,7 +89,7 @@ public class ExcelDomReaderService : IExcelDomReaderService
         {
             var identityIndex = headerRow.FindIndex(x => x == identityColumn);
 
-            if (identityIndex == - 1)
+            if (identityIndex == -1)
             {
                 throw new InvalidOperationException("Failed to find specified identity column: {identityColumn}");
             }

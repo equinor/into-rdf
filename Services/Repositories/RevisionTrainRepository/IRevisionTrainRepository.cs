@@ -5,13 +5,13 @@ namespace Repositories.RevisionTrainRepository;
 
 public interface IRevisionTrainRepository
 {
-    Task Add(Stream train);
+    Task Add(string revisionTrain);
     Task Restore(string train);
-    Task<Graph> GetByName(string name);
-    Task<Graph> GetByRecord(Uri record);
-    Task<Graph> Get(Uri id);
-    Task<Graph> GetAll();
-    Task Delete();
+    Task<string> GetByName(string name);
+    Task<string> GetByRecord(Uri record);
+    Task<string> Get(Uri id);
+    Task<string> GetAll();
+    Task Delete(string name);
     Task AddRecordContext(ResultGraph recordContext);
     Task DeleteRecordContext(Uri record);
 }

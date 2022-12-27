@@ -1,18 +1,25 @@
 using System.Text;
 using VDS.RDF;
 using VDS.RDF.Writing;
-using Common.Utils;
 
-namespace Services.Utils;
+namespace Common.Utils;
 
 public static class GraphSupportFunctions
 {
     public static string WriteGraphToString(Graph graph)
     {
         using MemoryStream outputStream = new MemoryStream();
-        
         graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new CompressingTurtleWriter());
+        
         return Encoding.UTF8.GetString(outputStream.ToArray());
+    }
+
+    public static Graph LoadGraphFromString(string graphContent)
+    {
+        var graph = new Graph();
+        graph.LoadFromString(graphContent);
+        
+        return graph;
     }
 
     public static string GetAskQuery(TripleContent tripleContent, string name)

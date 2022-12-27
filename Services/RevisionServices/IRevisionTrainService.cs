@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Common.GraphModels;
 using Common.RevisionTrainModels;
 
@@ -6,11 +5,10 @@ namespace Services.RevisionServices;
 
 public interface IRevisionTrainService
 {
-    Task<HttpResponseMessage> AddRevisionTrain(HttpRequest request);
-    Task<HttpResponseMessage> RestoreRevisionTrain(string revisionTrain);
-    Task<HttpResponseMessage> GetRevisionTrainByName(string name);
-    Task<HttpResponseMessage> GetRevisionTrainByRecord(Uri record);
-    Task<HttpResponseMessage> GetAllRevisionTrains();
-    Task<HttpResponseMessage> DeleteRevisionTrain(string name);
+    Task<string> Add(string revisionTrain);
+    Task<string> GetByName(string name);
+    Task<string> GetByRecord(Uri record);
+    Task<string> GetAll();
+    Task Delete(string name);
     ResultGraph CreateRecordContext(RevisionTrainModel train, string revisionName, DateTime revisionDate);
 }

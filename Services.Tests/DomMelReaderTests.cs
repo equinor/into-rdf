@@ -1,11 +1,9 @@
 ﻿using Common.ProvenanceModels;
 using Services.TransformationServices.SpreadsheetTransformationServices;
 using Services.GraphParserServices;
-using Services.Utils;
+using Common.Utils;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using VDS.RDF;
 using VDS.RDF.Parsing;
@@ -15,12 +13,12 @@ namespace Services.Tests
 {
     public class DomMelReaderTests
     {
-        private readonly IEnumerable<ISpreadsheetTransformationService> _transformationServices;
+        private readonly ISpreadsheetTransformationService _spreadsheetTransformationService;
         private readonly IGraphParser _graphParser;
 
-        public DomMelReaderTests(IEnumerable<ISpreadsheetTransformationService> transformationServices, IGraphParser graphParser)
+        public DomMelReaderTests(ISpreadsheetTransformationService transformationServices, IGraphParser graphParser)
         {
-            _transformationServices = transformationServices;
+            _spreadsheetTransformationService = transformationServices;
             _graphParser = graphParser;
         }
 
@@ -32,9 +30,6 @@ namespace Services.Tests
             var rdfTestUtils = new RdfTestUtils(DataSource.Mel);
             var stream = File.Open(testFile, FileMode.Open, FileAccess.Read);
 
-            var melTransformationService = _transformationServices.FirstOrDefault(service => service.GetDataSource() == DataSource.Mel) ?? 
-                                                throw new ArgumentException($"Transformer of type {DataSource.Mel} not available");
-
             using FileStream fs = new FileStream(testTrainFile, FileMode.Open, FileAccess.Read);
             using StreamReader sr = new StreamReader(fs, Encoding.UTF8);
 
@@ -42,7 +37,7 @@ namespace Services.Tests
 
             var trainRevisionModel = _graphParser.ParseRevisionTrain(trainContent);
 
-            var resultGraph = melTransformationService.Transform(trainRevisionModel, stream);
+            var resultGraph = _spreadsheetTransformationService.Transform(trainRevisionModel, stream);
             var result = GraphSupportFunctions.WriteGraphToString(resultGraph);
 
             Assert.NotNull(resultGraph);

@@ -19,7 +19,7 @@ public class RecordService : IRecordService
 {
     private readonly IRevisionTrainService _revisionTrainService;
     private readonly IRevisionService _revisionService;
-    private readonly IEnumerable<ISpreadsheetTransformationService> _spreadsheetTransformationService;
+    private readonly ISpreadsheetTransformationService _spreadsheetTransformationService;
     private readonly IFusekiService _fusekiService;
     private readonly IGraphParser _graphParser;
     private readonly IRecordRepository _recordRepository;
@@ -28,13 +28,13 @@ public class RecordService : IRecordService
     private readonly ISourceToOntologyConversionService _sourceConversionService;
     public RecordService(IRevisionTrainService revisionTrainService,
         IRevisionService revisionService,
-        IEnumerable<ISpreadsheetTransformationService> spreadsheetTransformationService,
+        ISpreadsheetTransformationService spreadsheetTransformationService,
         IFusekiService fusekiService,
         IGraphParser graphParser,
         IRecordRepository recordRepository,
         IRevisionTrainRepository revisionTrainRepository,
         IOntologyRepository ontologyRepository,
-        ISourceToOntologyConversionService sourceToOntologyConversion )
+        ISourceToOntologyConversionService sourceToOntologyConversion)
     {
         _revisionTrainService = revisionTrainService;
         _revisionService = revisionService;
@@ -47,17 +47,9 @@ public class RecordService : IRecordService
         _sourceConversionService = sourceToOntologyConversion;
     }
 
-    public Graph TransformExcel(RevisionTrainModel revisionTrain, Stream content)
-    {
-        var transformationService = GetTransformationService(revisionTrain.TrainType);
-
-        return transformationService.Transform(revisionTrain, content);
-    }
-
     public async Task<string> Add(RecordInputModel recordInput)
     {
-        var trainResponse = await _revisionTrainService.GetRevisionTrainByName(recordInput.RevisionTrainName);
-        var revisionTrain = await trainResponse.Content.ReadAsStringAsync();
+        var revisionTrain = await _revisionTrainService.GetByName(recordInput.RevisionTrainName);
         var revisionTrainModel = _graphParser.ParseRevisionTrain(revisionTrain);
         DateTime date = DateFormatter.FormateToDate(recordInput.RevisionDate);
 
@@ -84,7 +76,7 @@ public class RecordService : IRecordService
         }
 
         var ontologyGraph = await _ontologyRepository.Get(ServerKeys.Main, revisionTrainModel.TrainType);
-        
+
         var converted = ontologyGraph.IsEmpty ? transformed : _sourceConversionService.ConvertSourceToOntology(transformed, ontologyGraph);
         var convertedString = GraphSupportFunctions.WriteGraphToString(converted);
 
@@ -104,30 +96,64 @@ public class RecordService : IRecordService
         return recordContext.Name;
     }
 
-    public async Task<HttpResponseMessage> Delete(string server, Uri record)
+    public async Task<string> Transform(string revisionTrainName, Stream content, string contentType)
     {
-        return await _fusekiService.Update(server, GetDropRecordQuery(record.AbsoluteUri));
-    }
+        var revisionTrain = await _revisionTrainService.GetByName(revisionTrainName);
+        var revisionTrainModel = _graphParser.ParseRevisionTrain(revisionTrain);
 
-    public async Task<HttpResponseMessage> Delete(string server, List<Uri> records)
-    {
-        string deleteAllQuery = string.Empty;
-        foreach (var r in records)
+        var transformed = new Graph();
+
+        switch (contentType)
         {
-            deleteAllQuery += GetDropRecordQuery(r.AbsoluteUri);
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                transformed = TransformExcel(revisionTrainModel, content);
+                break;
+            case "application/AML":
+                throw new NotImplementedException("Splinter will soon have AML support");
+            case "text/turtle":
+                throw new NotImplementedException("WHAT? Isn't Splinter handling RDF yet? Ehhh, no");
+            default:
+                throw new UnsupportedContentTypeException(@$"Unsupported Media Type for IFormFile {contentType}.
+                        Supported content types:
+                            AML: application/AML,
+                            Excel: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                            RDF: text/turtlec
+                            ");
         }
 
-        return await _fusekiService.Update(server, deleteAllQuery);
+        var ontologyGraph = await _ontologyRepository.Get(ServerKeys.Main, revisionTrainModel.TrainType);
+        var converted = ontologyGraph.IsEmpty ? transformed : _sourceConversionService.ConvertSourceToOntology(transformed, ontologyGraph);
+
+        return GraphSupportFunctions.WriteGraphToString(converted);
     }
 
-    private ISpreadsheetTransformationService GetTransformationService(string trainType)
+    public async Task Delete(Uri record)
     {
-        return _spreadsheetTransformationService.FirstOrDefault(transformer => transformer.GetDataSource() == trainType) ??
-            throw new RevisionTrainValidationException($"A transformer of for train type {trainType} is not available.");
+        var revisionTrain = await _revisionTrainService.GetByRecord(record);
+        var revisionTrainModel = _graphParser.ParseRevisionTrain(revisionTrain);
+
+        var latestRecord = revisionTrainModel.Records.MaxBy(rec => rec.RevisionNumber);
+
+        if (latestRecord == null) { throw new ObjectNotFoundException($"Failed to delete record {record.AbsoluteUri} because it doesn't exist."); }
+
+        if (latestRecord.RecordUri != record) { throw new InvalidOperationException($"Failed to delete record {record.AbsoluteUri}. The latest revision {latestRecord.RecordUri.AbsoluteUri} must be deleted first"); }
+
+        await _revisionTrainRepository.DeleteRecordContext(latestRecord.RecordUri);
+        try
+        {
+            await _recordRepository.Delete(revisionTrainModel.TripleStore, latestRecord.RecordUri);
+        }
+        catch
+        {
+            await _revisionTrainRepository.AddRecordContext(new ResultGraph(record.ToString(), revisionTrain, true));
+            throw;
+        }
     }
 
-    private string GetDropRecordQuery(string record)
+    private Graph TransformExcel(RevisionTrainModel revisionTrain, Stream content)
     {
-        return $"DROP GRAPH <{record}> ;";
+        return _spreadsheetTransformationService.Transform(revisionTrain, content);
     }
+
+
 }
