@@ -83,7 +83,7 @@ public class RevisionTrainService : IRevisionTrainService
         catch
         {
             await ValidateTrain(revisionTrain);
-            await _revisionTrainRepository.Restore(revisionTrain);
+            await _revisionTrainRepository.Add(revisionTrain);
             throw;
         }
     }

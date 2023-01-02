@@ -71,7 +71,6 @@ public static class AppBuilderExtensions
                 case RevisionTrainValidationException:
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
                     break;
-                case FileNotFoundException:
                 case ObjectNotFoundException:
                     context.Response.StatusCode =StatusCodes.Status404NotFound;
                     break;

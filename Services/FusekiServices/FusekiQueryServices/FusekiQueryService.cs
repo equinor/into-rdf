@@ -29,9 +29,7 @@ public class FusekiQueryService : IFusekiQueryService
     {
         var result = await _fusekiService.Query(server, query);
 
-        _logger.LogInformation(result != null ? $"Successfully retrieved ontologies" : $"Failed to retrieve ontologies");
-
-        var resultSerialization = result != null ? await FusekiUtils.SerializeResponse(result) : string.Empty;
+        var resultSerialization = result != null && result.IsSuccessStatusCode ? await FusekiUtils.SerializeResponse(result) : string.Empty;
         
         Graph graph = new Graph();
         if (resultSerialization != string.Empty)

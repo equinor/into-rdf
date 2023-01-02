@@ -4,7 +4,9 @@ using Common.GraphModels;
 using Common.Utils;
 using Microsoft.Extensions.Logging;
 using Services.FusekiServices;
+using Services.Utils;
 using VDS.RDF;
+using VDS.RDF.Query;
 
 namespace Repositories.RevisionTrainRepository;
 
@@ -25,38 +27,12 @@ public class RevisionTrainRepository : IRevisionTrainRepository
     public async Task Add(string revisionTrain)
     {
         var response = await _fusekiService.AddData(_server, new ResultGraph(GraphConstants.Default, revisionTrain), "text/turtle");
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var content = await response.Content.ReadAsStringAsync();
-            var message = $"Failed to add revision train. Failed with status {response.StatusCode} and message {content}";
-            _log.LogInformation(message);
-            throw new BadGatewayException(message);
-        }
-
-        _log.LogInformation("Successfully uploaded revision train");
-    }
-
-    public async Task Restore(string train)
-    {
-        var response = await _fusekiService.AddData(_server, new ResultGraph(GraphConstants.Default, train), "text/turtle");
-        if (!response.IsSuccessStatusCode)
-        {
-            var content = await response.Content.ReadAsStringAsync();
-            throw new BadGatewayException(
-                $"Failed to restore revision train. Failed with status {response.StatusCode} and message {content}");
-        }
+        await ValidateAndLogResponse(response, HttpVerbs.Post);
     }
 
     public async Task<string> GetByName(string name)
     {
-        var trainExist = await _fusekiQueryService.Ask(_server, GraphSupportFunctions.GetAskQuery(TripleContent.Object, name));
-
-        if (!trainExist)
-        {
-            _log.LogWarning($"Failed to get train with name {name} because it doesn't exist");
-            throw new ObjectNotFoundException($"Failed to get train with name {name} because it doesn't exist");
-        }
+        await VerifyExistence(TripleContent.Object, name, "name");
 
         var revisionTrainQuery = GetRevisionTrainByNameQuery(name);
         var response = await _fusekiService.Query(_server, revisionTrainQuery);
@@ -68,13 +44,7 @@ public class RevisionTrainRepository : IRevisionTrainRepository
 
     public async Task<string> GetByRecord(Uri record)
     {
-        var recordExist = await _fusekiQueryService.Ask(_server, GraphSupportFunctions.GetAskQuery(TripleContent.Subject, record.AbsoluteUri));
-
-        if (!recordExist)
-        {
-            _log.LogWarning($"Failed to get revision train with record {record} because the record doesn't exist");
-            throw new FileNotFoundException($"Failed to get revision train with record {record} because the record doesn't exist");
-        }
+        await VerifyExistence(TripleContent.Subject, record.AbsoluteUri, "record");
 
         var revisionTrainQuery = GetRevisionTrainByRecordQuery(record);
         var response = await _fusekiService.Query(_server, revisionTrainQuery);
@@ -84,27 +54,14 @@ public class RevisionTrainRepository : IRevisionTrainRepository
         return await Get(trainUri);
     }
 
-    public async Task<string> Get(Uri trainUri)
+    private async Task<string> Get(Uri trainUri)
     {
-        var trainExist = await _fusekiQueryService.Ask(_server, GraphSupportFunctions.GetAskQuery(TripleContent.Subject, trainUri.AbsoluteUri));
-
-        if (!trainExist)
-        {
-            _log.LogWarning($"Failed to get revision train with record {trainUri} because the record doesn't exist");
-            throw new FileNotFoundException($"Failed to get revision train with record {trainUri} because the record doesn't exist");
-        }
-
         var revisionTrainQuery = GetRevisionTrainByUriQuery(trainUri);
         var response = await _fusekiService.Query(_server, revisionTrainQuery);
-        var content = await response.Content.ReadAsStringAsync();
 
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new BadGatewayException(
-                $"Failed to get revision train {trainUri}. Failed with status {response.StatusCode} and message {content}");
-        }
+        await ValidateAndLogResponse(response, HttpVerbs.Get, trainUri.AbsoluteUri);
 
-        return content;
+        return await response.Content.ReadAsStringAsync();
     }
 
     public async Task<string> GetAll()
@@ -112,51 +69,16 @@ public class RevisionTrainRepository : IRevisionTrainRepository
         var revisionTrainQuery = GetAllRevisionTrainQuery();
         var response = await _fusekiService.Query(_server, revisionTrainQuery);
 
-        var content = await response.Content.ReadAsStringAsync();
+        await ValidateAndLogResponse(response, HttpVerbs.Get);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new BadGatewayException(
-                $"Failed to get revision trains. Failed with status {response.StatusCode} and message {content}");
-        }
-
-        return content;
+        return await response.Content.ReadAsStringAsync();
     }
 
     public async Task Delete(string name)
     {
         var response = await _fusekiService.Update(_server, GetDeleteRevisionTrainQuery(name));
 
-        if (!response.IsSuccessStatusCode)
-        {
-            var content = await response.Content.ReadAsStringAsync();
-            throw new BadGatewayException(
-                $"Failed to delete revision train {name}. Failed with status {response.StatusCode} and message {content}");
-        }
-    }
-
-    public async Task AddRecordContext(ResultGraph recordContext)
-    {
-        var response = await _fusekiService.AddData(_server, recordContext, "text/turtle");
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var content = await response.Content.ReadAsStringAsync();
-            throw new BadGatewayException(
-                $"Failed to add record context for record {recordContext.Name}. Failed with status {response.StatusCode} and message {content}");
-        }
-    }
-
-    public async Task DeleteRecordContext(Uri record)
-    {
-        var response = await _fusekiService.Update(_server, GetDeleteRecordContextQuery(record));
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var content = await response.Content.ReadAsStringAsync();
-            throw new BadGatewayException(
-                $"Failed to delete record context for record {record.AbsoluteUri}. Failed with status {response.StatusCode} and message {content}");
-        }
+        await ValidateAndLogResponse(response, HttpVerbs.Delete, name);
     }
 
     private Uri GetTrainUriFromName(string name, string train)
@@ -187,33 +109,73 @@ public class RevisionTrainRepository : IRevisionTrainRepository
         return trainNode.Uri;
     }
 
-    private string GetDeleteRecordContextQuery(Uri recordContextUri)
-    {
-        var query =
-        @$"
-        prefix splinter: <https://rdf.equinor.com/splinter#>
-        DELETE 
-        {{
-            ?train splinter:hasRecord <{recordContextUri}> .
-            <{recordContextUri}> ?p ?o .
-        }}
-        WHERE 
-        {{
-            ?train splinter:hasRecord <{recordContextUri}> .
-            <{recordContextUri}> ?p ?o .
-        }}";
 
-        return query;
+    private async Task VerifyExistence(TripleContent tripleContent, string identifier, string? customMessage = null)
+    {
+        var trainExist = await _fusekiQueryService.Ask(_server, GraphSupportFunctions.GetAskQuery(tripleContent, identifier));
+
+        if (!trainExist)
+        {
+            var message = "Failed to get revision train ";
+            message += customMessage != null ? $"with {customMessage} " : "";
+            message += "because it doesn't exist.";
+
+            _log.LogWarning(message);
+            throw new ObjectNotFoundException(message);
+        }
+    }
+
+
+    private async Task ValidateAndLogResponse(HttpResponseMessage response, HttpVerbs verb, string? identifier = null)
+    {
+        if (!response.IsSuccessStatusCode)
+        {
+            var customMessage = string.Empty;
+            switch (verb)
+            {
+                case HttpVerbs.Get:
+                    customMessage = identifier != null ? $"Failed to get revision train {identifier}." : "Failed to get revision trains.";
+                    break;
+                case HttpVerbs.Post:
+                    customMessage = $"Failed to add revision train.";
+                    break;
+                case HttpVerbs.Delete:
+                    customMessage = $"Failed to delete revision train {identifier}.";
+                    break;
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var errorMessage = $"{customMessage} Failed with status {response.StatusCode} and message {content}";
+            _log.LogWarning(errorMessage);
+            throw new BadGatewayException(errorMessage);
+        }
+
+        if (response.IsSuccessStatusCode)
+        {
+            var customMessage = string.Empty;
+            switch (verb)
+            {
+                case HttpVerbs.Get:
+                    customMessage = identifier != null ? $"Successfully got revision train {identifier}." : "Successfully got revision trains.";
+                    break;
+                case HttpVerbs.Post:
+                    customMessage = $"Successfully added revision train.";
+                    break;
+                case HttpVerbs.Delete:
+                    customMessage = $"Successfully deleted revision train {identifier}.";
+                    break;
+            }
+
+            _log.LogInformation(customMessage);
+        }
     }
 
     private string GetDeleteRevisionTrainQuery(string name)
     {
-        var query =
+        var queryString = new SparqlParameterizedString();
+        queryString.Namespaces.AddNamespace("splinter", new Uri("https://rdf.equinor.com/splinter#"));
+        queryString.CommandText =
         @$"
-        prefix commonlib: <https://rdf.equinor.com/commonlib/tie#>
-        prefix splinter: <https://rdf.equinor.com/splinter#>
-        prefix spreadsheet: <https://rdf.equinor.com/splinter/spreadsheet#>
-
         DELETE
         {{
             ?train ?trainProperty ?obj1 .
@@ -221,7 +183,7 @@ public class RevisionTrainRepository : IRevisionTrainRepository
         }}
         WHERE
         {{
-            ?train splinter:name '{name}' ;
+            ?train splinter:name @name ;
                 (splinter:hasTieContext | splinter:hasSpreadsheetContext | splinter:hasRecord) ?context .
 
             ?train ?trainProperty ?obj1 .
@@ -229,75 +191,79 @@ public class RevisionTrainRepository : IRevisionTrainRepository
         }}
         ";
 
-        return query;
+        queryString.SetLiteral("name", name);
+        return queryString.ToString();
     }
 
     private string GetRevisionTrainByNameQuery(string name)
     {
-        var query =
+        var queryString = new SparqlParameterizedString();
+        queryString.Namespaces.AddNamespace("splinter", new Uri("https://rdf.equinor.com/splinter#"));
+        queryString.CommandText =
         @$"
-        prefix splinter: <https://rdf.equinor.com/splinter#>
-
         CONSTRUCT 
         {{
-            ?train splinter:name '{name}' .
+            ?train splinter:name @name .
         }}
         WHERE
         {{
-            ?train splinter:name '{name}' .
+            ?train splinter:name @name .
         }}
         ";
 
-        return query;
+        queryString.SetLiteral("name", name);
+        return queryString.ToString();
     }
 
     private string GetRevisionTrainByUriQuery(Uri uri)
     {
-        var query =
+        var queryString = new SparqlParameterizedString();
+        queryString.Namespaces.AddNamespace("splinter", new Uri("https://rdf.equinor.com/splinter#"));
+        queryString.CommandText =
         @$"
-        prefix splinter: <https://rdf.equinor.com/splinter#>
-
         CONSTRUCT 
         {{
-            <{uri}> ?trainProp ?trainValue .
+            @uri ?trainProp ?trainValue .
             ?trainValue ?contextProp ?contextValue . 
         }}
         WHERE
         {{
-            <{uri}> a splinter:RevisionTrain ;
+            @uri a splinter:RevisionTrain ;
                 ?trainProp ?trainValue .
             OPTIONAL {{?trainValue ?contextProp ?contextValue .}} 
         }}
         ";
 
-        return query;
+        queryString.SetUri("uri", uri);
+        return queryString.ToString();
     }
 
     private string GetRevisionTrainByRecordQuery(Uri record)
     {
-        var query =
+        var queryString = new SparqlParameterizedString();
+        queryString.Namespaces.AddNamespace("splinter", new Uri("https://rdf.equinor.com/splinter#"));
+        queryString.CommandText =
         @$"
-        prefix splinter: <https://rdf.equinor.com/splinter#>
-
         CONSTRUCT 
         {{
-            ?train splinter:hasRecord <{record}> .  
+            ?train splinter:hasRecord @record .  
         }}
         WHERE
         {{
-            ?train splinter:hasRecord <{record}> . 
+            ?train splinter:hasRecord @record . 
         }}
         ";
 
-        return query;
+        queryString.SetUri("record", record);
+        return queryString.ToString();
     }
 
-        private string GetAllRevisionTrainQuery()
+    private string GetAllRevisionTrainQuery()
     {
-        var query =
+        var queryString = new SparqlParameterizedString();
+        queryString.Namespaces.AddNamespace("splinter", new Uri("https://rdf.equinor.com/splinter#"));
+        queryString.CommandText =
         @$"
-        prefix splinter: <https://rdf.equinor.com/splinter#>
-
         CONSTRUCT 
         {{
             ?train ?trainProp ?trainValue .
@@ -311,6 +277,6 @@ public class RevisionTrainRepository : IRevisionTrainRepository
         }}
         ";
 
-        return query;
+        return queryString.ToString();
     }
 }
