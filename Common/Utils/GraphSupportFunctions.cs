@@ -1,6 +1,7 @@
 using System.Text;
 using VDS.RDF;
 using VDS.RDF.Writing;
+using VDS.RDF.Query;
 
 namespace Common.Utils;
 
@@ -24,31 +25,35 @@ public static class GraphSupportFunctions
 
     public static string GetAskQuery(TripleContent tripleContent, string name)
     {
-        var pattern = string.Empty;
+        var queryString = new SparqlParameterizedString();
+        queryString.Namespaces.AddNamespace("splinter", new Uri("https://rdf.equinor.com/splinter#"));
+
         switch (tripleContent)
         {
             case TripleContent.Subject:
-                pattern = $"<{name}> ?p ?o .";
+                queryString.CommandText = "ASK { @name ?p ?o .}";
+                queryString.SetUri("name", new Uri(name));
                 break;
             case TripleContent.Predicate:
-                pattern = $"?s <{name}> ?o .";
+                queryString.CommandText = "ASK { ?s @name ?o .}";
+                queryString.SetUri("name", new Uri(name));
                 break;
             case TripleContent.Object:
-                pattern = $"?s ?p '{name}' .";
+                queryString.CommandText = "ASK { ?s ?p @name .}";
+                if (Uri.IsWellFormedUriString(name, UriKind.Absolute))
+                {
+                    queryString.SetUri("name", new Uri(name));
+                }
+                else 
+                {
+                    queryString.SetLiteral("name", name);
+                }
                 break;
             default:
                 throw new InvalidOperationException($"Failed to create ASK query for {name}");
         }
-
-        var query = 
-        @$"
-        prefix splinter: <https://rdf.equinor.com/splinter#>
-        ASK 
-        {{
-            {pattern}
-        }}";
-
-        return query;
+        
+        return queryString.ToString();
     }
 }
 

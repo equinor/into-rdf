@@ -22,6 +22,7 @@ using Services.RevisionServices;
 using Services.ValidationServices.RevisionTrainValidationServices;
 using Repositories.OntologyRepository;
 using Repositories.RecordRepository;
+using Repositories.RecordContextRepository;
 using Repositories.RevisionTrainRepository;
 
 namespace Services.DependencyInjection;
@@ -63,6 +64,7 @@ public static class SetupServices
     {
         services.AddTransient<IOntologyRepository, OntologyRepository>();
         services.AddTransient<IRecordRepository, RecordRepository>();
+        services.AddTransient<IRecordContextRepository, RecordContextRepository>();
         services.AddTransient<IRevisionTrainRepository, RevisionTrainRepository>();
 
         return services;
