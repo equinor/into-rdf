@@ -38,7 +38,6 @@ public static class SetupServices
         services.AddScoped<IRdfGraphService, RdfGraphService>();
         services.AddScoped<IRdfPreprocessingService, RdfPreprocessingService>();
         services.AddScoped<IRdfService, RdfService>();
-        services.AddScoped<IXmlRdfService, XmlRdfService>();
         services.AddScoped<IRdfTableBuilderFactory, RdfTableBuilderFactory>();
         services.AddScoped<IRdfTableBuilderService, ExcelRdfTableBuilderService>();
         services.AddScoped<IRdfTableBuilderService, ShipweightRdfTableBuilderService>();
@@ -46,8 +45,6 @@ public static class SetupServices
         services.AddScoped<IRdfTransformationService, RdfTransformationService>();
         services.AddScoped<ISpreadsheetTransformationService, SpreadsheetTransformationService>();
         services.AddScoped<ISourceToOntologyConversionService, SourceToOntologyConversionService>();
-        services.AddScoped<IXMLTransformationService, AmlTransformationService>();
-        services.AddScoped<AmlToRdfConverter>();
         services.AddScoped<ITieMessageService, TieMessageService>();
         services.AddScoped<ICommonLibService, CommonlibService>();
         services.AddScoped<ICommonLibTransformationService, CommonLibTransformationService>();
