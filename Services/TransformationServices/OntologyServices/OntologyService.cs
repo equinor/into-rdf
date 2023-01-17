@@ -4,14 +4,14 @@ using System.Data;
 using VDS.RDF;
 using VDS.RDF.Query.Builder;
 
-namespace Services.TransformationServices.SourceToOntologyConversionService;
+namespace Services.TransformationServices.OntologyServices;
 
-public class SourceToOntologyConversionService : ISourceToOntologyConversionService
+public class OntologyService : IOntologyService
 {
     private Graph _graph;
-    private ILogger<SourceToOntologyConversionService> _logger;
+    private ILogger<OntologyService> _logger;
 
-    public SourceToOntologyConversionService(ILogger<SourceToOntologyConversionService> logger)
+    public OntologyService(ILogger<OntologyService> logger)
     {
         _graph = new Graph();
         _logger = logger;
@@ -28,8 +28,10 @@ public class SourceToOntologyConversionService : ISourceToOntologyConversionServ
         return _graph;
     }
 
-    public Graph ConvertSourceToOntology(Graph sourceGraph, Graph ontologyGraph)
+    public Graph EnrichRdf(Graph ontologyGraph, Graph sourceGraph)
     {
+        if (ontologyGraph.IsEmpty) { return sourceGraph; }
+
         InitializeGraph();
         var ontologyNamespaces = GetOntologyNamespace(ontologyGraph);
 

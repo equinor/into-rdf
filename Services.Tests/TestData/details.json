@@ -1,0 +1,22 @@
+{
+    "spreadsheetDetails":
+    { 
+        "sheetName": "MEL",
+        "headerRow": 6,
+        "dataStartRow": 8,
+        "startColumn": 1
+    },
+    "record": "https://www.equinor/test/record",
+    "scopes": [
+        "wist"
+    ],
+    "transformationType": "mel",
+    "level": 0,
+    "targetPathSegments":[
+        {
+            "target": "Tag Number",
+            "segment": "tag",
+            "isIdentity": true
+        }
+    ]
+}

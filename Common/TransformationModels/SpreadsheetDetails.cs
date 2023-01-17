@@ -1,8 +1,8 @@
-namespace Common.RevisionTrainModels
-{
-    public class SpreadsheetContext
+namespace Common.TransformationModels;
+
+public class SpreadsheetDetails
     {
-        public SpreadsheetContext(string sheetName,int headerRow, int dataStartRow, int startColumn)
+        public SpreadsheetDetails(string sheetName,int headerRow, int dataStartRow, int startColumn)
         {
             SheetName = sheetName;
             HeaderRow = headerRow;
@@ -10,7 +10,8 @@ namespace Common.RevisionTrainModels
             StartColumn = startColumn;
             IsTransposed = false;
         }
-        public string SheetName { get; set; }
+
+        public string? SheetName { get; set; }
         public int HeaderRow { get; set; }
         public int DataStartRow { get; set; }
         public int StartColumn { get; set; }
@@ -19,4 +20,3 @@ namespace Common.RevisionTrainModels
         public bool IsTransposed { get; set; }
         public string? IdentityColumn { get; set; }
     }
-}

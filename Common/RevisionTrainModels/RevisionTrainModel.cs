@@ -1,4 +1,6 @@
-﻿namespace Common.RevisionTrainModels
+﻿using Common.TransformationModels;
+
+namespace Common.RevisionTrainModels
 {
     public class RevisionTrainModel
     {
@@ -16,7 +18,7 @@
         public string TripleStore { get; set; }
         public string TrainType { get; set; }
         public TieContext? TieContext { get; set; }
-        public SpreadsheetContext? SpreadsheetContext { get; set; }
+        public SpreadsheetDetails? SpreadsheetDetails { get; set; }
         public List<RecordModel> Records {get; set; }
     }
 }

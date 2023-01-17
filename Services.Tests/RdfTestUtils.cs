@@ -40,7 +40,7 @@ namespace Services.Tests
                 $"Predicate {rdfPredicate}: {(predicateOk ? "✔" : "✗")}\n" +
                 $"Object {rdfObject}: {(objectOk ? "✔" : "✗")}\n";
 
-            //query again to get suggestions for remaining parts if at least 1 part of the tripple matched
+            //query again to get suggestions for remaining parts if at least 1 part of the triple matched
             var debugQuerySubject = subjectOk ? rdfSubject : null;
             var debugQueryPredicate = predicateOk ? rdfPredicate : null;
             var debugQueryObject = objectOk ? rdfObject : null;
@@ -55,7 +55,7 @@ namespace Services.Tests
 
         private bool Ask(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject)
         {
-            var tripplePattern = new TriplePattern(
+            var triplePattern = new TriplePattern(
                 CreatePattern(graph, rdfSubject),
                 CreatePattern(graph, rdfPredicate),
                 CreatePattern(graph, rdfObject)
@@ -63,7 +63,7 @@ namespace Services.Tests
 
             var query = QueryBuilder
                 .Ask()
-                .Where(tripplePattern)
+                .Where(triplePattern)
                 .BuildQuery();
 
             return ((SparqlResultSet)graph.ExecuteQuery(query)).Result;
@@ -76,11 +76,11 @@ namespace Services.Tests
             var (predicateSelect, predicatePattern) = CreateSelectAndPattern(graph, rdfPredicate, "predicate");
             var (objectSelect, objectPattern) = CreateSelectAndPattern(graph, rdfObject, "object");
 
-            var tripplePattern = new TriplePattern(subjectPattern, predicatePattern, objectPattern);
+            var triplePattern = new TriplePattern(subjectPattern, predicatePattern, objectPattern);
 
             var query = QueryBuilder
                 .Select(subjectSelect, predicateSelect, objectSelect)
-                .Where(tripplePattern)
+                .Where(triplePattern)
                 .Limit(limit)
                 .BuildQuery();
 
@@ -133,21 +133,6 @@ namespace Services.Tests
         private static int counter = 1;
         private PatternItem CreatePattern(Graph graph, object value)
         {
-            //Old MEL transformations and tests use undefined literals rather than string literal
-            //This check is a fix to ensure that both old and new tests work in a transition phase.
-            if (_dataSource == DataSource.Mel)
-            {
-                return value switch
-                {
-                    string undefinedLiteral => CreateLiteralPattern(graph, undefinedLiteral),
-                    double doubleLiteral => CreateDoubleLiteralPattern(graph, doubleLiteral),
-                    int intLiteral => CreateIntLiteralPattern(graph, intLiteral),
-                    Uri uri => CreateUriPattern(graph, uri),
-                    null => CreateVariablePattern("var" + counter++),
-                    _ => throw new Exception()
-                };
-            }
-
             return value switch
             {
                 string stringLiteral => CreateStringLiteralPattern(graph, stringLiteral),
