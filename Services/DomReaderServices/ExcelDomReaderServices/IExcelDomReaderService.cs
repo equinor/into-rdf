@@ -1,10 +1,9 @@
-using Common.RevisionTrainModels;
-using Common.SpreadsheetModels;
+using Common.TransformationModels;
 using System.Data;
 
 namespace Services.DomReaderServices.ExcelDomReaderServices;
 
 public interface IExcelDomReaderService
 {
-    DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetContext spreadsheetContext);
+    DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails details, string? identityColumn);
 }

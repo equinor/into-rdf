@@ -130,7 +130,7 @@ public class RevisionTrainService : IRevisionTrainService
             recordContext.Assert(new Triple(graphNode, replacesNode, replacesUriNode));
         }
 
-        return new ResultGraph(graphUri.AbsoluteUri, GraphSupportFunctions.WriteGraphToString(recordContext), true);
+        return new ResultGraph(graphUri.AbsoluteUri, GraphSupportFunctions.WriteGraphToString(recordContext, RdfWriterType.Turtle), true);
     }
 
     private async Task ValidateTrain(string revisionTrain)

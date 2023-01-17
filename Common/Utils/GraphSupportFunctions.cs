@@ -1,3 +1,4 @@
+using Common.Utils;
 using System.Text;
 using VDS.RDF;
 using VDS.RDF.Writing;
@@ -7,11 +8,24 @@ namespace Common.Utils;
 
 public static class GraphSupportFunctions
 {
-    public static string WriteGraphToString(Graph graph)
+
+    public static string WriteGraphToString(Graph graph, RdfWriterType writerType )
     {
         using MemoryStream outputStream = new MemoryStream();
-        graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new CompressingTurtleWriter());
-        
+        switch (writerType)
+        {
+            case RdfWriterType.Trig:
+                graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new TriGWriter());
+                break;
+            case RdfWriterType.Jsonld:
+                graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new JsonLdWriter());
+                break;
+            case RdfWriterType.Turtle:
+                graph.SaveToStream(new StreamWriter(outputStream, new UTF8Encoding(false)), new CompressingTurtleWriter());
+                break;
+            default:
+                throw new InvalidOperationException($"Unknown RDF writer type {writerType}");   
+        }
         return Encoding.UTF8.GetString(outputStream.ToArray());
     }
 

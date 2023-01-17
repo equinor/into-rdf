@@ -1,4 +1,5 @@
 using Common.RevisionTrainModels;
+using Common.TransformationModels;
 using Common.Exceptions;
 using Services.Utils;
 using VDS.RDF;
@@ -16,7 +17,7 @@ public class GraphParser : IGraphParser
 
         var revisionTrainModel = ParseMainTrain(trainGraph);
         revisionTrainModel.TieContext = ParseTieContext(trainGraph);
-        revisionTrainModel.SpreadsheetContext = ParseSpreadsheetContext(trainGraph);
+        revisionTrainModel.SpreadsheetDetails = ParseSpreadsheetDetails(trainGraph);
         revisionTrainModel.Records = ParseNamedGraphs(trainGraph);
 
         return revisionTrainModel;
@@ -67,7 +68,7 @@ public class GraphParser : IGraphParser
         return tieContext;
     }
 
-    private SpreadsheetContext? ParseSpreadsheetContext(Graph trainGraph)
+    private SpreadsheetDetails? ParseSpreadsheetDetails(Graph trainGraph)
     {
         var tieContextUri = GetSubjectValueForTripleWithObject(trainGraph, new Uri("https://rdf.equinor.com/splinter#SpreadsheetContext"));
         if (tieContextUri == null) { return null; }
@@ -87,21 +88,21 @@ public class GraphParser : IGraphParser
         if (startColumnNode == null) { throw new RevisionTrainValidationException("Failed to parse revision train. Start column is missing from Spreadsheet context"); }
         var startColumn = (int)startColumnNode.AsValuedNode().AsInteger();
 
-        var spreadsheetContext = new SpreadsheetContext(sheetName.ToString(), headerRow, dataStartRow, startColumn);
+        var spreadsheetDetails = new SpreadsheetDetails(sheetName.ToString(), headerRow, dataStartRow, startColumn);
 
         var dataEndRowNode = GetObjectNodeFromTripleWithPredicate(trainGraph, new Uri("https://rdf.equinor.com/splinter/spreadsheet#dataEndRow"));
-        if (dataEndRowNode != null) { spreadsheetContext.DataEndRow = (int)dataEndRowNode.AsValuedNode().AsInteger(); }
+        if (dataEndRowNode != null) { spreadsheetDetails.DataEndRow = (int)dataEndRowNode.AsValuedNode().AsInteger(); }
 
         var endColumnNode = GetObjectNodeFromTripleWithPredicate(trainGraph, new Uri("https://rdf.equinor.com/splinter/spreadsheet#endColumn"));
-        if (endColumnNode != null) { spreadsheetContext.EndColumn = (int)endColumnNode.AsValuedNode().AsInteger(); }
+        if (endColumnNode != null) { spreadsheetDetails.EndColumn = (int)endColumnNode.AsValuedNode().AsInteger(); }
 
         var isTransposedNode = GetObjectNodeFromTripleWithPredicate(trainGraph, new Uri("https://rdf.equinor.com/splinter/spreadsheet#startColumn"));
-        if (isTransposedNode != null) { spreadsheetContext.IsTransposed = isTransposedNode.AsValuedNode().AsBoolean(); }
+        if (isTransposedNode != null) { spreadsheetDetails.IsTransposed = isTransposedNode.AsValuedNode().AsBoolean(); }
 
         var identityColumnNode = GetObjectNodeFromTripleWithPredicate(trainGraph, new Uri("https://rdf.equinor.com/splinter/spreadsheet#identityColumn"));
-        if (identityColumnNode != null) { spreadsheetContext.IdentityColumn = identityColumnNode.ToString(); }
+        if (identityColumnNode != null) { spreadsheetDetails.IdentityColumn = identityColumnNode.ToString(); }
 
-        return spreadsheetContext;
+        return spreadsheetDetails;
     }
 
     private List<RecordModel> ParseNamedGraphs(Graph trainGraph)

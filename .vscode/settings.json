@@ -5,6 +5,7 @@
     "debug.internalConsoleOptions": "neverOpen",
     "azureFunctions.preDeployTask": "publish (functions)",
     "cSpell.words": [
+        "Preprocess",
         "Shipweight"
     ],
     "FSharp.inlayHints.typeAnnotations": false

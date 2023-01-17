@@ -1,8 +1,12 @@
 using Api.Utils.Bindings;
 using Common.RevisionTrainModels;
+using Common.TransformationModels;
+using Common.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Services.RecordServices;
+using Controller.RecordController;
+using Repositories.OntologyRepository;
+using Services.TransformerServices;
 using Services.RevisionServices;
 using System.Text;
 
@@ -79,8 +83,8 @@ public static class RouteBuilderExtensions
             string revision,
             string revisionDate,
             HttpContext context,
-            FileBinding fileBinding,
-            [FromServices] IRecordService recordService)
+            TransformationBinding fileBinding,
+            [FromServices] IRecordController recordService)
             =>
             {
                 if (fileBinding.File is null) throw new InvalidOperationException("No file");
@@ -96,7 +100,7 @@ public static class RouteBuilderExtensions
 
                 return Results.Created(context.Request.Path, response);
             })
-            .Accepts<FileBinding>("multipart/form-data")
+            .Accepts<TransformationBinding>("multipart/form-data")
             .Produces(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status409Conflict)
@@ -104,7 +108,7 @@ public static class RouteBuilderExtensions
             .Produces(StatusCodes.Status502BadGateway)
             .WithTags(recordTag);
 
-        app.MapDelete("record", [Authorize] async (string record, [FromServices] IRecordService recordService)
+        app.MapDelete("record", [Authorize] async (string record, [FromServices] IRecordController recordService)
             =>
             {
                 await recordService.Delete(new Uri(record));
@@ -123,18 +127,26 @@ public static class RouteBuilderExtensions
     public static B MapTransformationEndpoints<B>(this B app)
     where B : IEndpointRouteBuilder
     {
-        app.MapPost("transform", [Authorize] async (
-            string revisionTrainName,
-            FileBinding fileBinding,
-            [FromServices] IRecordService recordService)
+        app.MapPost("transform/spreadsheet", [Authorize] async (
+            TransformationBinding transformationBinding,
+            [FromServices] ITransformerService transformerService,
+            [FromServices] IOntologyRepository ontologyRepository)
             =>
             {
-                if (fileBinding.File is null) throw new InvalidOperationException("No file");
+                if (transformationBinding.File is null) throw new InvalidOperationException("No file");
+                if (transformationBinding.Details is null) throw new InvalidOperationException("Missing transformation details");
 
-                var response = await recordService.Transform(revisionTrainName, fileBinding.File.OpenReadStream(), fileBinding.File.ContentType);
-                return Results.Text(response, "text/turtle", Encoding.UTF8);
+
+                var ontology = await GetOntology(transformationBinding.Details, ontologyRepository);
+
+                var rdfGraph = transformerService.TransformSpreadsheet(transformationBinding.Details, transformationBinding.File.OpenReadStream());
+                var enrichedGraph = transformerService.EnrichRdf(ontology, rdfGraph);
+                var protoRecord = transformerService.CreateProtoRecord(transformationBinding.Details.Record, enrichedGraph);
+                
+                return Results.Text(protoRecord, "application/ld+json", Encoding.UTF8);
             })
-            .Accepts<FileBinding>("multipart/form-data")
+
+            .Accepts<TransformationBinding>("multipart/form-data")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError)
@@ -161,5 +173,16 @@ public static class RouteBuilderExtensions
             result = await streamReader.ReadToEndAsync();
         }
         return result;
+    }
+
+    private async static Task<string> GetOntology(SpreadsheetTransformationDetails transformationSettings, IOntologyRepository ontologyRepository)
+    {
+        if (transformationSettings.Level == EnrichmentLevel.None || transformationSettings.TransformationType == null)
+        {
+            return string.Empty;
+        }
+
+        var ontology = await ontologyRepository.Get(ServerKeys.Main, transformationSettings.TransformationType);
+        return GraphSupportFunctions.WriteGraphToString(ontology, RdfWriterType.Turtle);
     }
 }

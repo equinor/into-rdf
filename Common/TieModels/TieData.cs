@@ -15,11 +15,6 @@ public class TieData
         _objectData = objectData;
     }
 
-    public RevisionRequirement GetRevisionRequirements()
-    {
-        return new RevisionRequirement(GetFacilityId(), GetDocumentNumber(), GetRevisionName(), GetRevisionDate());
-    }
-
     public string GetDataCollectionName()
     {
         return _fileData.Name;

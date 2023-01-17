@@ -1,24 +1,16 @@
-using Common.Constants;
-using Common.GraphModels;
-using Common.ProvenanceModels;
 using Common.RdfModels;
-using Services.TransformationServices.SourceToOntologyConversionService;
 using System.Data;
-using System.Text;
 using VDS.RDF;
 using VDS.RDF.Parsing;
-using VDS.RDF.Writing;
 
 namespace Services.TransformationServices.RdfGraphServices;
 
 public class RdfGraphService : IRdfGraphService
 {
     private Graph _graph;
-    private readonly ISourceToOntologyConversionService _sourceVocabularyConversionService;
 
-    public RdfGraphService(ISourceToOntologyConversionService sourceVocabularyConversionService)
+    public RdfGraphService()
     {
-        _sourceVocabularyConversionService = sourceVocabularyConversionService;
         _graph = InitializeGraph();
     }
 
@@ -39,43 +31,9 @@ public class RdfGraphService : IRdfGraphService
         _graph.Merge(AssertRawData(dataTable));
     }
 
-    public ResultGraph GetResultGraph(string datasource)
-    {   
-        //TODO - The test against datasource is to ensure that MEL is still posted on the default graph.
-        //Update when moving MEL onto named graphs.
-        var name = datasource != DataSource.Mel && GetGraphName() != String.Empty ? GetGraphName() : GraphConstants.Default ;
-        var content = WriteGraphToString();
-
-        return new ResultGraph(name, content);
-    }
-
-    public string WriteGraphToString()
-    {
-        using MemoryStream outputStream = new MemoryStream();
-        
-        _graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new CompressingTurtleWriter());
-        return Encoding.UTF8.GetString(outputStream.ToArray());
-    }
-
     public Graph GetGraph()
     {
         return _graph;
-    }
-
-    private string GetGraphName()
-    {
-        var graphTriples = _graph.GetTriplesWithObject(_graph.CreateUriNode(RdfCommonClasses.CreateNamedGraphClass()));
-
-        if (graphTriples.Count() == 0)
-        {
-            return String.Empty;
-        }
-        if (graphTriples.Count() > 1)
-        {
-            throw new InvalidOperationException($"Multiple named graphs ({graphTriples.Count()} found in dataset. There can be only one!)");
-        }
-
-        return graphTriples.First().Subject.ToString();
     }
 
     private Graph AssertRawData(DataTable dataTable)
@@ -83,6 +41,7 @@ public class RdfGraphService : IRdfGraphService
         Graph graph = InitializeGraph();
         foreach (DataRow row in dataTable.Rows)
         {
+            var test = row["id"];
             var rdfSubject = CreateUriNode((Uri)row["id"]);
 
             foreach (DataColumn header in dataTable.Columns)
@@ -110,7 +69,7 @@ public class RdfGraphService : IRdfGraphService
     {
         return value switch
         {
-            string undefinedLiteral => CreateUndefinedLiteralNode(undefinedLiteral),
+            string stringLiteral => CreateStringLiteralNode(stringLiteral),
             int intLiteral => CreateIntLiteral(intLiteral),
             Uri uri => CreateUriNode(uri),
             DateTime dateTime => CreateDateTimeLiteral(dateTime),
@@ -123,19 +82,19 @@ public class RdfGraphService : IRdfGraphService
         throw new Exception($"Unknown datatype {value.GetType()}");
     }
 
-    private ILiteralNode CreateDateTimeLiteral(DateTime dateTime)
+    private ILiteralNode CreateDateTimeLiteral(DateTime literal)
     {
-        return _graph.CreateLiteralNode(dateTime.ToUniversalTime().ToString("o"), new Uri(XmlSpecsHelper.XmlSchemaDataTypeDateTime));
+        return _graph.CreateLiteralNode(literal.ToUniversalTime().ToString("o"), new Uri(XmlSpecsHelper.XmlSchemaDataTypeDateTime));
     }
 
-    private ILiteralNode CreateIntLiteral(int intLiteral)
+    private ILiteralNode CreateIntLiteral(int literal)
     {
-        return _graph.CreateLiteralNode(intLiteral.ToString(), new Uri(RdfPrefixes.Prefix2Uri["xsd"] + "int"));
+        return _graph.CreateLiteralNode(literal.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeInt));
     }
 
-    private ILiteralNode CreateUndefinedLiteralNode(string undefinedLiteral)
+    private ILiteralNode CreateStringLiteralNode(string literal)
     {
-        return _graph.CreateLiteralNode(undefinedLiteral);
+        return _graph.CreateLiteralNode(literal, new Uri(XmlSpecsHelper.XmlSchemaDataTypeString));
     }
 
     private IUriNode CreateUriNode(Uri uri)
