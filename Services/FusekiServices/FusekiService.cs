@@ -1,6 +1,5 @@
 ﻿using System.Net.Http.Headers;
 using Common.AppsettingsModels;
-using Common.GraphModels;
 using Common.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Web;
@@ -39,11 +38,11 @@ public class FusekiService : IFusekiService
         return response;
     }
 
-    public async Task<HttpResponseMessage> AddData(string server, ResultGraph resultGraph, string contentType)
+    public async Task<HttpResponseMessage> AddData(string server, string graph, string contentType)
     {
         VerifyServer(server);
         var response = await _downstreamWebApi.CallWebApiForAppAsync(server.ToLower(), options
-            => GetDownStreamWebApiOptionsForData(options, resultGraph, contentType));
+            => GetDownStreamWebApiOptionsForData(options, graph, contentType));
 
         return response;
     }
@@ -88,14 +87,14 @@ public class FusekiService : IFusekiService
         return options;
     }
 
-    private DownstreamWebApiOptions GetDownStreamWebApiOptionsForData(DownstreamWebApiOptions options, ResultGraph resultGraph, string contentType)
+    private DownstreamWebApiOptions GetDownStreamWebApiOptionsForData(DownstreamWebApiOptions options, string graph, string contentType)
     {
         options.HttpMethod = HttpMethod.Post;
-        options.RelativePath = resultGraph.IsDefault ? "ds/data" : $"ds/data?graph={resultGraph.Name}";
+        options.RelativePath = "ds/data";
         options.CustomizeHttpRequestMessage = message =>
         {
             message.Headers.Add("Accept", contentType);
-            message.Content = new StringContent(resultGraph.Content);
+            message.Content = new StringContent(graph);
             message.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
         };
 

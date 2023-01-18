@@ -1,8 +1,6 @@
 using VDS.RDF;
 using System.Xml;
 using System.Xml.Schema;
-using Services.TransformationServices.XMLTransformationServices.Serializers;
-using Common.RevisionTrainModels;
 using VDS.RDF.Parsing;
 using System.Linq;
 

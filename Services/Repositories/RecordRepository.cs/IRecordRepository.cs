@@ -1,12 +1,9 @@
-using Common.GraphModels;
 
-namespace Repositories.RecordRepository
+namespace Repositories.RecordRepository;
+
+public interface IRecordRepository
 {
-    public interface IRecordRepository
-    {
-        Task Add(string server, ResultGraph record);
-        Task Delete(string server, Uri record);
-        Task Delete(string server, List<Uri> records);
-    }
+    Task Add(string server, string record, string contentType);
+    Task Delete(string server, Uri record);
 }
 

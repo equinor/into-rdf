@@ -20,7 +20,6 @@ type RdfService =
     member s.parser = new SparqlQueryParser()
     member s.processor = new LeviathanQueryProcessor(new InMemoryDataset(s.model))
     interface IRdfService with
-        member this.PostToFusekiAsUser(server, data, contentType) = failwith "Not Implemented"
         member this.QueryFusekiAsUser(server, query, accepts) = 
             let q = this.parser.ParseFromString(query)
             let resultContent, resultType = 

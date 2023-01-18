@@ -1,106 +1,42 @@
 using Api.Utils.Bindings;
-using Common.RevisionTrainModels;
 using Common.TransformationModels;
 using Common.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Controller.RecordController;
 using Repositories.OntologyRepository;
 using Services.TransformerServices;
-using Services.RevisionServices;
+using Services.RecordServices;
 using System.Text;
 
 namespace Api;
 
 public static class RouteBuilderExtensions
 {
-    private static readonly string[] trainTag = { "Revision trains" };
-
-    public static B MapRevisionTrainEndpoints<B>(this B app)
-    where B : IEndpointRouteBuilder
-    {
-        app.MapPost("revision-trains", [Authorize] async (HttpRequest request, HttpContext context, [FromServices] IRevisionTrainService revisionTrainService)
-            =>
-            {
-                var revisionTrain = await ReadStreamAsync(request.Body);
-                var response = await revisionTrainService.Add(revisionTrain);
-                return Results.Created(context.Request.Path, response);
-            })
-            .Accepts<string>("text/turtle; charset=UTF-8")
-            .Produces(StatusCodes.Status201Created)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status409Conflict)
-            .Produces(StatusCodes.Status500InternalServerError)
-            .Produces(StatusCodes.Status502BadGateway)
-            .WithTags(trainTag);
-
-        app.MapGet("revision-trains/{id}", [Authorize] async (string id, [FromServices] IRevisionTrainService revisionTrainService)
-            =>
-            {
-                var response = await revisionTrainService.GetByName(id);
-                return Results.Text(response, "text/turtle", Encoding.UTF8);
-            })
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status500InternalServerError)
-            .Produces(StatusCodes.Status502BadGateway)
-            .WithTags(trainTag);
-
-        app.MapGet("revision-trains/", [Authorize] async ([FromServices] IRevisionTrainService revisionTrainService)
-            =>
-            {
-                var response = await revisionTrainService.GetAll();
-                return Results.Text(response, "text/turtle", Encoding.UTF8);
-            })
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status500InternalServerError)
-            .Produces(StatusCodes.Status502BadGateway)
-            .WithTags(trainTag);
-
-        app.MapDelete("revision-trains/", [Authorize] async (string name, [FromServices] IRevisionTrainService revisionTrainService)
-            =>
-            {
-                await revisionTrainService.Delete(name);
-                return Results.NoContent();
-            })
-            .Produces(StatusCodes.Status204NoContent)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status500InternalServerError)
-            .Produces(StatusCodes.Status502BadGateway)
-            .WithTags(trainTag);
-        return app;
-    }
-
     private static readonly string[] recordTag = { "Record" };
     public static B MapRecordEndpoints<B>(this B app)
     where B : IEndpointRouteBuilder
     {
         app.MapPost("record", [Authorize] async (
-            string revisionTrainName,
-            string revision,
-            string revisionDate,
             HttpContext context,
-            TransformationBinding fileBinding,
-            [FromServices] IRecordController recordService)
+            RecordBinding recordBinding,
+            [FromServices] IRecordService recordService)
             =>
             {
-                if (fileBinding.File is null) throw new InvalidOperationException("No file");
+                string[] validContentTypes = new string[]{"application/ld+json", "application/trig"};
+                if (recordBinding is null) { throw new InvalidOperationException("Unable to bind input"); }
+                if (recordBinding.Record is null) { throw new InvalidOperationException("No record to assert"); }
+                if (validContentTypes.Contains(recordBinding.Record.ContentType))
+                {
+                    var contentTypes = validContentTypes.ToString();
+                    throw new InvalidOperationException($"Wrong content type {recordBinding.Record.ContentType}. Expected {validContentTypes.ToString()}");
+                }
 
-                var recordInput = new RecordInputModel(
-                    revisionTrainName,
-                    revision,
-                    revisionDate,
-                    fileBinding.File.OpenReadStream(),
-                    fileBinding.File.ContentType);
+                //Not working with Swagger as record content type become application/octet-stream
+                await recordService.Add(recordBinding.Cursor, recordBinding.Record.OpenReadStream(), "application/ld+json");
 
-                var response = await recordService.Add(recordInput);
-
-                return Results.Created(context.Request.Path, response);
+                return Results.Ok();
             })
-            .Accepts<TransformationBinding>("multipart/form-data")
+            .Accepts<RecordBinding>("multipart/form-data")
             .Produces(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status409Conflict)
@@ -108,10 +44,10 @@ public static class RouteBuilderExtensions
             .Produces(StatusCodes.Status502BadGateway)
             .WithTags(recordTag);
 
-        app.MapDelete("record", [Authorize] async (string record, [FromServices] IRecordController recordService)
+        app.MapDelete("record", [Authorize] async (string recordId, [FromServices] IRecordService recordService)
             =>
             {
-                await recordService.Delete(new Uri(record));
+                await recordService.Delete(new Uri(recordId));
                 return Results.NoContent();
             })
             .Produces(StatusCodes.Status204NoContent)
@@ -142,7 +78,7 @@ public static class RouteBuilderExtensions
                 var rdfGraph = transformerService.TransformSpreadsheet(transformationBinding.Details, transformationBinding.File.OpenReadStream());
                 var enrichedGraph = transformerService.EnrichRdf(ontology, rdfGraph);
                 var protoRecord = transformerService.CreateProtoRecord(transformationBinding.Details.Record, enrichedGraph);
-                
+
                 return Results.Text(protoRecord, "application/ld+json", Encoding.UTF8);
             })
 
@@ -158,7 +94,6 @@ public static class RouteBuilderExtensions
     public static B MapAPIEndpoints<B>(this B app)
     where B : IEndpointRouteBuilder
     {
-        app.MapRevisionTrainEndpoints();
         app.MapRecordEndpoints();
         app.MapTransformationEndpoints();
         app.MapControllers();

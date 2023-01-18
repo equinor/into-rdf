@@ -1,5 +1,4 @@
 using Common.Exceptions;
-using Common.GraphModels;
 using Services.Utils;
 using Microsoft.Extensions.Logging;
 using Services.FusekiServices;
@@ -18,11 +17,11 @@ public class RecordRepository : IRecordRepository
         _log = log;
     }
 
-    public async Task Add(string server, ResultGraph record)
+    public async Task Add(string server, string record, string contentType)
     {
-        var response = await _fusekiService.AddData(server, record, "text/turtle");
+        var response = await _fusekiService.AddData(server, record, contentType);
 
-        await ValidateAndLogResponse(response, HttpVerbs.Post, record.Name);
+        await ValidateAndLogResponse(response, HttpVerbs.Post);
     }
 
     public async Task Delete(string server, Uri record)
@@ -30,19 +29,6 @@ public class RecordRepository : IRecordRepository
         var response = await _fusekiService.Update(server, GetDropRecordQuery(record.AbsoluteUri));
 
         await ValidateAndLogResponse(response, HttpVerbs.Delete, record.AbsoluteUri);
-    }
-
-    public async Task Delete(string server, List<Uri> records)
-    {
-        string deleteRecordsQuery = string.Empty;
-        foreach (var r in records)
-        {
-            deleteRecordsQuery += GetDropRecordQuery(r.AbsoluteUri);
-        }
-
-        var response = await _fusekiService.Update(server, deleteRecordsQuery);
-
-        await ValidateAndLogResponse(response, HttpVerbs.Delete);
     }
 
     private string GetDropRecordQuery(string record)

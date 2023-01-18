@@ -2,7 +2,7 @@ using VDS.RDF;
 
 namespace Services.TransformationServices.RecordService;
 
-public interface IRecordService
+public interface IRecordTransformationService
 {
     public Graph CreateProtoRecord(Uri record, Graph graph);
 }

@@ -1,5 +1,4 @@
 using Services.TransformationServices.SpreadsheetServices;
-using Services.GraphParserServices;
 using Common.TransformationModels;
 using System;
 using System.IO;
@@ -12,12 +11,10 @@ namespace Services.Tests
     public class DomMelReaderTests
     {
         private readonly ISpreadsheetService _spreadsheetTransformationService;
-        private readonly IGraphParser _graphParser;
 
-        public DomMelReaderTests(ISpreadsheetService transformationServices, IGraphParser graphParser)
+        public DomMelReaderTests(ISpreadsheetService transformationServices)
         {
             _spreadsheetTransformationService = transformationServices;
-            _graphParser = graphParser;
         }
 
         [Fact]
