@@ -11,7 +11,7 @@
         "wist"
     ],
     "transformationType": "mel",
-    "level": 0,
+    "level": 1,
     "targetPathSegments":[
         {
             "target": "Tag Number",

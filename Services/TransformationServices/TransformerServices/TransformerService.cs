@@ -12,11 +12,11 @@ public class TransformerService : ITransformerService
 {
     private readonly ISpreadsheetService _spreadsheetService;
     private readonly IOntologyService _ontologyService;
-    private readonly IRecordService _recordService;
+    private readonly IRecordTransformationService _recordService;
 
     public TransformerService(ISpreadsheetService spreadsheetService, 
         IOntologyService ontologyService,
-        IRecordService recordService)
+        IRecordTransformationService recordService)
     {
         _spreadsheetService = spreadsheetService;
         _ontologyService = ontologyService;
