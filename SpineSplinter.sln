@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Servic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{5504589D-4475-4C94-AD28-6BD1D253958A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TieMelConsumer", "TieMelConsumer\TieMelConsumer.csproj", "{8A04FF9D-2E96-481D-9320-1FA469B07218}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services.Tests", "Services.Tests\Services.Tests.csproj", "{BA5EE965-EDCF-4D5A-85A9-D1E4063C44D6}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Api.Tests", "Api.Tests\Api.Tests.fsproj", "{8CBDE3D1-6531-45C7-9FE3-37D7C316E463}"
@@ -33,10 +31,6 @@ Global
 		{5504589D-4475-4C94-AD28-6BD1D253958A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5504589D-4475-4C94-AD28-6BD1D253958A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5504589D-4475-4C94-AD28-6BD1D253958A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8A04FF9D-2E96-481D-9320-1FA469B07218}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8A04FF9D-2E96-481D-9320-1FA469B07218}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8A04FF9D-2E96-481D-9320-1FA469B07218}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8A04FF9D-2E96-481D-9320-1FA469B07218}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BA5EE965-EDCF-4D5A-85A9-D1E4063C44D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BA5EE965-EDCF-4D5A-85A9-D1E4063C44D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA5EE965-EDCF-4D5A-85A9-D1E4063C44D6}.Release|Any CPU.ActiveCfg = Release|Any CPU

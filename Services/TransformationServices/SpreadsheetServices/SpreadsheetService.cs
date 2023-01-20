@@ -61,13 +61,13 @@ public class SpreadsheetService : ISpreadsheetService
        return _rdfGraphService.GetGraph(); 
     }
 
-    private Uri CreateDataContentUri(List<string> scopes)
+    private Uri CreateDataContentUri(List<string> iriSegments)
     {
         var dataContentPath = RdfPrefixes.Prefix2Uri["equinor"].AbsoluteUri;
 
-        if (scopes.Count > 0)
+        if (iriSegments.Count > 0)
         {
-            scopes.ForEach(s => dataContentPath += $"{s}/");
+            iriSegments.ForEach(s => dataContentPath += $"{s}/");
         }
         return new Uri(dataContentPath);
     }

@@ -19,7 +19,7 @@ let query = "select ?p (count(?s) as ?cont) where {graph ?g {?s ?p ?o} union {?s
 let post (server: TestServer) method (uri: string) (contentType: string) payload = 
     server
         .CreateRequest(uri)
-        .And(fun req -> req.Content <- new StringContent(payload, System.Text.Encoding.UTF8, contentType))
+        .And(fun req -> req.Content <- new StringContent(payload, MediaTypeHeaderValue.Parse contentType))
         .PostAsync() 
         |> Async.AwaitTask
     

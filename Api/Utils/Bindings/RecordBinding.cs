@@ -13,7 +13,7 @@ public class RecordBinding
         return ValueTask.FromResult<RecordBinding?>(new RecordBinding
         {
             Record = record,
-            Cursor = Int32.Parse(cursor)
+            Cursor = cursor != null ? Int32.Parse(cursor) : -1
         });
     }
 }

@@ -19,7 +19,9 @@ public class TransformationBinding
         var file = context.Request.Form.Files["File"];
         var details = context.Request.Form["Details"].First();
 
-        var transformationDetails = JsonSerializer.Deserialize<SpreadsheetTransformationDetails>(details, serializeOptions);
+        var transformationDetails = details != null 
+            ? JsonSerializer.Deserialize<SpreadsheetTransformationDetails>(details, serializeOptions)
+            : throw new InvalidOperationException("Missing transformation details");
         return ValueTask.FromResult<TransformationBinding?>(new TransformationBinding
         {
             File = file,

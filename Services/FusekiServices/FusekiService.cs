@@ -14,7 +14,7 @@ public class FusekiService : IFusekiService
     public FusekiService(IConfiguration config, IDownstreamWebApi downstreamWebApi)
     {
         _downstreamWebApi = downstreamWebApi;
-        _fusekis = config.GetSection(ApiKeys.Servers).Get<List<RdfServer>>().Select(f => f.Name).ToList();
+        _fusekis = config.GetSection(ApiKeys.Servers)?.Get<List<RdfServer>>()?.Select(f => f.Name)?.ToList() ?? new List<string>();
     }
 
     public async Task<HttpResponseMessage> Query(string server, string sparql, IEnumerable<string?>? accepts = null)
@@ -49,7 +49,7 @@ public class FusekiService : IFusekiService
 
     private void VerifyServer(string server)
     {
-        if (!_fusekis.Contains(server))
+        if (_fusekis.Count() == 0 || !_fusekis.Contains(server))
         {
             throw new Exception($"Downstream Fuskeki named {server} not found among [{string.Join(", ", _fusekis)}]");
         }

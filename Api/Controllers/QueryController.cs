@@ -32,8 +32,8 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest, "application/json")]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, "application/json")]
         [Produces("text/turtle", "application/trig", "application/sparql-results+json")]
-        [Consumes("application/sparql-query", "application/json", "text/plain", "application/x-www-form-urlencoded", "multipart/form-data","text/plain")]
-        
+        [Consumes("application/sparql-query", "application/json", "text/plain", "application/x-www-form-urlencoded", "multipart/form-data", "text/plain")]
+
         [RequestSizeLimit(int.MaxValue)]
         [HttpPost("{server}/sparql")]
         public async Task<ContentResult> Query(string server, [FromBody] SparqlQuery sparql)
@@ -44,7 +44,7 @@ namespace Api.Controllers
             return Content(content, contentType ?? "text/plain", System.Text.Encoding.UTF8);
         }
     }
-    public struct SparqlQuery 
+    public struct SparqlQuery
     {
         public SparqlQuery(string Query, IEnumerable<string?>? Accept = null)
         {
@@ -81,7 +81,8 @@ namespace Api.Controllers
             {
                 if (MediaTypeHeaderValue.TryParse(av, out var mv))
                 {
-                    if (mv.MediaType == "*/*"){
+                    if (mv.MediaType == "*/*")
+                    {
                         star = true;
                         continue;
                     }
@@ -115,12 +116,15 @@ namespace Api.Controllers
                     var reader = new StreamReader(context.Request.Body, enc);
                     return new SparqlQuery((await reader.ReadToEndAsync()), ctypes);
                 case "application/json":
-                    var json = await context.Request.ReadFromJsonAsync<Dictionary<string,string>>();
+                    var json = await context.Request.ReadFromJsonAsync<Dictionary<string, string>>();
+                    if (json == null || json["query"] == null) { throw new InvalidOperationException("Missing SPARQL query"); }
                     return new SparqlQuery(json["query"], ctypes);
                 case "application/x-www-form-urlencoded":
                 case "multipart/form-data":
                     var form = await context.Request.ReadFormAsync();
-                    return new SparqlQuery(form["query"], ctypes);
+                    var hasQuery = form.TryGetValue("query", out var sparql);
+                    if (!hasQuery || !string.IsNullOrEmpty(sparql)) {throw new InvalidOperationException("Missing SPARQL query"); }
+                    return new SparqlQuery(sparql.ToString(), ctypes);
                 default:
                     throw new BadHttpRequestException($"{context.Request.ContentType} not supported for SPARQL request", 400);
             }

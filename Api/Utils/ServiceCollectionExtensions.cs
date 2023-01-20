@@ -80,6 +80,8 @@ public static class ServiceCollectionExtensions
         services.AddEndpointsApiExplorer();
 
         var azureAdConfig = config.GetSection("AzureAd").Get<AzureAdConfig>();
+        if (azureAdConfig == null) { throw new InvalidOperationException("Missing Azure configuration"); }
+        
         services.AddSwaggerGen(options =>
         {
             options.SwaggerDoc("v1", new OpenApiInfo { Title = "Spine Splinter", Version = "v1" });

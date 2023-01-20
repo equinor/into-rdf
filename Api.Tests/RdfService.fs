@@ -33,6 +33,6 @@ type RdfService =
                 | _ -> failwith "Unknown result type"
             Task.FromResult(
                 let m = new HttpResponseMessage(HttpStatusCode.OK)
-                m.Content <- new StringContent(resultContent,System.Text.Encoding.UTF8, resultType)
+                m.Content <- new StringContent(resultContent, MediaTypeHeaderValue.Parse resultType)
                 m
             )

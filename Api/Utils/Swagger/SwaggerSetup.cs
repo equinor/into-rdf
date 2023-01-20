@@ -9,6 +9,8 @@ namespace Api.Utils.Swagger
         public static void SetupCustomSwagger(this WebApplicationBuilder builder)
         {
             var azureAdConfig = builder.Configuration.GetSection("AzureAd").Get<AzureAdConfig>();
+            if (azureAdConfig == null) { throw new InvalidOperationException("Missing Azure configuration"); }
+
             builder.Services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "Spine Splinter", Version = "v1" });
@@ -38,6 +40,7 @@ namespace Api.Utils.Swagger
         public static void SetupCustomSwaggerUi(this IApplicationBuilder app, IConfiguration config)
         {
             var azureAdConfig = config.GetSection("AzureAd").Get<AzureAdConfig>();
+            if (azureAdConfig == null) { throw new InvalidOperationException("Missing Azure configuration"); }
 
             app.UseSwagger();
             app.UseSwaggerUI(setup =>

@@ -11,7 +11,7 @@ public static class AppBuilderExtensions
         where B : IApplicationBuilder
     {
         var azureAdConfig = config.GetSection("AzureAd").Get<AzureAdConfig>();
-        // var azureAdConfig = builder.Configuration.GetSection("AzureAd").Get<AzureAdConfig>();
+        if (azureAdConfig == null) { throw new InvalidOperationException("Missing Azure configuration"); }
 
         app.UseSwagger();
         app.UseSwaggerUI(setup =>
