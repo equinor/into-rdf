@@ -14,16 +14,13 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3.0.3
         with:
-          dotnet-version: "6.x.x"
+          dotnet-version: "7.x.x"
 
       - name: Restore dependencies
         run: dotnet restore -r linux-x64
 
       - name: Build Solution
         run: dotnet build --no-restore --configuration Release
-
-      - name: Create Functions Artifact
-        run: dotnet publish TieMelConsumer/TieMelConsumer.csproj --no-restore --no-build --output ${{ github.workspace }}/out/functions --configuration Release
 
       - name: Tests
         run: dotnet test --no-restore --no-build --configuration Release
