@@ -56,7 +56,7 @@ param fusekiParameters array = [
   }
 ]
 
-var dotnetVersion = 'v6.0'
+var dotnetVersion = 'v7.0'
 var dugtrioGroupId = '5cb080af-069d-47db-8675-67efa584f59c'
 var loudredGroupId = 'bdf2d33e-44a0-4774-9a11-204301b8e502'
 
@@ -163,7 +163,7 @@ resource Api 'Microsoft.Web/sites@2021-03-01' = {
     siteConfig: {
       alwaysOn: false
       netFrameworkVersion: dotnetVersion
-      linuxFxVersion: 'DOTNETCORE|6.0'
+      linuxFxVersion: 'DOTNETCORE|7.0'
       http20Enabled: true
       appSettings: union([
         {
@@ -217,7 +217,7 @@ resource AzFunction 'Microsoft.Web/sites@2021-03-01' = {
     dailyMemoryTimeQuota: 1000
     siteConfig: {
       netFrameworkVersion: dotnetVersion
-      linuxFxVersion: 'dotnet|6'
+      linuxFxVersion: 'dotnet|7'
       http20Enabled: true
       appSettings: [
         {
