@@ -9,7 +9,7 @@ namespace Services.TransformationServices.XMLTransformationServices.Converters;
 
 public class AmlToRdfConverter
 {
-    public AmlToRdfConverter(Uri baseUri, Uri TagPattern, ILogger<AmlToRdfConverter> logger, List<Uri> scopes)
+    public AmlToRdfConverter(Uri baseUri, ILogger<AmlToRdfConverter> logger, List<Uri> scopes, List<(string, Uri)> identityCollectionsAndPatternsArgs)
     {
         _logger = logger;
         amlGraph = new Graph();
@@ -39,7 +39,8 @@ public class AmlToRdfConverter
         describes = amlGraph.CreateUriNode("rec:describes");
         recordNode = amlGraph.CreateUriNode(new Uri(baseUri, "REPLACEME"));
 
-        internalElementBasedCollections = new List<string>();
+        internalElementBasedCollections = new List<(string, bool)>();
+        identityCollectionsAndPatterns = identityCollectionsAndPatternsArgs;
 
         amlGraph.BaseUri = recordNode.Uri;
     }
@@ -65,7 +66,8 @@ public class AmlToRdfConverter
     private IUriNode isInScope;
     private IUriNode describes;
     private IUriNode recordNode;
-    private readonly List<String> internalElementBasedCollections;
+    private readonly List<(string Pattern, Uri Uri)> identityCollectionsAndPatterns;
+    private readonly List<(String Collection, bool IRIOverride)> internalElementBasedCollections;
     public Graph Convert(Stream amlStream)
     {
         XmlDocument aml = validateAndGenerateAmlDocument(amlStream);
@@ -143,9 +145,9 @@ public class AmlToRdfConverter
         //Do nothing for now
     }
 
-    private List<string> decomposeSystemUnitClassLib(XmlElement node)
+    private List<(string, bool)> decomposeSystemUnitClassLib(XmlElement node)
     {
-        var systemUnitClassLibs = new List<string>();
+        var systemUnitClassLibs = new List<(string, bool)>();
         foreach (XmlElement child in node.ChildNodes)
         {
             if (child.Name == "SystemUnitClass")
@@ -154,7 +156,11 @@ public class AmlToRdfConverter
                 {
                     if (grandChild.Name == "SupportedRoleClass" && grandChild.GetAttribute("RefRoleClassPath") == "AutomationMLBaseRoleClassLib/AutomationMLBaseRole/Structure")
                     {
-                        systemUnitClassLibs.Add($"{node.GetAttribute("Name")}/{child.GetAttribute("Name")}");
+                        var systemUnitPath = $"{node.GetAttribute("Name")}/{child.GetAttribute("Name")}";
+                        if(identityCollectionsAndPatterns.Any(e => e.Pattern == systemUnitPath)) {
+                            systemUnitClassLibs.Add(new(systemUnitPath, true));
+                        }
+                        systemUnitClassLibs.Add(new(systemUnitPath, false));
                         break; //Found what we're looking for.
                     }
                 }
@@ -164,12 +170,12 @@ public class AmlToRdfConverter
     }
     private void decomposeInstanceHierachy(XmlElement xmlelement)
     {
-        IUriNode InstanceHierarchy;
         var xmlNameAttribute = xmlelement.GetAttribute("Name");
         if (xmlelement.Attributes is not null && xmlelement.HasChildNodes && xmlNameAttribute != string.Empty)
         {
             var urlEncodedName = System.Web.HttpUtility.UrlEncode(xmlNameAttribute, System.Text.Encoding.UTF8);
-            InstanceHierarchy = amlGraph.CreateUriNode("aml:" + urlEncodedName);
+            IUriNode InstanceHierarchy = amlGraph.CreateUriNode("aml:" + urlEncodedName);
+            describeInMainRecord(InstanceHierarchy);
             amlGraph.Assert(new Triple(InstanceHierarchy, a, amlGraph.CreateUriNode("aml:" + xmlelement.Name)));
             if (InstanceHierarchy is not null)
             {
@@ -181,7 +187,7 @@ public class AmlToRdfConverter
                     }
                     else
                     {
-                        AddIfBasicTextElement(childNode, amlGraph, InstanceHierarchy);
+                        AddIfBasicTextElement(childNode, InstanceHierarchy);
                     }
                 }
             }
@@ -191,55 +197,31 @@ public class AmlToRdfConverter
     private void decomposeInternalElementTypedCollection(INode parent, XmlElement focusedCollectionElement)
     {
         var focusedrdf = CreateAndAssertUriNode(parent, focusedCollectionElement);
-        foreach (XmlElement child in focusedCollectionElement.ChildNodes)
+        if (focusedrdf.NodeType != NodeType.Blank)
         {
-            if (isCollectionElement(child))
+            describeInMainRecord((IUriNode)focusedrdf);
+            foreach (XmlElement child in focusedCollectionElement.ChildNodes)
             {
-                decomposeInternalElementTypedCollection(focusedrdf, child);
+                if (isCollectionElement(child))
+                {
+                    decomposeInternalElementTypedCollection(focusedrdf, child);
+                }
+                else
+                {
+                    decomposeInternalElementInstance(parent, child);
+                }
             }
-            else
-            {
-                decomposeInternalElementInstance(parent, child);
-            }
+            traverseXml(focusedCollectionElement);
         }
-        traverseXml(focusedCollectionElement);
-
     }
-
-    private INode CreateAndAssertUriNode(INode parent, XmlElement focusedXml)
-    {
-        return CreateAdnAssertUriNodeFromNamedAttribute(parent, focusedXml, "Name");
-    }
-
-    private INode CreateAdnAssertUriNodeFromNamedAttribute(INode parent, XmlElement focusedXml, string namedAttribute)
-    {
-        var namedAttributeElement = focusedXml.Attributes.GetNamedItem(namedAttribute);
-        if (namedAttributeElement is not null)
-        {
-            var focusedrdf = amlGraph.CreateUriNode("aml:" + namedAttributeElement.Value);
-            amlGraph.Assert(parent, amlXmlNesting, focusedrdf);
-            var typeAttribute = focusedXml.Attributes.GetNamedItem("RefBaseSystemUnitPath");
-            if (typeAttribute is not null)
-            {
-                amlGraph.Assert(focusedrdf, a, amlGraph.CreateUriNode("aml:" + typeAttribute.Value));
-            }
-            var idAttribute = focusedXml.Attributes.GetNamedItem("ID");
-            if (idAttribute is not null)
-            {
-                amlGraph.Assert(focusedrdf, amlGraph.CreateUriNode("aml:ID"), amlGraph.CreateUriNode("aml:" + idAttribute.Value));
-            }
-            return focusedrdf;
-        }
-        return amlGraph.CreateBlankNode();
-    }
-
     private void decomposeInternalElementInstance(INode parentCollection, XmlElement internalElement)
     {
         var internalElementRdf = CreateAndAssertUriNode(parentCollection, internalElement);
-
-        amlGraph.Assert(new Triple(internalElementRdf, rdfslabel, CreateLiteralNode(internalElement.GetAttribute("Name"))));
-        //Fetchin Item(0) is reliable due to cardinality defined in XSD. Cardinality is always 0 or 1.
-        AddLiteralFromInnerText(internalElementRdf, amlDescription, internalElement.GetElementsByTagName("Description").Item(0));
+        if (internalElementRdf.NodeType != NodeType.Blank)
+        {
+            amlGraph.Assert(new Triple(internalElementRdf, rdfslabel, CreateLiteralNode(internalElement.GetAttribute("Name"))));
+            describeInMainRecord((IUriNode)internalElementRdf);
+        }
         foreach (XmlElement nestedElement in internalElement.ChildNodes)
         {
             if (isCollectionElement(nestedElement))
@@ -259,35 +241,31 @@ public class AmlToRdfConverter
                     case "ExternalInterface":
                         decomposeExternalInterface(internalElementRdf, (XmlElement)nestedElement);
                         break;
-                    default: break;
+                    default:
+                        if (!AddIfBasicTextElement(nestedElement, parentCollection)) _logger.LogWarning($"Found nesting where nesting should not be. Found {nestedElement.Name} under {parentCollection.ToString()}");
+                        break;
                 }
             }
         }
     }
-
     private void decomposeExternalInterface(INode parent, XmlElement element)
     {
         // var externalInterfaceRdf = amlGraph.CreateUriNode("aml:" +element.GetAttribute("ID"));
-        //This is bad. Enables the pattern where the InternalLink Elements referr to <parent.id>:<this.name> instead of this.ID.
+        //This is bad, but it enables the pattern where the InternalLink Elements referr to <parent.id>:<this.name> instead of this.ID.
         var externalInterfaceRdf = amlGraph.CreateUriNode(new Uri(parent + ":" + element.GetAttribute("Name")));
+        describeInMainRecord((IUriNode)externalInterfaceRdf);
 
         var RefBaseSystemUnitPathRdf = amlGraph.CreateUriNode("aml:" + element.GetAttribute("RefBaseClassPath"));
 
-        amlGraph.Assert(new Triple(externalInterfaceRdf, a, RefBaseSystemUnitPathRdf));
-        amlGraph.Assert(new Triple(externalInterfaceRdf, a, amlExternalInterface));
         amlGraph.Assert(new Triple(parent, amlHasExternalInterface, externalInterfaceRdf));
 
         amlGraph.Assert(new Triple(externalInterfaceRdf, rdfslabel, CreateLiteralNode(element.GetAttribute("Name"))));
         //Fetchin Item(0) is reliable due to cardinality defined in XSD
-        AddLiteralFromInnerText(externalInterfaceRdf, amlDescription, element.GetElementsByTagName("Description").Item(0));
-        if (externalInterfaceRdf is not null)
+        foreach (XmlNode nestedElement in element.ChildNodes)
         {
-            foreach (XmlNode nestedElement in element.ChildNodes)
+            if (nestedElement.Name == "Attribute")
             {
-                if (nestedElement.Name == "Attribute")
-                {
-                    decomposeAttribute(externalInterfaceRdf, (XmlElement)nestedElement);
-                }
+                decomposeAttribute(externalInterfaceRdf, (XmlElement)nestedElement);
             }
         }
     }
@@ -295,10 +273,10 @@ public class AmlToRdfConverter
     {
         IUriNode RefPartnerSideA = amlGraph.CreateUriNode("aml:" + internalLink.GetAttribute("RefPartnerSideA"));
         IUriNode RefPartnerSideB = amlGraph.CreateUriNode("aml:" + internalLink.GetAttribute("RefPartnerSideB"));
-        IUriNode Name = amlGraph.CreateUriNode("aml:" + internalLink.GetAttribute("Name").Replace(" ", "").Split(".")[0]);
-        amlGraph.Assert(new Triple(RefPartnerSideA, Name, RefPartnerSideB));
-        amlGraph.Assert(new Triple(Name, a, amlGraph.CreateUriNode("aml:internalLink")));
-
+        IUriNode internalLinkNode = amlGraph.CreateUriNode("aml:" + internalLink.GetAttribute("Name").Replace(" ", "").Split(".")[0]);
+        amlGraph.Assert(new Triple(RefPartnerSideA, internalLinkNode, RefPartnerSideB));
+        amlGraph.Assert(new Triple(internalLinkNode, a, amlGraph.CreateUriNode("aml:internalLink")));
+        describeInMainRecord(internalLinkNode);
     }
     private void decomposeAttribute(INode parent, XmlElement attributeElement)
     {
@@ -332,9 +310,8 @@ public class AmlToRdfConverter
             }
         }
     }
-    private bool AddIfBasicTextElement(XmlElement node, Graph amlGraph, INode subject)
+    private bool AddIfBasicTextElement(XmlElement node, INode subject)
     {
-        Console.WriteLine($"Assuming {node.Name} is a basic a textElement. DECOMPOSE!!");
         bool isPrimitiveText = !node.HasAttributes && node.ChildNodes.Count == 1 && node.ChildNodes[0].Name == "#text";
         if (isPrimitiveText)
         {
@@ -349,7 +326,6 @@ public class AmlToRdfConverter
             amlGraph.Assert(new Triple(subject, predicate, CreateLiteralNode(node.InnerText)));
         }
     }
-
     private ILiteralNode CreateLiteralNode(string value)
     {
         value = System.Text.RegularExpressions.Regex.Replace(value, @"\r\n?|\n", " ");
@@ -384,6 +360,43 @@ public class AmlToRdfConverter
 
     private bool isCollectionElement(XmlElement focusedElement)
     {
-        return internalElementBasedCollections.Contains(focusedElement.GetAttribute("RefBaseSystemUnitPath"));
+
+        return internalElementBasedCollections.Any(e => e.Collection == focusedElement.GetAttribute("RefBaseSystemUnitPath"));
+    }
+
+    private void describeInRecord(IUriNode Record, IUriNode Individual)
+    {
+        amlGraph.Assert(record, describes, Individual);
+    }
+    private void describeInMainRecord(IUriNode Individual)
+    {
+        describeInRecord(record, Individual);
+    }
+    private INode CreateAndAssertUriNode(INode parent, XmlElement focusedXml)
+    {
+        return CreateAndAssertUriNodeFromNamedAttribute(parent, focusedXml, "Name");
+    }
+
+    //Returns blank node if unable to find named attribute value
+    private INode CreateAndAssertUriNodeFromNamedAttribute(INode parent, XmlElement focusedXml, string namedAttribute)
+    {
+        var namedAttributeElement = focusedXml.Attributes.GetNamedItem(namedAttribute);
+        if (namedAttributeElement is not null)
+        {
+            var focusedrdf = amlGraph.CreateUriNode("aml:" + namedAttributeElement.Value);
+            amlGraph.Assert(parent, amlXmlNesting, focusedrdf);
+            var typeAttribute = focusedXml.Attributes.GetNamedItem("RefBaseSystemUnitPath");
+            if (typeAttribute is not null)
+            {
+                amlGraph.Assert(focusedrdf, a, amlGraph.CreateUriNode("aml:" + typeAttribute.Value));
+            }
+            var idAttribute = focusedXml.Attributes.GetNamedItem("ID");
+            if (idAttribute is not null)
+            {
+                amlGraph.Assert(focusedrdf, amlGraph.CreateUriNode("aml:ID"), amlGraph.CreateUriNode("aml:" + idAttribute.Value));
+            }
+            return focusedrdf;
+        }
+        return amlGraph.CreateBlankNode();
     }
 }
