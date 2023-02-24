@@ -1,7 +1,6 @@
 using Common.TransformationModels;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Text.RegularExpressions;
 
@@ -9,11 +8,8 @@ namespace Services.DomReaderServices.ExcelDomReaderServices;
 
 public class ExcelDomReaderService : IExcelDomReaderService
 {
-    private readonly ILogger<ExcelDomReaderService> _logger;
-
-    public ExcelDomReaderService(ILogger<ExcelDomReaderService> logger)
+    public ExcelDomReaderService()
     {
-        _logger = logger;
     }
 
     public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails spreadsheetDetails, string? identityColumn)
@@ -26,15 +22,10 @@ public class ExcelDomReaderService : IExcelDomReaderService
 
         var headerRow = GetHeaderRow(worksheetPart, workbookPart, spreadsheetDetails);
 
-        _logger.LogDebug("<ExcelDomReaderService> - GetSpreadsheetData: - Created header row with {nbOfColumns} columns", headerRow.Count);
-
         var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetDetails, identityColumn);
-
-        _logger.LogDebug("<ExcelDomReaderService> - GetSpreadsheetData: - Created dataset with {nbOfRows} rows", dataRows.Count);
 
         var data = CreateDataTable(spreadsheetDetails.DataStartRow, headerRow, dataRows, spreadsheetDetails.SheetName);
 
-        _logger.LogInformation("<ExcelDomReaderService> - GetSpreadsheetData: - Created table with {nbOfRows} rows", data.Rows.Count);
         return data;
     }
 

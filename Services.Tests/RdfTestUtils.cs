@@ -13,13 +13,6 @@ namespace Services.Tests
 {
     internal class RdfTestUtils
     {
-        private string _dataSource;
-
-        public RdfTestUtils(string source)
-        {
-            _dataSource = source;
-        }
-
         public void AssertTripleAsserted(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject)
         {
             var ok = Ask(graph, rdfSubject, rdfPredicate, rdfObject);

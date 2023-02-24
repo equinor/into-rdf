@@ -2,8 +2,6 @@ using Services.TransformationServices.SpreadsheetServices;
 using Common.TransformationModels;
 using System;
 using System.IO;
-using System.Text;
-using VDS.RDF;
 using Xunit;
 
 namespace Services.Tests
@@ -21,7 +19,7 @@ namespace Services.Tests
         public void TestDomParsing()
         {
             var testFile = "TestData/test.xlsx";
-            var rdfTestUtils = new RdfTestUtils("mel");
+            var rdfTestUtils = new RdfTestUtils();
             var stream = File.Open(testFile, FileMode.Open, FileAccess.Read);
 
             var transformationDetails = CreateTransformationDetails();
