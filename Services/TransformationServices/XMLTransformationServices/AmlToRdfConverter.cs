@@ -2,16 +2,13 @@ using VDS.RDF;
 using System.Xml;
 using System.Xml.Schema;
 using VDS.RDF.Parsing;
-using System.Linq;
-using Microsoft.Extensions.Logging;
 
 namespace Services.TransformationServices.XMLTransformationServices.Converters;
 
 public class AmlToRdfConverter
 {
-    public AmlToRdfConverter(Uri baseUri, ILogger<AmlToRdfConverter> logger, List<Uri> scopes, List<(string, Uri)> identityCollectionsAndPatternsArgs)
+    public AmlToRdfConverter(Uri baseUri, List<Uri> scopes, List<(string, Uri)> identityCollectionsAndPatternsArgs)
     {
-        _logger = logger;
         amlGraph = new Graph();
         amlGraph.NamespaceMap.AddNamespace("aml", baseUri);
         amlGraph.NamespaceMap.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
@@ -44,7 +41,7 @@ public class AmlToRdfConverter
 
         amlGraph.BaseUri = recordNode.Uri;
     }
-    private readonly ILogger<AmlToRdfConverter> _logger;
+
     private readonly Graph amlGraph;
     private readonly List<Uri> baseScopes;
     private IUriNode amlDescription;
@@ -242,7 +239,6 @@ public class AmlToRdfConverter
                         decomposeExternalInterface(internalElementRdf, (XmlElement)nestedElement);
                         break;
                     default:
-                        if (!AddIfBasicTextElement(nestedElement, parentCollection)) _logger.LogWarning($"Found nesting where nesting should not be. Found {nestedElement.Name} under {parentCollection.ToString()}");
                         break;
                 }
             }
@@ -348,11 +344,9 @@ public class AmlToRdfConverter
         switch (args.Severity)
         {
             case XmlSeverityType.Error:
-                _logger.LogError($"INVALID AML. Error: {args.Message}");
-                break;
+                throw new Exception($"INVALID AML. Error: {args.Message}");
             case XmlSeverityType.Warning:
-                _logger.LogWarning($"INVALID AML. Warning: {args.Message}");
-                break;
+                throw new Exception($"INVALID AML. Warning: {args.Message}");
             default:
                 break;
         }
