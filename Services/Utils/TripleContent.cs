@@ -1,4 +1,4 @@
-namespace Common.Utils;
+namespace IntoRdf.Utils;
 
 public enum TripleContent
 {

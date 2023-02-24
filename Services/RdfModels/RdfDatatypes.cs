@@ -1,4 +1,4 @@
-namespace Common.RdfModels;
+namespace IntoRdf.RdfModels;
 
 public class RdfDatatypes
 {

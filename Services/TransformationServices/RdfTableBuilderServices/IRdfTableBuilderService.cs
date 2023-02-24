@@ -1,5 +1,5 @@
 using System.Data;
-using Common.TransformationModels;
+using IntoRdf.TransformationModels;
 
 namespace Services.TransformationServices.RdfTableBuilderServices;
 

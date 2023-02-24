@@ -3,7 +3,7 @@ using VDS.RDF;
 using VDS.RDF.Writing;
 using VDS.RDF.Query;
 
-namespace Common.Utils;
+namespace IntoRdf.Utils;
 
 public static class GraphSupportFunctions
 {

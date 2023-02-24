@@ -1,4 +1,4 @@
-namespace Common.TransformationModels;
+    namespace IntoRdf.TransformationModels;
 
 public class TargetPathSegment
 {
