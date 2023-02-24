@@ -31,11 +31,10 @@ namespace Services.Tests
             var logger = factory.CreateLogger<AmlToRdfConverter>();
             var amlConverter = new AmlToRdfConverter(
                 new Uri("https://rdf.equinor.com/jsv/scd/"),
-                new Uri("https://rdf.equinor.com/jsv/tag/<tag>"),
                 logger,
-                new List<Uri>()
-                    { new Uri("https://example.com"),
-                    new Uri("https://iAmAlsoExample.com")
+                new List<Uri>(),
+                new List<(string,Uri)>()
+                    { ("IAmString" ,new Uri("https://iAmAlsoExample.com"))
                     }
                 );
             var graph = amlConverter.Convert(fs);
