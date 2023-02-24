@@ -346,7 +346,7 @@ public class AmlToRdfConverter
             case XmlSeverityType.Error:
                 throw new Exception($"INVALID AML. Error: {args.Message}");
             case XmlSeverityType.Warning:
-                throw new Exception($"INVALID AML. Warning: {args.Message}");
+                break;
             default:
                 break;
         }
