@@ -1,10 +1,10 @@
-using Common.TransformationModels;
-using Common.Utils;
+using IntoRdf.TransformationModels;
 using Services.TransformationServices.SpreadsheetServices;
 using Services.TransformationServices.OntologyServices;
 using Services.TransformationServices.RecordService;
 using VDS.RDF;
 using VDS.RDF.Parsing;
+using IntoRdf.Utils;
 
 namespace Services.TransformerServices;
 

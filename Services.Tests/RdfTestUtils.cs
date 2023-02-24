@@ -1,5 +1,4 @@
-﻿using Common.ProvenanceModels;
-using Common.RdfModels;
+﻿using IntoRdf.RdfModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,4 +1,4 @@
-using Common.TransformationModels;
+using IntoRdf.TransformationModels;
 using System.Data;
 
 namespace Services.DomReaderServices.ExcelDomReaderServices;

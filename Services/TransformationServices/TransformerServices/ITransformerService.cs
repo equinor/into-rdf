@@ -1,4 +1,4 @@
-using Common.TransformationModels;
+using IntoRdf.TransformationModels;
 
 namespace Services.TransformerServices
 {

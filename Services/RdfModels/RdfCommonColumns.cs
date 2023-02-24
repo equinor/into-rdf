@@ -1,6 +1,6 @@
 using System.Data;
 
-namespace Common.RdfModels;
+namespace IntoRdf.RdfModels;
 
 public static class RdfCommonColumns
 {

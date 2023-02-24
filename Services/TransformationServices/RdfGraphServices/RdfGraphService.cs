@@ -1,4 +1,4 @@
-using Common.RdfModels;
+using IntoRdf.RdfModels;
 using System.Data;
 using VDS.RDF;
 using VDS.RDF.Parsing;

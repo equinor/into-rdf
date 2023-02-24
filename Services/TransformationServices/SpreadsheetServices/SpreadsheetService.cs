@@ -1,5 +1,5 @@
-using Common.RdfModels;
-using Common.TransformationModels;
+using IntoRdf.RdfModels;
+using IntoRdf.TransformationModels;
 using Microsoft.Extensions.Logging;
 using Services.DomReaderServices.ExcelDomReaderServices;
 using Services.TransformationServices.RdfTableBuilderServices;
