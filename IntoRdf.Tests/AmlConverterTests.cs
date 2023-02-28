@@ -22,13 +22,12 @@ namespace IntoRdf.Tests
 
             var amlDetails = new AmlTransformationDetails(
                 new Uri("https://rdf.equinor.com/jsv/scd/"),
-                new List<Uri>(),
                 new List<(string,Uri)>()
                     { ("IAmString" ,new Uri("https://iAmAlsoExample.com"))
                     }
                 );
 
-            var turtle = new TransformerService().TransformAml(amlDetails, fs, RdfFormat.Turtle);
+            var turtle = new TransformerService().TransformAml(amlDetails, fs, RdfFormat.Turtle, new Uri("https://dugtrioexperimental.blob.core.windows.net/validation-schemas/CAEX_ClassModel_V.3.0.xsd"));
             var graph = new Graph();
             graph.LoadFromString(turtle);
 

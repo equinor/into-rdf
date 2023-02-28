@@ -7,14 +7,13 @@ namespace IntoRdf.TransformationServices.XMLTransformationServices.Converters;
 
 internal class AmlToRdfConverter
 {
-    internal AmlToRdfConverter(Uri baseUri, List<Uri> scopes, List<(string, Uri)> identityCollectionsAndPatternsArgs)
+    internal AmlToRdfConverter(Uri baseUri, List<(string, Uri)> identityCollectionsAndPatternsArgs)
     {
         amlGraph = new Graph();
         amlGraph.NamespaceMap.AddNamespace("aml", baseUri);
         amlGraph.NamespaceMap.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
         amlGraph.NamespaceMap.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
         amlGraph.NamespaceMap.AddNamespace("rec", new Uri("https://rdf.equinor.com/ontology/record/"));
-        baseScopes = scopes;
         amlDescription = amlGraph.CreateUriNode("aml:description");
         amlAttributeVale = amlGraph.CreateUriNode("aml:attributeValue");
         amlDefaultAttributeVale = amlGraph.CreateUriNode("aml:defaultAttributeValue");
@@ -29,21 +28,13 @@ internal class AmlToRdfConverter
         amlExternalInterface = amlGraph.CreateUriNode("aml:ExternalInterface");
         a = amlGraph.CreateUriNode("rdf:type");
         rdfslabel = amlGraph.CreateUriNode("rdfs:label");
-        //Record helpers
-        record = amlGraph.CreateUriNode("rec:Record");
-        isSubRecordOf = amlGraph.CreateUriNode("rec:isSubRecordOf");
-        isInScope = amlGraph.CreateUriNode("rec:isInScope");
-        describes = amlGraph.CreateUriNode("rec:describes");
-        recordNode = amlGraph.CreateUriNode(new Uri(baseUri, "REPLACEME"));
 
         internalElementBasedCollections = new List<(string, bool)>();
         identityCollectionsAndPatterns = identityCollectionsAndPatternsArgs;
 
-        amlGraph.BaseUri = recordNode.Uri;
     }
 
     private readonly Graph amlGraph;
-    private readonly List<Uri> baseScopes;
     private IUriNode amlDescription;
     private IUriNode amlAttributeVale;
     private IUriNode amlDefaultAttributeVale;
@@ -58,16 +49,11 @@ internal class AmlToRdfConverter
     private IUriNode amlExternalInterface;
     private IUriNode a;
     private IUriNode rdfslabel;
-    private IUriNode record;
-    private IUriNode isSubRecordOf;
-    private IUriNode isInScope;
-    private IUriNode describes;
-    private IUriNode recordNode;
     private readonly List<(string Pattern, Uri Uri)> identityCollectionsAndPatterns;
     private readonly List<(String Collection, bool IRIOverride)> internalElementBasedCollections;
-    internal Graph Convert(Stream amlStream)
+    internal Graph Convert(Stream amlStream, Uri AmlXsdUri)
     {
-        XmlDocument aml = validateAndGenerateAmlDocument(amlStream);
+        XmlDocument aml = validateAndGenerateAmlDocument(amlStream, AmlXsdUri);
         var caexFiles = aml.GetElementsByTagName("CAEXFile");
         foreach (XmlElement caexFile in caexFiles)
         {
@@ -78,9 +64,6 @@ internal class AmlToRdfConverter
 
     private void startTraversalofCaexFile(XmlNode node)
     {
-        amlGraph.Assert(recordNode, a, record);
-        baseScopes.ForEach(scope => amlGraph.Assert(recordNode, isInScope, amlGraph.CreateUriNode(scope)));
-
         traverseXml(node);
     }
     private void traverseXml(XmlNode node)
@@ -172,7 +155,6 @@ internal class AmlToRdfConverter
         {
             var urlEncodedName = System.Web.HttpUtility.UrlEncode(xmlNameAttribute, System.Text.Encoding.UTF8);
             IUriNode InstanceHierarchy = amlGraph.CreateUriNode("aml:" + urlEncodedName);
-            describeInMainRecord(InstanceHierarchy);
             amlGraph.Assert(new Triple(InstanceHierarchy, a, amlGraph.CreateUriNode("aml:" + xmlelement.Name)));
             if (InstanceHierarchy is not null)
             {
@@ -196,7 +178,6 @@ internal class AmlToRdfConverter
         var focusedrdf = CreateAndAssertUriNode(parent, focusedCollectionElement);
         if (focusedrdf.NodeType != NodeType.Blank)
         {
-            describeInMainRecord((IUriNode)focusedrdf);
             foreach (XmlElement child in focusedCollectionElement.ChildNodes)
             {
                 if (isCollectionElement(child))
@@ -217,7 +198,6 @@ internal class AmlToRdfConverter
         if (internalElementRdf.NodeType != NodeType.Blank)
         {
             amlGraph.Assert(new Triple(internalElementRdf, rdfslabel, CreateLiteralNode(internalElement.GetAttribute("Name"))));
-            describeInMainRecord((IUriNode)internalElementRdf);
         }
         foreach (XmlElement nestedElement in internalElement.ChildNodes)
         {
@@ -249,7 +229,6 @@ internal class AmlToRdfConverter
         // var externalInterfaceRdf = amlGraph.CreateUriNode("aml:" +element.GetAttribute("ID"));
         //This is bad, but it enables the pattern where the InternalLink Elements referr to <parent.id>:<this.name> instead of this.ID.
         var externalInterfaceRdf = amlGraph.CreateUriNode(new Uri(parent + ":" + element.GetAttribute("Name")));
-        describeInMainRecord((IUriNode)externalInterfaceRdf);
 
         var RefBaseSystemUnitPathRdf = amlGraph.CreateUriNode("aml:" + element.GetAttribute("RefBaseClassPath"));
 
@@ -272,7 +251,6 @@ internal class AmlToRdfConverter
         IUriNode internalLinkNode = amlGraph.CreateUriNode("aml:" + internalLink.GetAttribute("Name").Replace(" ", "").Split(".")[0]);
         amlGraph.Assert(new Triple(RefPartnerSideA, internalLinkNode, RefPartnerSideB));
         amlGraph.Assert(new Triple(internalLinkNode, a, amlGraph.CreateUriNode("aml:internalLink")));
-        describeInMainRecord(internalLinkNode);
     }
     private void decomposeAttribute(INode parent, XmlElement attributeElement)
     {
@@ -339,7 +317,7 @@ internal class AmlToRdfConverter
         value = System.Text.RegularExpressions.Regex.Replace(value, @"\r\n?|\n", " ");
         return amlGraph.CreateLiteralNode(value, new Uri(XmlSpecsHelper.XmlSchemaDataTypeString));
     }
-    private XmlDocument validateAndGenerateAmlDocument(Stream amlStream)
+    private XmlDocument validateAndGenerateAmlDocument(Stream amlStream, Uri AmlXSD)
     {
         XmlReaderSettings settings = new XmlReaderSettings();
         ValidationEventHandler eventHandler = new ValidationEventHandler(amlValidationHandler);
@@ -347,7 +325,7 @@ internal class AmlToRdfConverter
         var aml = new XmlDocument();
         aml.Load(reader);
         //Sometime in the future the location of the XSD should be not hardcoded in the sourcecode. 
-        aml.Schemas.Add("http://www.dke.de/CAEX", "https://dugtrioexperimental.blob.core.windows.net/validation-schemas/CAEX_ClassModel_V.3.0.xsd");
+        aml.Schemas.Add("http://www.dke.de/CAEX", AmlXSD.ToString());
         aml.Validate(eventHandler);
         return aml;
     }
@@ -370,14 +348,6 @@ internal class AmlToRdfConverter
         return internalElementBasedCollections.Any(e => e.Collection == focusedElement.GetAttribute("RefBaseSystemUnitPath"));
     }
 
-    private void describeInRecord(IUriNode Record, IUriNode Individual)
-    {
-        amlGraph.Assert(record, describes, Individual);
-    }
-    private void describeInMainRecord(IUriNode Individual)
-    {
-        describeInRecord(record, Individual);
-    }
     private INode CreateAndAssertUriNode(INode parent, XmlElement focusedXml)
     {
         return CreateAndAssertUriNodeFromNamedAttribute(parent, focusedXml, "Name");
