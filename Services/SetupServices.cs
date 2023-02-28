@@ -11,10 +11,6 @@ internal static class SetupServices
 {
     internal static IServiceCollection AddSplinterServices(this IServiceCollection services)
     {
-        /*        IExcelDomReaderService excelDomReaderService, 
-        IExcelRdfTableBuilderService excelTableBuilderService,
-        IRdfGraphService rdfGraphService)
-        */
         services.AddTransient<IExcelDomReaderService, ExcelDomReaderService>();
         services.AddTransient<IRdfGraphService, RdfGraphService>();
         services.AddTransient<IExcelRdfTableBuilderService, ExcelRdfTableBuilderService>();
