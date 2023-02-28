@@ -1,6 +1,6 @@
 using VDS.RDF;
 
-namespace IntoRdf.Services.TransformationServices.RecordService;
+namespace IntoRdf.TransformationServices.RecordService;
 
 internal class RecordTransformationService : IRecordTransformationService
 {

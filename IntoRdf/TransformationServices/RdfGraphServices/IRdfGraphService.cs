@@ -1,7 +1,7 @@
 using System.Data;
 using VDS.RDF;
 
-namespace IntoRdf.Services.TransformationServices.RdfGraphServices;
+namespace IntoRdf.TransformationServices.RdfGraphServices;
 
 internal interface IRdfGraphService
 {

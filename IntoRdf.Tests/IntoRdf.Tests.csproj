@@ -25,10 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Services\IntoRdf.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="TestData\test.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -44,6 +40,10 @@
         <None Update="TestData\revisionTestTrainSiemens.ttl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IntoRdf\IntoRdf.csproj" />
   </ItemGroup>
 
 </Project>

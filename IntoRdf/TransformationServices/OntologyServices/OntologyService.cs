@@ -3,7 +3,7 @@ using System.Data;
 using VDS.RDF;
 using VDS.RDF.Query.Builder;
 
-namespace IntoRdf.Services.TransformationServices.OntologyServices;
+namespace IntoRdf.TransformationServices.OntologyServices;
 
 internal class OntologyService : IOntologyService
 {

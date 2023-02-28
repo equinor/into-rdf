@@ -4,7 +4,7 @@ using System.Data;
 using System.Text.RegularExpressions;
 using IntoRdf.Public.Models;
 
-namespace IntoRdf.Services.DomReaderServices.ExcelDomReaderServices;
+namespace IntoRdf.DomReaderServices.ExcelDomReaderServices;
 
 internal class ExcelDomReaderService : IExcelDomReaderService
 {

@@ -1,7 +1,7 @@
 using IntoRdf.Public.Models;
 using System.Data;
 
-namespace IntoRdf.Services.TransformationServices.RdfTableBuilderServices;
+namespace IntoRdf.TransformationServices.RdfTableBuilderServices;
 
 internal interface IExcelRdfTableBuilderService
 {

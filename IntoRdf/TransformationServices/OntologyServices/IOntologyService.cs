@@ -1,7 +1,6 @@
-using System.Data;
 using VDS.RDF;
 
-namespace IntoRdf.Services.TransformationServices.OntologyServices;
+namespace IntoRdf.TransformationServices.OntologyServices;
 
 internal interface IOntologyService
 {

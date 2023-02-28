@@ -1,13 +1,13 @@
-using IntoRdf.Services.TransformationServices.SpreadsheetServices;
-using IntoRdf.Services.TransformationServices.OntologyServices;
-using IntoRdf.Services.TransformationServices.RecordService;
+using IntoRdf.TransformationServices.SpreadsheetServices;
+using IntoRdf.TransformationServices.OntologyServices;
+using IntoRdf.TransformationServices.RecordService;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 using IntoRdf.Utils;
-using IntoRdf.Services.DependencyInjection;
+using IntoRdf.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using IntoRdf.Public.Models;
-using IntoRdf.Services.TransformationServices.XMLTransformationServices.Converters;
+using IntoRdf.TransformationServices.XMLTransformationServices.Converters;
 
 namespace IntoRdf;
 

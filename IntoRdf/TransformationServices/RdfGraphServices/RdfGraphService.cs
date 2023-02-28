@@ -2,7 +2,7 @@ using System.Data;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 
-namespace IntoRdf.Services.TransformationServices.RdfGraphServices;
+namespace IntoRdf.TransformationServices.RdfGraphServices;
 
 internal class RdfGraphService : IRdfGraphService
 {

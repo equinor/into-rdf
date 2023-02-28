@@ -3,9 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntoRdf", "Services\IntoRdf.csproj", "{F29C921F-F6C3-438B-B1E6-48E09116D494}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntoRdf", "IntoRdf\IntoRdf.csproj", "{F29C921F-F6C3-438B-B1E6-48E09116D494}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntoRdf.Tests", "Services.Tests\IntoRdf.Tests.csproj", "{26916F46-A913-44F9-B8B9-AC475B454BB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntoRdf.Tests", "IntoRdf.Tests\IntoRdf.Tests.csproj", "{26916F46-A913-44F9-B8B9-AC475B454BB7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F29C921F-F6C3-438B-B1E6-48E09116D494} = {F29C921F-F6C3-438B-B1E6-48E09116D494}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

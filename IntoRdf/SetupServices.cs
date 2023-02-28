@@ -1,12 +1,12 @@
 using Microsoft.Extensions.DependencyInjection;
-using IntoRdf.Services.TransformationServices.RdfGraphServices;
-using IntoRdf.Services.DomReaderServices.ExcelDomReaderServices;
-using IntoRdf.Services.TransformationServices.RdfTableBuilderServices;
-using IntoRdf.Services.TransformationServices.SpreadsheetServices;
-using IntoRdf.Services.TransformationServices.OntologyServices;
-using IntoRdf.Services.TransformationServices.RecordService;
+using IntoRdf.TransformationServices.RdfGraphServices;
+using IntoRdf.DomReaderServices.ExcelDomReaderServices;
+using IntoRdf.TransformationServices.RdfTableBuilderServices;
+using IntoRdf.TransformationServices.SpreadsheetServices;
+using IntoRdf.TransformationServices.OntologyServices;
+using IntoRdf.TransformationServices.RecordService;
 
-namespace IntoRdf.Services.DependencyInjection;
+namespace IntoRdf.DependencyInjection;
 internal static class SetupServices
 {
     internal static IServiceCollection AddSplinterServices(this IServiceCollection services)

@@ -5,11 +5,10 @@ using Xunit;
 using System.Collections.Generic;
 using VDS.RDF;
 using VDS.RDF.Writing;
-using Microsoft.Extensions.DependencyInjection;
 using IntoRdf.Public.Models;
-using IntoRdf;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Services.Tests
+namespace IntoRdf.Tests
 {
     public class AmlConverterTests
     {

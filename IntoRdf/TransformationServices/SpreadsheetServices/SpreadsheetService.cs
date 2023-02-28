@@ -1,14 +1,12 @@
-using IntoRdf.RdfModels;
-using Microsoft.Extensions.Logging;
-using IntoRdf.Services.DomReaderServices.ExcelDomReaderServices;
-using IntoRdf.Services.TransformationServices.RdfTableBuilderServices;
-using IntoRdf.Services.TransformationServices.RdfGraphServices;
+using IntoRdf.DomReaderServices.ExcelDomReaderServices;
+using IntoRdf.TransformationServices.RdfTableBuilderServices;
+using IntoRdf.TransformationServices.RdfGraphServices;
 
 using System.Data;
 using VDS.RDF;
 using IntoRdf.Public.Models;
 
-namespace IntoRdf.Services.TransformationServices.SpreadsheetServices;
+namespace IntoRdf.TransformationServices.SpreadsheetServices;
 
 internal class SpreadsheetService : ISpreadsheetService
 {

@@ -1,5 +1,4 @@
-﻿using IntoRdf.RdfModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using VDS.RDF;
@@ -8,7 +7,7 @@ using VDS.RDF.Query.Builder;
 using VDS.RDF.Query.Patterns;
 using Xunit;
 
-namespace IntoRdf.Services.Tests
+namespace IntoRdf.Tests
 {
     internal class RdfTestUtils
     {

@@ -1,7 +1,7 @@
 using IntoRdf.Public.Models;
 using System.Data;
 
-namespace IntoRdf.Services.DomReaderServices.ExcelDomReaderServices;
+namespace IntoRdf.DomReaderServices.ExcelDomReaderServices;
 
 internal interface IExcelDomReaderService
 {

@@ -3,7 +3,7 @@ using System.Xml;
 using System.Xml.Schema;
 using VDS.RDF.Parsing;
 
-namespace IntoRdf.Services.TransformationServices.XMLTransformationServices.Converters;
+namespace IntoRdf.TransformationServices.XMLTransformationServices.Converters;
 
 internal class AmlToRdfConverter
 {

@@ -1,11 +1,10 @@
-using IntoRdf;
 using IntoRdf.Public.Models;
 using System;
 using System.IO;
 using VDS.RDF;
 using Xunit;
 
-namespace IntoRdf.Services.Tests
+namespace IntoRdf.Tests
 {
     public class DomMelReaderTests
     {
