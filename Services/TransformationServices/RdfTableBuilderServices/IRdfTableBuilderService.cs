@@ -1,9 +1,9 @@
+using IntoRdf.Public.Models;
 using System.Data;
-using IntoRdf.TransformationModels;
 
-namespace Services.TransformationServices.RdfTableBuilderServices;
+namespace IntoRdf.Services.TransformationServices.RdfTableBuilderServices;
 
-public interface IExcelRdfTableBuilderService
+internal interface IExcelRdfTableBuilderService
 {
     DataTable GetInputDataTable(Uri dataCollectionUri, SpreadsheetTransformationDetails transformationSettings, DataTable inputData);
 }

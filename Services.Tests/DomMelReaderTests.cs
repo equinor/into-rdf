@@ -1,20 +1,14 @@
-using Services.TransformationServices.SpreadsheetServices;
-using IntoRdf.TransformationModels;
+using IntoRdf;
+using IntoRdf.Public.Models;
 using System;
 using System.IO;
+using VDS.RDF;
 using Xunit;
 
-namespace Services.Tests
+namespace IntoRdf.Services.Tests
 {
     public class DomMelReaderTests
     {
-        private readonly ISpreadsheetService _spreadsheetTransformationService;
-
-        public DomMelReaderTests(ISpreadsheetService transformationServices)
-        {
-            _spreadsheetTransformationService = transformationServices;
-        }
-
         [Fact]
         public void TestDomParsing()
         {
@@ -24,7 +18,9 @@ namespace Services.Tests
 
             var transformationDetails = CreateTransformationDetails();
 
-            var graph = _spreadsheetTransformationService.ConvertToRdf(transformationDetails, stream);
+            var turtle = new TransformerService().TransformSpreadsheet(transformationDetails, stream, RdfFormat.Turtle);
+            var graph = new Graph();
+            graph.LoadFromString(turtle);
 
             Assert.NotNull(graph);
 

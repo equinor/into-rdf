@@ -1,9 +1,9 @@
 using System.Data;
 using VDS.RDF;
 
-namespace Services.TransformationServices.OntologyServices;
+namespace IntoRdf.Services.TransformationServices.OntologyServices;
 
-public interface IOntologyService
+internal interface IOntologyService
 {
      Graph EnrichRdf(Graph sourceGraph, Graph ontologyGraph);
 }

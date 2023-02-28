@@ -1,6 +1,6 @@
 namespace IntoRdf.Utils;
 
-public enum TripleContent
+internal enum TripleContent
 {
     Subject,
     Predicate,

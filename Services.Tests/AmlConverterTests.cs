@@ -1,15 +1,13 @@
 using System;
 using System.IO;
 using System.Linq;
-using VDS.RDF.Parsing;
 using Xunit;
-using Services.TransformationServices.XMLTransformationServices.Converters;
-using VDS.RDF.Query.Expressions;
 using System.Collections.Generic;
-using VDS.RDF.Query;
 using VDS.RDF;
 using VDS.RDF.Writing;
 using Microsoft.Extensions.DependencyInjection;
+using IntoRdf.Public.Models;
+using IntoRdf;
 
 namespace Services.Tests
 {
@@ -17,13 +15,13 @@ namespace Services.Tests
     {
         FileStream fs = new FileStream("TestData/test.aml", FileMode.Open);
         [Fact(Skip = "TODO fix test by providing a valid aml file")]
-        public void AsserTriplesFromAML()
+        internal void AsserTriplesFromAML()
         {
             var serviceProvider = new ServiceCollection()
                 .AddLogging()
                 .BuildServiceProvider();
 
-            var amlConverter = new AmlToRdfConverter(
+            var amlDetails = new AmlTransformationDetails(
                 new Uri("https://rdf.equinor.com/jsv/scd/"),
                 new List<Uri>(),
                 new List<(string,Uri)>()
@@ -31,8 +29,10 @@ namespace Services.Tests
                     }
                 );
 
-            var graph = amlConverter.Convert(fs);
-            
+            var turtle = new TransformerService().TransformAml(amlDetails, fs, RdfFormat.Turtle);
+            var graph = new Graph();
+            graph.LoadFromString(turtle);
+
             var ts = new TripleStore();
             ts.Add(graph);
             

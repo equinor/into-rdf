@@ -1,9 +1,9 @@
-using IntoRdf.TransformationModels;
+using IntoRdf.Public.Models;
 using VDS.RDF;
 
-namespace Services.TransformationServices.SpreadsheetServices;
+namespace IntoRdf.Services.TransformationServices.SpreadsheetServices;
 
-public interface ISpreadsheetService
+internal interface ISpreadsheetService
 {
     Graph ConvertToRdf(SpreadsheetTransformationDetails transformationDetails, Stream content);
 }

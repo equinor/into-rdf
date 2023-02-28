@@ -1,17 +1,13 @@
-using IntoRdf.TransformationModels;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Data;
 using System.Text.RegularExpressions;
+using IntoRdf.Public.Models;
 
-namespace Services.DomReaderServices.ExcelDomReaderServices;
+namespace IntoRdf.Services.DomReaderServices.ExcelDomReaderServices;
 
-public class ExcelDomReaderService : IExcelDomReaderService
+internal class ExcelDomReaderService : IExcelDomReaderService
 {
-    public ExcelDomReaderService()
-    {
-    }
-
     public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails spreadsheetDetails, string? identityColumn)
     {
         if (spreadsheetDetails.SheetName == null) throw new InvalidOperationException("Failed to transform spreadsheet. Missing spreadsheet name in SpreadsheetContext");

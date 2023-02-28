@@ -1,17 +1,17 @@
 namespace IntoRdf.RdfModels;
 
-public static class RdfCommonProperties
+internal static class RdfCommonProperties
 {
-    public static Uri CreateSubPropertyOfProperty() => new Uri(RdfPrefixes.Prefix2Uri["rdfs"] + "subPropertyOf");
-    public static Uri CreateObjectProperty() => new Uri(RdfPrefixes.Prefix2Uri["owl"] + "ObjectProperty");
-    public static Uri CreateDatatypeProperty() => new Uri(RdfPrefixes.Prefix2Uri["owl"] + "DatatypeProperty");
-    public static Uri CreateType() => new Uri(RdfPrefixes.Prefix2Uri["rdf"] + "type");
-    public static Uri CreateRange() => new Uri(RdfPrefixes.Prefix2Uri["rdfs"] + "range");
-    public static Uri CreateDomain() => new Uri(RdfPrefixes.Prefix2Uri["rdfs"] + "domain");
-    public static Uri CreateLabel() => new Uri(RdfPrefixes.Prefix2Uri["rdfs"] + "label");
-    public static Uri CreateHasPhysicalQuantity() => new Uri(RdfPrefixes.Prefix2Uri["physical"] + "hasPhysicalQuantity");
-    public static Uri CreateQuantityQualifiedAs() => new Uri(RdfPrefixes.Prefix2Uri["physical"] + "qualityQuantifiedAs");
-    public static Uri CreateDatumUOM() => new Uri(RdfPrefixes.Prefix2Uri["physical"] + "datumUOM");
-    public static Uri CreateDatumValue() => new Uri(RdfPrefixes.Prefix2Uri["physical"] + "datumValue");
-    public static Uri CreateHasPrefix() => new Uri(RdfPrefixes.Prefix2Uri["sor"] + "hasPrefix");
+    internal static Uri CreateSubPropertyOfProperty() => new Uri(Public.Utils.PrefixToUri["rdfs"] + "subPropertyOf");
+    internal static Uri CreateObjectProperty() => new Uri(Public.Utils.PrefixToUri["owl"] + "ObjectProperty");
+    internal static Uri CreateDatatypeProperty() => new Uri(Public.Utils.PrefixToUri["owl"] + "DatatypeProperty");
+    internal static Uri CreateType() => new Uri(Public.Utils.PrefixToUri["rdf"] + "type");
+    internal static Uri CreateRange() => new Uri(Public.Utils.PrefixToUri["rdfs"] + "range");
+    internal static Uri CreateDomain() => new Uri(Public.Utils.PrefixToUri["rdfs"] + "domain");
+    internal static Uri CreateLabel() => new Uri(Public.Utils.PrefixToUri["rdfs"] + "label");
+    internal static Uri CreateHasPhysicalQuantity() => new Uri(Public.Utils.PrefixToUri["physical"] + "hasPhysicalQuantity");
+    internal static Uri CreateQuantityQualifiedAs() => new Uri(Public.Utils.PrefixToUri["physical"] + "qualityQuantifiedAs");
+    internal static Uri CreateDatumUOM() => new Uri(Public.Utils.PrefixToUri["physical"] + "datumUOM");
+    internal static Uri CreateDatumValue() => new Uri(Public.Utils.PrefixToUri["physical"] + "datumValue");
+    internal static Uri CreateHasPrefix() => new Uri(Public.Utils.PrefixToUri["sor"] + "hasPrefix");
 }

@@ -1,10 +1,10 @@
 namespace IntoRdf.RdfModels;
 
-public class RdfDatatypes
+internal class RdfDatatypes
 {
-    public static Uri CreateUriDatatype() => new Uri(RdfPrefixes.Prefix2Uri["xsd"] + "anyURI");
-    public static Uri CreateStringDatatype() => new Uri(RdfPrefixes.Prefix2Uri["xsd"] + "string");
-    public static Uri CreateIntegerDatatype() => new Uri(RdfPrefixes.Prefix2Uri["xsd"] + "integer");
-    public static Uri CreateDoubleDatatype() => new Uri(RdfPrefixes.Prefix2Uri["xsd"] + "double");
-    public static Uri CreateDateTimeDatatype() => new Uri(RdfPrefixes.Prefix2Uri["xsd"] + "dateTime");
-}
+    internal static Uri CreateUriDatatype() => new Uri(Public.Utils.PrefixToUri["xsd"] + "anyURI");
+    internal static Uri CreateStringDatatype() => new Uri(Public.Utils.PrefixToUri["xsd"] + "string");
+    internal static Uri CreateIntegerDatatype() => new Uri(Public.Utils.PrefixToUri["xsd"] + "integer");
+    internal static Uri CreateDoubleDatatype() => new Uri(Public.Utils.PrefixToUri["xsd"] + "double");
+    internal static Uri CreateDateTimeDatatype() => new Uri(Public.Utils.PrefixToUri["xsd"] + "dateTime");
+}   

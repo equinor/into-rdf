@@ -2,24 +2,25 @@ using System.Text;
 using VDS.RDF;
 using VDS.RDF.Writing;
 using VDS.RDF.Query;
+using IntoRdf.Public.Models;
 
 namespace IntoRdf.Utils;
 
-public static class GraphSupportFunctions
+internal static class GraphSupportFunctions
 {
 
-    public static string WriteGraphToString(Graph graph, RdfWriterType writerType )
+    internal static string WriteGraphToString(Graph graph, RdfFormat writerType )
     {
         using MemoryStream outputStream = new MemoryStream();
         switch (writerType)
         {
-            case RdfWriterType.Trig:
+            case RdfFormat.Trig:
                 graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new TriGWriter());
                 break;
-            case RdfWriterType.Jsonld:
+            case RdfFormat.Jsonld:
                 graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new JsonLdWriter());
                 break;
-            case RdfWriterType.Turtle:
+            case RdfFormat.Turtle:
                 graph.SaveToStream(new StreamWriter(outputStream, new UTF8Encoding(false)), new CompressingTurtleWriter());
                 break;
             default:
@@ -28,7 +29,7 @@ public static class GraphSupportFunctions
         return Encoding.UTF8.GetString(outputStream.ToArray());
     }
 
-    public static Graph LoadGraphFromString(string graphContent)
+    internal static Graph LoadGraphFromString(string graphContent)
     {
         var graph = new Graph();
         graph.LoadFromString(graphContent);
@@ -36,7 +37,7 @@ public static class GraphSupportFunctions
         return graph;
     }
 
-    public static string GetAskQuery(TripleContent tripleContent, string name)
+    internal static string GetAskQuery(TripleContent tripleContent, string name)
     {
         var queryString = new SparqlParameterizedString();
         queryString.Namespaces.AddNamespace("splinter", new Uri("https://rdf.equinor.com/splinter#"));

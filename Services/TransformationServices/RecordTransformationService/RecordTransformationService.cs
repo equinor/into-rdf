@@ -1,8 +1,8 @@
 using VDS.RDF;
 
-namespace Services.TransformationServices.RecordService;
+namespace IntoRdf.Services.TransformationServices.RecordService;
 
-public class RecordTransformationService : IRecordTransformationService
+internal class RecordTransformationService : IRecordTransformationService
 {
     public Graph CreateProtoRecord(Uri uri, Graph graph)
     {

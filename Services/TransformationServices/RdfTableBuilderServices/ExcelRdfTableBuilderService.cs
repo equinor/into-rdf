@@ -1,10 +1,10 @@
+using IntoRdf.Public.Models;
 using IntoRdf.RdfModels;
 using System.Data;
-using IntoRdf.TransformationModels;
 
-namespace Services.TransformationServices.RdfTableBuilderServices;
+namespace IntoRdf.Services.TransformationServices.RdfTableBuilderServices;
 
-public class ExcelRdfTableBuilderService : IExcelRdfTableBuilderService
+internal class ExcelRdfTableBuilderService : IExcelRdfTableBuilderService
 {
     private DataTable _dataTable;
 
@@ -28,7 +28,7 @@ public class ExcelRdfTableBuilderService : IExcelRdfTableBuilderService
         _dataTable.Columns.Add(idColumn);
         _dataTable.PrimaryKey = new DataColumn[] { idColumn };
 
-        var dataUri = $"{RdfPrefixes.Prefix2Uri["source"]}{transformationSettings.TransformationType}#";
+        var dataUri = $"{Public.Utils.PrefixToUri["source"]}{transformationSettings.TransformationType}#";
 
         foreach (DataColumn column in columns)
         {

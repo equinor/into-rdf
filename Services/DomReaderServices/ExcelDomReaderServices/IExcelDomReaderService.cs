@@ -1,9 +1,9 @@
-using IntoRdf.TransformationModels;
+using IntoRdf.Public.Models;
 using System.Data;
 
-namespace Services.DomReaderServices.ExcelDomReaderServices;
+namespace IntoRdf.Services.DomReaderServices.ExcelDomReaderServices;
 
-public interface IExcelDomReaderService
+internal interface IExcelDomReaderService
 {
-    DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails details, string? identityColumn);
+    public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails details, string? identityColumn);
 }

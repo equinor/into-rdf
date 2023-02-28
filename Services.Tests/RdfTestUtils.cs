@@ -8,11 +8,11 @@ using VDS.RDF.Query.Builder;
 using VDS.RDF.Query.Patterns;
 using Xunit;
 
-namespace Services.Tests
+namespace IntoRdf.Services.Tests
 {
     internal class RdfTestUtils
     {
-        public void AssertTripleAsserted(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject)
+        internal void AssertTripleAsserted(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject)
         {
             var ok = Ask(graph, rdfSubject, rdfPredicate, rdfObject);
             if (ok)
@@ -154,17 +154,17 @@ namespace Services.Tests
 
         private static NodeMatchPattern CreateStringLiteralPattern(Graph graph, string literal)
         {
-            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(RdfPrefixes.Prefix2Uri["xsd"].ToString() + "string")));
+            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(Public.Utils.PrefixToUri["xsd"].ToString() + "string")));
         }
 
         private static NodeMatchPattern CreateDoubleLiteralPattern(Graph graph, double literal)
         {
-            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(RdfPrefixes.Prefix2Uri["xsd"].ToString() + "double")));
+            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(Public.Utils.PrefixToUri["xsd"].ToString() + "double")));
         }
 
         private static NodeMatchPattern CreateIntLiteralPattern(Graph graph, int literal)
         {
-            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(RdfPrefixes.Prefix2Uri["xsd"].ToString() + "int")));
+            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(Public.Utils.PrefixToUri["xsd"].ToString() + "int")));
         }
     }
 }

@@ -3,11 +3,11 @@ using System.Xml;
 using System.Xml.Schema;
 using VDS.RDF.Parsing;
 
-namespace Services.TransformationServices.XMLTransformationServices.Converters;
+namespace IntoRdf.Services.TransformationServices.XMLTransformationServices.Converters;
 
-public class AmlToRdfConverter
+internal class AmlToRdfConverter
 {
-    public AmlToRdfConverter(Uri baseUri, List<Uri> scopes, List<(string, Uri)> identityCollectionsAndPatternsArgs)
+    internal AmlToRdfConverter(Uri baseUri, List<Uri> scopes, List<(string, Uri)> identityCollectionsAndPatternsArgs)
     {
         amlGraph = new Graph();
         amlGraph.NamespaceMap.AddNamespace("aml", baseUri);
@@ -65,7 +65,7 @@ public class AmlToRdfConverter
     private IUriNode recordNode;
     private readonly List<(string Pattern, Uri Uri)> identityCollectionsAndPatterns;
     private readonly List<(String Collection, bool IRIOverride)> internalElementBasedCollections;
-    public Graph Convert(Stream amlStream)
+    internal Graph Convert(Stream amlStream)
     {
         XmlDocument aml = validateAndGenerateAmlDocument(amlStream);
         var caexFiles = aml.GetElementsByTagName("CAEXFile");
@@ -308,13 +308,25 @@ public class AmlToRdfConverter
     }
     private bool AddIfBasicTextElement(XmlElement node, INode subject)
     {
-        bool isPrimitiveText = !node.HasAttributes && node.ChildNodes.Count == 1 && node.ChildNodes[0].Name == "#text";
-        if (isPrimitiveText)
+        if (IsPrimitiveText(node))
         {
             AddLiteralFromInnerText(subject, amlGraph.CreateUriNode("aml:" + node.Name), node);
         }
-        return isPrimitiveText;
+        return IsPrimitiveText(node);
     }
+
+    private static bool IsPrimitiveText (XmlElement node) {
+        if (!node.HasAttributes && node.ChildNodes.Count == 1)
+        {
+            var child = node.ChildNodes[0];
+            if (child != null)
+            {
+                return child.Name == "#text";
+            }
+        }
+        return false;
+    }
+
     private void AddLiteralFromInnerText(INode subject, INode predicate, XmlNode? node)
     {
         if (node is not null)

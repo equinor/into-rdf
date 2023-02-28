@@ -1,0 +1,63 @@
+using IntoRdf.Services.TransformationServices.SpreadsheetServices;
+using IntoRdf.Services.TransformationServices.OntologyServices;
+using IntoRdf.Services.TransformationServices.RecordService;
+using VDS.RDF;
+using VDS.RDF.Parsing;
+using IntoRdf.Utils;
+using IntoRdf.Services.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using IntoRdf.Public.Models;
+using IntoRdf.Services.TransformationServices.XMLTransformationServices.Converters;
+
+namespace IntoRdf;
+
+public class TransformerService : ITransformerService
+{
+    private readonly ISpreadsheetService _spreadsheetService;
+    private readonly IOntologyService _ontologyService;
+    private readonly IRecordTransformationService _recordTransformationService;
+
+    public TransformerService()
+    {
+        var collection = new ServiceCollection();
+        collection.AddSplinterServices();
+        var provider = collection.BuildServiceProvider();
+
+        _spreadsheetService = provider.GetService<ISpreadsheetService>() ?? throw new Exception("Unable to resolve ISpreadsheetService");
+        _ontologyService = provider.GetService<IOntologyService>() ?? throw new Exception("Unable to resolve IOntologyService");
+        _recordTransformationService = provider.GetService<IRecordTransformationService>() ?? throw new Exception("Unable to resolve IRecordTransformationService");
+    }
+
+    public string TransformSpreadsheet(SpreadsheetTransformationDetails transformationDetails, Stream content, RdfFormat outputFormat)
+    {
+        var graph = _spreadsheetService.ConvertToRdf(transformationDetails, content);
+        return GraphSupportFunctions.WriteGraphToString(graph, outputFormat);
+    }
+
+    public string EnrichRdf(string ontologyString, string graphString, RdfFormat outputFormat)
+    {
+        var source = new Graph();
+        source.LoadFromString(graphString, new TurtleParser());
+
+        var ontology = new Graph();
+        ontology.LoadFromString(ontologyString);
+
+        var enriched = _ontologyService.EnrichRdf(ontology, source);
+        return GraphSupportFunctions.WriteGraphToString(enriched, outputFormat);
+    }
+
+    public string CreateProtoRecord(Uri record, string graphString, RdfFormat outputFormat)
+    {
+        var graph = new Graph();
+        graph.LoadFromString(graphString);
+        var protoRecord = _recordTransformationService.CreateProtoRecord(record, graph);
+        return GraphSupportFunctions.WriteGraphToString(protoRecord, outputFormat);
+    }
+
+    public string TransformAml(AmlTransformationDetails transformationDetails, Stream content, RdfFormat outputFormat)
+    {
+        var amlTransformer = new AmlToRdfConverter(transformationDetails.BaseUri, transformationDetails.Scopes, transformationDetails.IdentityCollectionsAndPatternsArgs);
+        var graph = amlTransformer.Convert(content);
+        return GraphSupportFunctions.WriteGraphToString(graph, outputFormat);
+    }
+}

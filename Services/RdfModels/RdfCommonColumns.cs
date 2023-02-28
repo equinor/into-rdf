@@ -2,28 +2,28 @@ using System.Data;
 
 namespace IntoRdf.RdfModels;
 
-public static class RdfCommonColumns
+internal static class RdfCommonColumns
 {
-    public static DataColumn CreateIdColumn() => new DataColumn("id", typeof(Uri));
-    public static DataColumn CreateHasFacilityId() => new DataColumn(RdfPrefixes.Prefix2Uri["identification"] + "hasFacilityId", typeof(Uri));
-    public static DataColumn CreateHasDocumentProjectId() => new DataColumn(RdfPrefixes.Prefix2Uri["identification"] + "hasDocumentProjectId", typeof(Uri));
-    public static DataColumn CreateHasPlantId() => new DataColumn(RdfPrefixes.Prefix2Uri["identification"] + "hasPlantId", typeof(Uri));
-    public static DataColumn CreateGeneratedAtTime() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "generatedAtTime", typeof(DateTime));
-    public static DataColumn CreateUsed() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "used", typeof(Uri));
-    public static DataColumn CreateHadMember() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "hadMember", typeof(Uri));
-    public static DataColumn CreateWasGeneratedBy() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "wasGeneratedBy", typeof(Uri));
-    public static DataColumn CreateWasRevisionOf() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "wasRevisionOf", typeof(Uri));
-    public static DataColumn CreateWasDerivedFrom() => new DataColumn(RdfPrefixes.Prefix2Uri["prov"] + "wasDerivedFrom", typeof(string));
-    public static DataColumn CreateType() => new DataColumn(RdfCommonProperties.CreateType().AbsoluteUri, typeof(Uri));
-    public static DataColumn CreateFromDataCollection() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "fromDataCollection", typeof(string));
-    public static DataColumn CreateHasSource() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasSource", typeof(Uri));
-    public static DataColumn CreateHasSourceType() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasSourceType", typeof(Uri));
-    public static DataColumn CreateHasRevisionNumber() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasRevisionNumber", typeof(int));
-    public static DataColumn CreateHasRevisionName() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasRevisionName", typeof(string));
-    public static DataColumn CreateStartedAtTime() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "startedAtTime", typeof(DateTime));
-    public static DataColumn CreateTransformedBy() => new DataColumn(RdfPrefixes.Prefix2Uri["transformation"] + "transformedBy", typeof(string));
-    public static DataColumn CreateHasDocumentName() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasDocumentName", typeof(string));
-    public static DataColumn CreateHasContractNumber() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasContractNumber", typeof(string));
-    public static DataColumn CreateHasProjectCode() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasProjectCode", typeof(string));
-    public static DataColumn CreateHasDocumentTitle() => new DataColumn(RdfPrefixes.Prefix2Uri["sor"] + "hasDocumentTitle", typeof(string));
-}
+    internal static DataColumn CreateIdColumn() => new DataColumn("id", typeof(Uri));
+    internal static DataColumn CreateHasFacilityId() => new DataColumn(Public.Utils.PrefixToUri["identification"] + "hasFacilityId", typeof(Uri));
+    internal static DataColumn CreateHasDocumentProjectId() => new DataColumn(Public.Utils.PrefixToUri["identification"] + "hasDocumentProjectId", typeof(Uri));
+    internal static DataColumn CreateHasPlantId() => new DataColumn(Public.Utils.PrefixToUri["identification"] + "hasPlantId", typeof(Uri));
+    internal static DataColumn CreateGeneratedAtTime() => new DataColumn(Public.Utils.PrefixToUri["prov"] + "generatedAtTime", typeof(DateTime));
+    internal static DataColumn CreateUsed() => new DataColumn(Public.Utils.PrefixToUri["prov"] + "used", typeof(Uri));
+    internal static DataColumn CreateHadMember() => new DataColumn(Public.Utils.PrefixToUri["prov"] + "hadMember", typeof(Uri));
+    internal static DataColumn CreateWasGeneratedBy() => new DataColumn(Public.Utils.PrefixToUri["prov"] + "wasGeneratedBy", typeof(Uri));
+    internal static DataColumn CreateWasRevisionOf() => new DataColumn(Public.Utils.PrefixToUri["prov"] + "wasRevisionOf", typeof(Uri));
+    internal static DataColumn CreateWasDerivedFrom() => new DataColumn(Public.Utils.PrefixToUri["prov"] + "wasDerivedFrom", typeof(string));
+    internal static DataColumn CreateType() => new DataColumn(RdfCommonProperties.CreateType().AbsoluteUri, typeof(Uri));
+    internal static DataColumn CreateFromDataCollection() => new DataColumn(Public.Utils.PrefixToUri["sor"] + "fromDataCollection", typeof(string));
+    internal static DataColumn CreateHasSource() => new DataColumn(Public.Utils.PrefixToUri["sor"] + "hasSource", typeof(Uri));
+    internal static DataColumn CreateHasSourceType() => new DataColumn(Public.Utils.PrefixToUri["sor"] + "hasSourceType", typeof(Uri));
+    internal static DataColumn CreateHasRevisionNumber() => new DataColumn(Public.Utils.PrefixToUri["sor"] + "hasRevisionNumber", typeof(int));
+    internal static DataColumn CreateHasRevisionName() => new DataColumn(Public.Utils.PrefixToUri["sor"] + "hasRevisionName", typeof(string));
+    internal static DataColumn CreateStartedAtTime() => new DataColumn(Public.Utils.PrefixToUri["sor"] + "startedAtTime", typeof(DateTime));
+    internal static DataColumn CreateTransformedBy() => new DataColumn(Public.Utils.PrefixToUri["transformation"] + "transformedBy", typeof(string));
+    internal static DataColumn CreateHasDocumentName() => new DataColumn(Public.Utils.PrefixToUri["sor"] + "hasDocumentName", typeof(string));
+    internal static DataColumn CreateHasContractNumber() => new DataColumn(Public.Utils.PrefixToUri["sor"] + "hasContractNumber", typeof(string));
+    internal static DataColumn CreateHasProjectCode() => new DataColumn(Public.Utils.PrefixToUri["sor"] + "hasProjectCode", typeof(string));
+    internal static DataColumn CreateHasDocumentTitle() => new DataColumn(Public.Utils.PrefixToUri["sor"] + "hasDocumentTitle", typeof(string));
+}   

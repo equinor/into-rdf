@@ -1,4 +1,4 @@
-namespace IntoRdf.TransformationModels;
+namespace IntoRdf.Public.Models;
 
 public class SpreadsheetTransformationDetails
 {
@@ -6,7 +6,7 @@ public class SpreadsheetTransformationDetails
     public Uri Record { get; set; }
     public List<string> IriSegments { get; set; }
     public string? TransformationType { get; set; }
-    public EnrichmentLevel Level {get; set;}
+    public EnrichmentLevel Level { get; set; }
     public List<TargetPathSegment> TargetPathSegments { get; set; }
 
     public SpreadsheetTransformationDetails(Uri record, SpreadsheetDetails spreadsheetDetails)

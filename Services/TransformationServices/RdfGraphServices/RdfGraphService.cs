@@ -1,11 +1,10 @@
-using IntoRdf.RdfModels;
 using System.Data;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 
-namespace Services.TransformationServices.RdfGraphServices;
+namespace IntoRdf.Services.TransformationServices.RdfGraphServices;
 
-public class RdfGraphService : IRdfGraphService
+internal class RdfGraphService : IRdfGraphService
 {
     private Graph _graph;
 
@@ -18,7 +17,7 @@ public class RdfGraphService : IRdfGraphService
     {
         var graph = new Graph();
 
-        foreach (var pair in RdfPrefixes.Prefix2Uri)
+        foreach (var pair in Public.Utils.PrefixToUri)
         {
             graph.NamespaceMap.AddNamespace(pair.Key, pair.Value);
         }

@@ -1,10 +1,10 @@
 using System.Data;
 using VDS.RDF;
 
-namespace Services.TransformationServices.RdfGraphServices;
+namespace IntoRdf.Services.TransformationServices.RdfGraphServices;
 
-public interface IRdfGraphService
+internal interface IRdfGraphService
 {
-    public void AssertDataTable(DataTable dataTable);
-    public Graph GetGraph();
+    internal void AssertDataTable(DataTable dataTable);
+    internal Graph GetGraph();
 }

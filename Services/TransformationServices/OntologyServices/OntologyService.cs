@@ -1,26 +1,23 @@
 using IntoRdf.RdfModels;
-using Microsoft.Extensions.Logging;
 using System.Data;
 using VDS.RDF;
 using VDS.RDF.Query.Builder;
 
-namespace Services.TransformationServices.OntologyServices;
+namespace IntoRdf.Services.TransformationServices.OntologyServices;
 
-public class OntologyService : IOntologyService
+internal class OntologyService : IOntologyService
 {
     private Graph _graph;
-    private ILogger<OntologyService> _logger;
 
-    public OntologyService(ILogger<OntologyService> logger)
+    public OntologyService()
     {
         _graph = new Graph();
-        _logger = logger;
     }
 
     private Graph InitializeGraph()
     {
         _graph = new Graph();
-        foreach (var pair in RdfPrefixes.Prefix2Uri)
+        foreach (var pair in Public.Utils.PrefixToUri)
         {
             _graph.NamespaceMap.AddNamespace(pair.Key, pair.Value);
         }
@@ -221,7 +218,6 @@ public class OntologyService : IOntologyService
 
         if (datatypesOfPredicate.Count() != 1)
         {
-            _logger.LogWarning($"Wrong number ({datatypesOfPredicate.Count()}) of datatypes for predicate {predicate}");
             AssertValueWithoutDatatype(subjectIndividual, _graph.CreateUriNode(RdfCommonProperties.CreateDatumValue()), objectIndividual);
             return;
         }
@@ -236,7 +232,6 @@ public class OntologyService : IOntologyService
 
         if (datatypesOfPredicate.Count() != 1)
         {
-            _logger.LogDebug($"Wrong number ({datatypesOfPredicate.Count()}) of datatypes for predicate {predicate}");
             AssertValueWithoutDatatype(subjectIndividual, predicate, objectIndividual);
             return;
         }
@@ -262,7 +257,6 @@ public class OntologyService : IOntologyService
 
         if (uomsOfPredicate.Count() != 1)
         {
-            _logger.LogDebug($"Wrong number of units of measure for predicate {predicate}");
             return;
         }
 

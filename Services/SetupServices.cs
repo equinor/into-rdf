@@ -1,18 +1,20 @@
 using Microsoft.Extensions.DependencyInjection;
-using Services.DomReaderServices.ExcelDomReaderServices;
-using Services.TransformerServices;
-using Services.TransformationServices.RecordService;
-using Services.TransformationServices.RdfGraphServices;
-using Services.TransformationServices.RdfTableBuilderServices;
-using Services.TransformationServices.SpreadsheetServices;
-using Services.TransformationServices.OntologyServices;
+using IntoRdf.Services.TransformationServices.RdfGraphServices;
+using IntoRdf.Services.DomReaderServices.ExcelDomReaderServices;
+using IntoRdf.Services.TransformationServices.RdfTableBuilderServices;
+using IntoRdf.Services.TransformationServices.SpreadsheetServices;
+using IntoRdf.Services.TransformationServices.OntologyServices;
+using IntoRdf.Services.TransformationServices.RecordService;
 
-
-namespace Services.DependencyInjection;
-public static class SetupServices
+namespace IntoRdf.Services.DependencyInjection;
+internal static class SetupServices
 {
-    public static IServiceCollection AddSplinterServices(this IServiceCollection services)
+    internal static IServiceCollection AddSplinterServices(this IServiceCollection services)
     {
+        /*        IExcelDomReaderService excelDomReaderService, 
+        IExcelRdfTableBuilderService excelTableBuilderService,
+        IRdfGraphService rdfGraphService)
+        */
         services.AddTransient<IExcelDomReaderService, ExcelDomReaderService>();
         services.AddTransient<IRdfGraphService, RdfGraphService>();
         services.AddTransient<IExcelRdfTableBuilderService, ExcelRdfTableBuilderService>();

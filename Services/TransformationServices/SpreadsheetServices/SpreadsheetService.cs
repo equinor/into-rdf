@@ -1,38 +1,34 @@
 using IntoRdf.RdfModels;
-using IntoRdf.TransformationModels;
 using Microsoft.Extensions.Logging;
-using Services.DomReaderServices.ExcelDomReaderServices;
-using Services.TransformationServices.RdfTableBuilderServices;
-using Services.TransformationServices.RdfGraphServices;
+using IntoRdf.Services.DomReaderServices.ExcelDomReaderServices;
+using IntoRdf.Services.TransformationServices.RdfTableBuilderServices;
+using IntoRdf.Services.TransformationServices.RdfGraphServices;
 
 using System.Data;
-using VDS.RDF;  
+using VDS.RDF;
+using IntoRdf.Public.Models;
 
-namespace Services.TransformationServices.SpreadsheetServices;
+namespace IntoRdf.Services.TransformationServices.SpreadsheetServices;
 
-public class SpreadsheetService : ISpreadsheetService
+internal class SpreadsheetService : ISpreadsheetService
 {
     private readonly IExcelDomReaderService _excelDomReaderService;
     private readonly IExcelRdfTableBuilderService _excelTableBuilderService;
     private readonly IRdfGraphService _rdfGraphService;
-    private readonly ILogger<SpreadsheetService> _log;
 
     public SpreadsheetService(
         IExcelDomReaderService excelDomReaderService, 
         IExcelRdfTableBuilderService excelTableBuilderService,
-        IRdfGraphService rdfGraphService,
-        ILogger<SpreadsheetService> log)
+        IRdfGraphService rdfGraphService)
     {
         _excelDomReaderService = excelDomReaderService;
         _excelTableBuilderService = excelTableBuilderService;
         _rdfGraphService = rdfGraphService;
-        _log = log;
     }
 
     public Graph ConvertToRdf(SpreadsheetTransformationDetails transformationDetails, Stream content)
     {
-        _log.LogInformation("<SpreadsheetTransformer> - Transform: Starting parsing of spreadsheet data");
-        
+      
         var contentTable = GetSpreadsheetContent(content, transformationDetails);
 
         var processedTable = PreprocessContent(transformationDetails, contentTable);
@@ -63,7 +59,7 @@ public class SpreadsheetService : ISpreadsheetService
 
     private Uri CreateDataContentUri(List<string> iriSegments)
     {
-        var dataContentPath = RdfPrefixes.Prefix2Uri["equinor"].AbsoluteUri;
+        var dataContentPath = Public.Utils.PrefixToUri["equinor"].AbsoluteUri;
 
         if (iriSegments.Count > 0)
         {
