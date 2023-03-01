@@ -54,10 +54,10 @@ public class TransformerService : ITransformerService
         return GraphSupportFunctions.WriteGraphToString(protoRecord, outputFormat);
     }
 
-    public string TransformAml(AmlTransformationDetails transformationDetails, Stream content, RdfFormat outputFormat, Uri AmlXsdUri)
+    public string TransformAml(AmlTransformationDetails transformationDetails, Stream content, RdfFormat outputFormat, Stream Xsdstream)
     {
         var amlTransformer = new AmlToRdfConverter(transformationDetails.BaseUri, transformationDetails.IdentityCollectionsAndPatternsArgs);
-        var graph = amlTransformer.Convert(content, AmlXsdUri);
+        var graph = amlTransformer.Convert(content, Xsdstream);
         return GraphSupportFunctions.WriteGraphToString(graph, outputFormat);
     }
 }

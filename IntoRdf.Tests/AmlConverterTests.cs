@@ -12,35 +12,26 @@ namespace IntoRdf.Tests
 {
     public class AmlConverterTests
     {
-        FileStream fs = new FileStream("TestData/test.aml", FileMode.Open);
-        [Fact(Skip = "TODO fix test by providing a valid aml file")]
-        internal void AsserTriplesFromAML()
+        FileStream faultyAML = new FileStream("TestData/test.aml", FileMode.Open);
+        [Fact]
+        internal void AssertThrowsOnMalformedAML()
         {
             var serviceProvider = new ServiceCollection()
                 .AddLogging()
                 .BuildServiceProvider();
 
             var amlDetails = new AmlTransformationDetails(
-                new Uri("https://rdf.equinor.com/jsv/scd/"),
+                    new Uri("https://IAmTest/scd/"),
                 new List<(string,Uri)>()
-                    { ("IAmString" ,new Uri("https://iAmAlsoExample.com"))
+                    { ("IAmString" ,new Uri("https://iAmAlsoTest.com"))
                     }
                 );
 
-            var turtle = new TransformerService().TransformAml(amlDetails, fs, RdfFormat.Turtle, new Uri("https://dugtrioexperimental.blob.core.windows.net/validation-schemas/CAEX_ClassModel_V.3.0.xsd"));
-            var graph = new Graph();
-            graph.LoadFromString(turtle);
+            var xsdfs = new FileStream("TestData/CAEX_ClassModel_V.3.0.xsd", FileMode.Open);
+            xsdfs.Position = 0;
 
-            var ts = new TripleStore();
-            ts.Add(graph);
+            Assert.Throws<System.Exception>(() => new TransformerService().TransformAml(amlDetails, faultyAML, RdfFormat.Turtle, xsdfs));
             
-            Assert.True(ts.Graphs.Count == 1);
-            Assert.True(ts.Triples.Count() > 0);
-            Assert.True(ts.Triples.All(t => t.Graph == ts.Graphs.First()));
-            if (File.Exists("turtle.ttl")) File.Delete("turtle.ttl");
-            graph.SaveToFile("turtle.ttl", new CompressingTurtleWriter());
-            if (File.Exists("store.trig")) File.Delete("store.trig");
-            ts.SaveToFile("store.trig", new TriGWriter());
         }
     }
 }

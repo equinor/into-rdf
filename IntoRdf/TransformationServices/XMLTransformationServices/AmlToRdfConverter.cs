@@ -51,9 +51,9 @@ internal class AmlToRdfConverter
     private IUriNode rdfslabel;
     private readonly List<(string Pattern, Uri Uri)> identityCollectionsAndPatterns;
     private readonly List<(String Collection, bool IRIOverride)> internalElementBasedCollections;
-    internal Graph Convert(Stream amlStream, Uri AmlXsdUri)
+    internal Graph Convert(Stream amlStream, Stream Xsdstream)
     {
-        XmlDocument aml = validateAndGenerateAmlDocument(amlStream, AmlXsdUri);
+        XmlDocument aml = validateAndGenerateAmlDocument(amlStream, Xsdstream);
         var caexFiles = aml.GetElementsByTagName("CAEXFile");
         foreach (XmlElement caexFile in caexFiles)
         {
@@ -317,15 +317,15 @@ internal class AmlToRdfConverter
         value = System.Text.RegularExpressions.Regex.Replace(value, @"\r\n?|\n", " ");
         return amlGraph.CreateLiteralNode(value, new Uri(XmlSpecsHelper.XmlSchemaDataTypeString));
     }
-    private XmlDocument validateAndGenerateAmlDocument(Stream amlStream, Uri AmlXSD)
+    private XmlDocument validateAndGenerateAmlDocument(Stream amlStream, Stream XsdStream)
     {
         XmlReaderSettings settings = new XmlReaderSettings();
         ValidationEventHandler eventHandler = new ValidationEventHandler(amlValidationHandler);
         var reader = XmlReader.Create(amlStream, settings);
         var aml = new XmlDocument();
         aml.Load(reader);
-        //Sometime in the future the location of the XSD should be not hardcoded in the sourcecode. 
-        aml.Schemas.Add("http://www.dke.de/CAEX", AmlXSD.ToString());
+        var schemaReader = XmlReader.Create(XsdStream);
+        aml.Schemas.Add("http://www.dke.de/CAEX", schemaReader);
         aml.Validate(eventHandler);
         return aml;
     }
