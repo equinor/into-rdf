@@ -13,22 +13,22 @@ internal class ExcelRdfTableBuilderService : IExcelRdfTableBuilderService
         _dataTable = new DataTable();
     }
 
-    public DataTable GetInputDataTable(Uri dataCollectionUri, SpreadsheetTransformationDetails transformationSettings, DataTable inputData)
+    public DataTable GetInputDataTable(TransformationDetails transformationDetails, DataTable inputData)
     {
         _dataTable = new DataTable();
-        CreateInputDataSchema(transformationSettings, inputData.Columns);
-        AddInputDataRows(dataCollectionUri, transformationSettings, inputData);
+        CreateInputDataSchema(transformationDetails, inputData.Columns);
+        AddInputDataRows(transformationDetails, inputData);
 
         return _dataTable;
     }
 
-    private void CreateInputDataSchema(SpreadsheetTransformationDetails transformationSettings, DataColumnCollection columns)
+    private void CreateInputDataSchema(TransformationDetails transformationSettings, DataColumnCollection columns)
     {
         var idColumn = RdfCommonColumns.CreateIdColumn();
         _dataTable.Columns.Add(idColumn);
         _dataTable.PrimaryKey = new DataColumn[] { idColumn };
 
-        var dataUri = $"{Public.Utils.PrefixToUri["source"]}{transformationSettings.TransformationType}#";
+        var dataUri = $"{transformationSettings.SourcePredicateBaseUri ?? transformationSettings.BaseUri}";
 
         foreach (DataColumn column in columns)
         {
@@ -43,13 +43,13 @@ internal class ExcelRdfTableBuilderService : IExcelRdfTableBuilderService
         }
     }
 
-    private void AddInputDataRows(Uri dataCollectionUri, SpreadsheetTransformationDetails transformationServices, DataTable inputData)
+    private void AddInputDataRows(TransformationDetails transformationDetails, DataTable inputData)
     {
         const int NumberOfFixedColumns = 1;
 
-        var targetIdColumn = GetIdentificationColumn(transformationServices, inputData.Columns);
-        var pathSegment = String.IsNullOrEmpty(targetIdColumn.Segment) ? "" : $"{targetIdColumn.Segment}/"; 
-        dataCollectionUri = new Uri($"{dataCollectionUri.AbsoluteUri}{pathSegment}");
+        var targetIdColumn = GetIdentificationColumn(transformationDetails, inputData.Columns);
+        var pathSegment = String.IsNullOrEmpty(targetIdColumn.UriSegment) ? "" : $"{targetIdColumn.UriSegment}/"; 
+        var dataCollectionUri = new Uri($"{transformationDetails.BaseUri.AbsoluteUri}{pathSegment}");
 
         foreach (DataRow row in inputData.Rows)
         {
@@ -75,7 +75,7 @@ internal class ExcelRdfTableBuilderService : IExcelRdfTableBuilderService
         }
     }
 
-    private TargetPathSegment GetIdentificationColumn(SpreadsheetTransformationDetails transformationSettings, DataColumnCollection columns)
+    private TargetPathSegment GetIdentificationColumn(TransformationDetails transformationSettings, DataColumnCollection columns)
     {
         var targetPaths = transformationSettings.TargetPathSegments.Where(x => x.IsIdentity == true);
 

@@ -1,5 +1,6 @@
 using IntoRdf.Public.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using VDS.RDF;
 using Xunit;
@@ -15,9 +16,10 @@ namespace IntoRdf.Tests
             var rdfTestUtils = new RdfTestUtils();
             var stream = File.Open(testFile, FileMode.Open, FileAccess.Read);
 
+            var spreadsheetDetails = CreateSpreadsheetDetails();
             var transformationDetails = CreateTransformationDetails();
 
-            var turtle = new TransformerService().TransformSpreadsheet(transformationDetails, stream, RdfFormat.Turtle);
+            var turtle = new TransformerService().TransformSpreadsheet(spreadsheetDetails, transformationDetails, stream, RdfFormat.Turtle);
             var graph = new Graph();
             graph.LoadFromString(turtle);
 
@@ -60,18 +62,18 @@ namespace IntoRdf.Tests
             );
         }
 
-        private SpreadsheetTransformationDetails CreateTransformationDetails()
+        private SpreadsheetDetails CreateSpreadsheetDetails()
         {
-            var spreadsheetDetails = new SpreadsheetDetails("sheetName", 1, 2, 1);
+            return new SpreadsheetDetails("sheetName", 1, 2, 1);
+        }
 
-            var transformationDetails = new SpreadsheetTransformationDetails(new Uri("https://rdf.equinor.com/test"), spreadsheetDetails);
-            transformationDetails.TransformationType = "mel";
-            transformationDetails.Level = EnrichmentLevel.None;
+        private TransformationDetails CreateTransformationDetails()
+        {
+            var baseUri = new Uri("https://rdf.equinor.com/");
+            var sourceBaseUri = new Uri("https://rdf.equinor.com/source/mel#");
+            var targetPathSegments = new List<TargetPathSegment>(){new TargetPathSegment("Tag Number", "test", true)};
 
-            var identityColumn = new TargetPathSegment("Tag Number", "test", true);
-            transformationDetails.TargetPathSegments.Add(identityColumn);
-
-            return transformationDetails;
+            return new TransformationDetails(baseUri, sourceBaseUri, targetPathSegments);
         }
     }
 }

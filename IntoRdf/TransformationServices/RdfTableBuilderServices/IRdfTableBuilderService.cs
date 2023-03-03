@@ -5,5 +5,5 @@ namespace IntoRdf.TransformationServices.RdfTableBuilderServices;
 
 internal interface IExcelRdfTableBuilderService
 {
-    DataTable GetInputDataTable(Uri dataCollectionUri, SpreadsheetTransformationDetails transformationSettings, DataTable inputData);
+    DataTable GetInputDataTable(TransformationDetails transformationSettings, DataTable inputData);
 }
