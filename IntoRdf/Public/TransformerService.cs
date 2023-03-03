@@ -20,7 +20,7 @@ public class TransformerService : ITransformerService
     public TransformerService()
     {
         var collection = new ServiceCollection();
-        collection.AddSplinterServices();
+        collection.AddServices();
         var provider = collection.BuildServiceProvider();
 
         _spreadsheetService = provider.GetService<ISpreadsheetService>() ?? throw new Exception("Unable to resolve ISpreadsheetService");
@@ -28,13 +28,13 @@ public class TransformerService : ITransformerService
         _recordTransformationService = provider.GetService<IRecordTransformationService>() ?? throw new Exception("Unable to resolve IRecordTransformationService");
     }
 
-    public string TransformSpreadsheet(SpreadsheetTransformationDetails transformationDetails, Stream content, RdfFormat outputFormat)
+    public string TransformSpreadsheet(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content, RdfFormat outputFormat)
     {
-        var graph = _spreadsheetService.ConvertToRdf(transformationDetails, content);
+        var graph = _spreadsheetService.ConvertToRdf(spreadsheetDetails, transformationDetails, content);
         return GraphSupportFunctions.WriteGraphToString(graph, outputFormat);
     }
 
-    public string EnrichRdf(string ontologyString, string graphString, RdfFormat outputFormat)
+    public string InferFromOntology(string ontologyString, string graphString, RdfFormat outputFormat)
     {
         var source = new Graph();
         source.LoadFromString(graphString, new TurtleParser());

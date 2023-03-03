@@ -5,5 +5,5 @@ namespace IntoRdf.TransformationServices.SpreadsheetServices;
 
 internal interface ISpreadsheetService
 {
-    Graph ConvertToRdf(SpreadsheetTransformationDetails transformationDetails, Stream content);
+    Graph ConvertToRdf(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content);
 }
