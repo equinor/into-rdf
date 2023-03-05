@@ -81,13 +81,14 @@ internal class ExcelRdfTableBuilderService : IExcelRdfTableBuilderService
 
         if (targetPaths.Count() > 1) { throw new InvalidOperationException($"Wrong number of identity columns. Expected 1 got {targetPaths.Count()}"); }
 
-        if (!columns.Contains(targetPaths.First().Target))
+        if (targetPaths.Count() == 1)
         {
-            throw new InvalidOperationException($"Failed to parse spreadsheet. Unable to find column with identifiers for train type {targetPaths.First().Target}");
+            if (!columns.Contains(targetPaths.First().Target))
+            {
+                throw new InvalidOperationException($"Failed to parse spreadsheet. Unable to find column with identifiers for target {targetPaths.First().Target}");
+            }
+            return targetPaths.First();
         }
-
-        var identityColumn = targetPaths.Count() == 1 ? targetPaths.First() : new TargetPathSegment("id", "row", true);
-
-        return identityColumn; 
+        return new TargetPathSegment("id", "row", true);
     }
 }

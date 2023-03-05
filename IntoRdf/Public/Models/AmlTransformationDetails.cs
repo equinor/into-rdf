@@ -1,4 +1,4 @@
-﻿
+
 namespace IntoRdf.Public.Models
 {
     public class AmlTransformationDetails
