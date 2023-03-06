@@ -8,7 +8,7 @@ namespace IntoRdf.DomReaderServices.ExcelDomReaderServices;
 
 internal class ExcelDomReaderService : IExcelDomReaderService
 {
-    public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails spreadsheetDetails, string? identityColumn)
+    public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails spreadsheetDetails)
     {
         if (spreadsheetDetails.SheetName == null) throw new InvalidOperationException("Failed to transform spreadsheet. Missing spreadsheet name in SpreadsheetContext");
 
@@ -18,7 +18,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
 
         var headerRow = GetHeaderRow(worksheetPart, workbookPart, spreadsheetDetails);
 
-        var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetDetails, identityColumn);
+        var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetDetails);
 
         var data = CreateDataTable(spreadsheetDetails.DataStartRow, headerRow, dataRows, spreadsheetDetails.SheetName);
 
@@ -54,8 +54,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
     private List<List<string>> GetDataRows(WorksheetPart worksheetPart,
                                             WorkbookPart workbookPart,
                                             List<string> headerRow,
-                                            SpreadsheetDetails spreadsheetDetails,
-                                            string? identityColumn)
+                                            SpreadsheetDetails spreadsheetDetails)
     {
         var rowSkip = spreadsheetDetails.DataStartRow - 1;
         var rowTake = spreadsheetDetails.DataEndRow - rowSkip;
@@ -68,40 +67,14 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         var trimmedDataRows = rowTake > 0 ? completeDataRows.Take(rowTake) : completeDataRows;
 
         return trimmedDataRows
-            .Where(row => ValidRow(workbookPart, row, headerRow, identityColumn))
+            .Where(row => ValidRow(workbookPart, row, headerRow))
             .Select(row => GetCompleteRow(workbookPart, row, spreadsheetDetails.StartColumn, headerRow.Count).ToList())
             .ToList();
     }
 
-    private bool ValidRow(WorkbookPart workBookPart, Row row, List<string> headerRow, string? identityColumn)
+    private bool ValidRow(WorkbookPart workBookPart, Row row, List<string> headerRow)
     {
-        var descendants = row.Descendants<Cell>();
-
-        if (descendants.Count() == 0)
-        {
-            return false;
-        }
-
-        if (identityColumn != null)
-        {
-            var identityIndex = headerRow.FindIndex(x => x == identityColumn);
-
-            if (identityIndex == -1)
-            {
-                throw new InvalidOperationException($"Failed to find specified identity column: {identityColumn}");
-            }
-
-            if (descendants.Count() < identityIndex)
-            {
-                return false;
-            }
-
-            var cell = descendants.ElementAt(identityIndex);
-
-            return cell.CellValue != null && GetCellValue(cell, workBookPart) != "BOTTOM LINE";
-        }
-
-        return descendants.Count() > 0;
+        return row.Descendants<Cell>().Any();
     }
 
     private IEnumerable<string> GetCompleteRow(WorkbookPart wbPart, Row row, int startColumn, int endColumn)
