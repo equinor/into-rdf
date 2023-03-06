@@ -16,8 +16,4 @@
     <PackageReference Include="rdfsharp" Version="3.1.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="TransformationServices\TransformerServices\" />
-  </ItemGroup>
-
 </Project>

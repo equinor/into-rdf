@@ -1,5 +1,7 @@
 using IntoRdf.Public.Models;
 using Spectre.Console.Cli;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace IntoRdf.Cli;
 
@@ -17,26 +19,42 @@ internal class TransformExcelSettings : CommandSettings
     [CommandOption("-c|--start-column")]
     public int StartColumn { get; set; } = 1;
 
+    [Description("base uri of new generated uris, defaults to http://example.com")]
     [CommandOption("-b|--base-uri")]
     public string BaseUri { get; set; } = "http://example.com";
 
+    [Description("jsonld, turtle or trig")]
     [CommandOption("-f|--output-format")]
     public RdfFormat RdfFormat { get; set; } = RdfFormat.Turtle;
+
+    [Description("A list of colon separated entries indicating target, segement and a boolean set to true if it is the identity. For example Tag no:tag:true")]
+    [CommandOption("-t |--target-path-segment")]
+    public string[] TargetPathSegments { get; set; } = new string[0];
 }
 
 internal class TransformExcelCommand : Command<TransformExcelSettings>
 {
-    public override int Execute(CommandContext context, TransformExcelSettings settings)
+    public override int Execute([NotNull] CommandContext context, [NotNull] TransformExcelSettings settings)
     {
         var details = new SpreadsheetDetails(settings.SheetName, settings.PredicateRow, settings.DataRow, settings.StartColumn);
-        var transformationDetails = new TransformationDetails(new Uri(settings.BaseUri), new Uri(settings.BaseUri), new List<TargetPathSegment> {new TargetPathSegment("Name", "Person", true)});
+        var segments = settings.TargetPathSegments
+                .Select(raw => raw.Split(":"))
+                .Select(array => new TargetPathSegment(array[0], array[1], Boolean.Parse(array[2])))
+                .ToList();
+
+        var transformationDetails = new TransformationDetails(
+            new Uri(settings.BaseUri),
+            new Uri(settings.BaseUri), 
+            segments,
+            settings.RdfFormat
+        );
 
         var inputStream = Console.OpenStandardInput();
         var transformer = new TransformerService();
 
         try
         {
-            var rdf = transformer.TransformSpreadsheet(details, transformationDetails, inputStream, settings.RdfFormat);
+            var rdf = transformer.TransformSpreadsheet(details, transformationDetails, inputStream);
             Console.WriteLine(rdf);
         } catch (Exception ex)
         {

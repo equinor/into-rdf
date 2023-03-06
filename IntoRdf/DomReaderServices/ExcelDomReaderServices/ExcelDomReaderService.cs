@@ -30,11 +30,18 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         var columnSkip = spreadsheetDetails.StartColumn - 1;
         var columnTake = spreadsheetDetails.EndColumn - columnSkip;
 
-        var completeHeaderRow = worksheetPart
+
+        var headerRow = worksheetPart
             .Worksheet
             .Descendants<Row>()
-            .First(r => (r.RowIndex ?? 0) == spreadsheetDetails.HeaderRow)
-            .Skip(columnSkip);
+            .FirstOrDefault(r => (r.RowIndex ?? 0) == spreadsheetDetails.HeaderRow);
+
+        if (headerRow == null)
+        {
+            throw new Exception($"Looks like the specified header row, row {spreadsheetDetails.HeaderRow}, is empty.");
+        }
+
+        var completeHeaderRow = headerRow.Skip(columnSkip);
 
         var trimmedHeaderRow = columnTake > 0 ? completeHeaderRow.Take(columnTake) : completeHeaderRow;
 
@@ -76,7 +83,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
 
             if (identityIndex == -1)
             {
-                throw new InvalidOperationException("Failed to find specified identity column: {identityColumn}");
+                throw new InvalidOperationException($"Failed to find specified identity column: {identityColumn}");
             }
 
             if (descendants.Count() < identityIndex)
@@ -144,7 +151,8 @@ internal class ExcelDomReaderService : IExcelDomReaderService
 
         if (string.IsNullOrEmpty(sheetId))
         {
-            throw new InvalidOperationException($"Spreadsheet does not contain sheet {sheetName}");
+            var otherSheetNames = sheets.Select(s => s.Name);
+            throw new InvalidOperationException($"Did not find sheet with name {sheetName} among [{string.Join(",", otherSheetNames)}]");
         }
 
         var worksheetPart = (WorksheetPart)doc.WorkbookPart.GetPartById(sheetId);
