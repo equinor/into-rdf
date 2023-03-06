@@ -77,6 +77,11 @@ internal class ExcelDomReaderService : IExcelDomReaderService
     {
         var descendants = row.Descendants<Cell>();
 
+        if (descendants.Count() == 0)
+        {
+            return false;
+        }
+
         if (identityColumn != null)
         {
             var identityIndex = headerRow.FindIndex(x => x == identityColumn);
