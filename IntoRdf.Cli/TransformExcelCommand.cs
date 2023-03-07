@@ -19,6 +19,9 @@ internal class TransformExcelSettings : CommandSettings
     [CommandOption("-c|--start-column")]
     public int StartColumn { get; set; } = 1;
 
+    [CommandOption("--end-column")]
+    public int EndColumn { get; set; } = int.MaxValue;
+
     [Description("base uri of new generated uris, defaults to http://example.com")]
     [CommandOption("-b|--base-uri")]
     public string BaseUri { get; set; } = "http://example.com";
@@ -36,7 +39,7 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
 {
     public override int Execute([NotNull] CommandContext context, [NotNull] TransformExcelSettings settings)
     {
-        var details = new SpreadsheetDetails(settings.SheetName, settings.PredicateRow, settings.DataRow, settings.StartColumn);
+        var details = new SpreadsheetDetails(settings.SheetName, settings.PredicateRow, settings.DataRow, settings.StartColumn) { EndColumn = settings.EndColumn};
         var segments = settings.TargetPathSegments
                 .Select(raw => raw.Split(":"))
                 .Select(array => new TargetPathSegment(array[0], array[1], Boolean.Parse(array[2])))

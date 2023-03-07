@@ -27,10 +27,6 @@ internal class ExcelDomReaderService : IExcelDomReaderService
 
     private List<string> GetHeaderRow(WorksheetPart worksheetPart, WorkbookPart workbookPart, SpreadsheetDetails spreadsheetDetails)
     {
-        var columnSkip = spreadsheetDetails.StartColumn - 1;
-        var columnTake = spreadsheetDetails.EndColumn - columnSkip;
-
-
         var headerRow = worksheetPart
             .Worksheet
             .Descendants<Row>()
@@ -41,14 +37,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
             throw new Exception($"Looks like the specified header row, row {spreadsheetDetails.HeaderRow}, is empty.");
         }
 
-        var completeHeaderRow = headerRow.Skip(columnSkip);
-
-        var trimmedHeaderRow = columnTake > 0 ? completeHeaderRow.Take(columnTake) : completeHeaderRow;
-
-        return trimmedHeaderRow
-            .Select(xmlElement => GetCellValue((Cell)xmlElement, workbookPart))
-            .Where(xmlElement => xmlElement != "")
-            .ToList();
+        return GetCompleteRow(workbookPart, headerRow, spreadsheetDetails.StartColumn, spreadsheetDetails.EndColumn).ToList();
     }
 
     private List<List<string>> GetDataRows(WorksheetPart worksheetPart,
@@ -67,14 +56,9 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         var trimmedDataRows = rowTake > 0 ? completeDataRows.Take(rowTake) : completeDataRows;
 
         return trimmedDataRows
-            .Where(row => ValidRow(workbookPart, row, headerRow))
-            .Select(row => GetCompleteRow(workbookPart, row, spreadsheetDetails.StartColumn, headerRow.Count).ToList())
+            .Where(r => r.Descendants<Cell>().Any())
+            .Select(row => GetCompleteRow(workbookPart, row, spreadsheetDetails.StartColumn, spreadsheetDetails.StartColumn + headerRow.Count).ToList())
             .ToList();
-    }
-
-    private bool ValidRow(WorkbookPart workBookPart, Row row, List<string> headerRow)
-    {
-        return row.Descendants<Cell>().Any();
     }
 
     private IEnumerable<string> GetCompleteRow(WorkbookPart wbPart, Row row, int startColumn, int endColumn)
@@ -86,7 +70,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         // maintaining a negative offset to pass to ElementAt which is zero-indexed. If we hit
         // empty cell they will not be stored in descendants and the difference between actual
         // excel columns and what we are iterating through using ElementAt will increase.
-        var offset = -1;
+        var offset = -startColumn;
 
         for (int i = startColumn; i <= endColumn && i + offset < descendants.Count(); i++)
         {
@@ -103,8 +87,8 @@ internal class ExcelDomReaderService : IExcelDomReaderService
                 offset--;
                 yield return string.Empty;
             }
-
-            yield return GetCellValue(cell, wbPart);
+            var value = GetCellValue(cell, wbPart);
+            yield return value;
         }
     }
 
