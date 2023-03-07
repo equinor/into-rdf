@@ -19,7 +19,7 @@ namespace IntoRdf.Tests
             var spreadsheetDetails = CreateSpreadsheetDetails();
             var transformationDetails = CreateTransformationDetails();
 
-            var turtle = new TransformerService().TransformSpreadsheet(spreadsheetDetails, transformationDetails, stream, RdfFormat.Turtle);
+            var turtle = new TransformerService().TransformSpreadsheet(spreadsheetDetails, transformationDetails, stream);
             var graph = new Graph();
             graph.LoadFromString(turtle);
 
@@ -73,7 +73,7 @@ namespace IntoRdf.Tests
             var sourceBaseUri = new Uri("https://rdf.equinor.com/source/mel#");
             var targetPathSegments = new List<TargetPathSegment>(){new TargetPathSegment("Tag Number", "test", true)};
 
-            return new TransformationDetails(baseUri, sourceBaseUri, targetPathSegments);
+            return new TransformationDetails(baseUri, sourceBaseUri, targetPathSegments, RdfFormat.Turtle);
         }
     }
 }

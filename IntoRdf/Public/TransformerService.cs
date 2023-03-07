@@ -28,10 +28,10 @@ public class TransformerService : ITransformerService
         _recordTransformationService = provider.GetService<IRecordTransformationService>() ?? throw new Exception("Unable to resolve IRecordTransformationService");
     }
 
-    public string TransformSpreadsheet(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content, RdfFormat outputFormat)
+    public string TransformSpreadsheet(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content)
     {
         var graph = _spreadsheetService.ConvertToRdf(spreadsheetDetails, transformationDetails, content);
-        return GraphSupportFunctions.WriteGraphToString(graph, outputFormat);
+        return GraphSupportFunctions.WriteGraphToString(graph, transformationDetails.OutputFormat);
     }
 
     public string InferFromOntology(string ontologyString, string graphString, RdfFormat outputFormat)

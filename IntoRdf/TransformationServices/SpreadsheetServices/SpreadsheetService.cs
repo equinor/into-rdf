@@ -33,9 +33,7 @@ internal class SpreadsheetService : ISpreadsheetService
 
     private DataTable GetSpreadsheetContent(Stream content, SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails)
     {
-        var identityTargetPath = transformationDetails.TargetPathSegments.Where(x => x.IsIdentity == true);
-        var identityColumn = identityTargetPath.Count() == 1 ? identityTargetPath.First().Target : null;
-        return _excelDomReaderService.GetSpreadsheetData(content, spreadsheetDetails, identityColumn);
+        return _excelDomReaderService.GetSpreadsheetData(content, spreadsheetDetails);
     }
 
     private DataTable PreprocessContent(TransformationDetails transformationDetails, DataTable content)

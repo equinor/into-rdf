@@ -1,4 +1,4 @@
-﻿namespace IntoRdf.Public
+namespace IntoRdf.Public
 {
     public class Utils
     {
