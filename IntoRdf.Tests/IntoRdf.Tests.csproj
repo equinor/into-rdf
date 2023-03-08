@@ -37,7 +37,7 @@
     <None Update="TestData\revisionTestTrain.ttl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-        <None Update="TestData\revisionTestTrainSiemens.ttl">
+    <None Update="TestData\revisionTestTrainSiemens.ttl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -56,7 +56,7 @@ public class TransformerService : ITransformerService
 
     public string TransformAml(AmlTransformationDetails transformationDetails, Stream content, RdfFormat outputFormat)
     {
-        var amlTransformer = new AmlToRdfConverter(transformationDetails.BaseUri, transformationDetails.Scopes, transformationDetails.IdentityCollectionsAndPatternsArgs);
+        var amlTransformer = new AmlToRdfConverter(transformationDetails.BaseUri, transformationDetails.IdentityCollectionsAndPatternsArgs);
         var graph = amlTransformer.Convert(content);
         return GraphSupportFunctions.WriteGraphToString(graph, outputFormat);
     }
