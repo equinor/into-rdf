@@ -20,4 +20,9 @@
     <Folder Include="TransformationServices\TransformerServices\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Schemas\CAEX_ClassModel_V.3.0.xsd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

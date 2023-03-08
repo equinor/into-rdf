@@ -19,18 +19,13 @@ namespace IntoRdf.Tests
             var serviceProvider = new ServiceCollection()
                 .AddLogging()
                 .BuildServiceProvider();
-
             var amlDetails = new AmlTransformationDetails(
                     new Uri("https://IAmTest/scd/"),
                 new List<(string,Uri)>()
                     { ("IAmString" ,new Uri("https://iAmAlsoTest.com"))
                     }
                 );
-
-            var xsdfs = new FileStream("TestData/CAEX_ClassModel_V.3.0.xsd", FileMode.Open);
-            xsdfs.Position = 0;
-
-            Assert.Throws<System.Exception>(() => new TransformerService().TransformAml(amlDetails, faultyAML, RdfFormat.Turtle, xsdfs));
+            Assert.Throws<System.Exception>(() => new TransformerService().TransformAml(amlDetails, faultyAML, RdfFormat.Turtle));
             
         }
     }

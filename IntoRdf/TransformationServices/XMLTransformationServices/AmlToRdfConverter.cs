@@ -51,9 +51,9 @@ internal class AmlToRdfConverter
     private IUriNode rdfslabel;
     private readonly List<(string Pattern, Uri Uri)> identityCollectionsAndPatterns;
     private readonly List<(String Collection, bool IRIOverride)> internalElementBasedCollections;
-    internal Graph Convert(Stream amlStream, Stream Xsdstream)
+    internal Graph Convert(Stream amlStream)
     {
-        XmlDocument aml = validateAndGenerateAmlDocument(amlStream, Xsdstream);
+        XmlDocument aml = validateAndGenerateAmlDocument(amlStream);
         var caexFiles = aml.GetElementsByTagName("CAEXFile");
         foreach (XmlElement caexFile in caexFiles)
         {
@@ -137,7 +137,8 @@ internal class AmlToRdfConverter
                     if (grandChild.Name == "SupportedRoleClass" && grandChild.GetAttribute("RefRoleClassPath") == "AutomationMLBaseRoleClassLib/AutomationMLBaseRole/Structure")
                     {
                         var systemUnitPath = $"{node.GetAttribute("Name")}/{child.GetAttribute("Name")}";
-                        if(identityCollectionsAndPatterns.Any(e => e.Pattern == systemUnitPath)) {
+                        if (identityCollectionsAndPatterns.Any(e => e.Pattern == systemUnitPath))
+                        {
                             systemUnitClassLibs.Add(new(systemUnitPath, true));
                         }
                         systemUnitClassLibs.Add(new(systemUnitPath, false));
@@ -293,7 +294,8 @@ internal class AmlToRdfConverter
         return IsPrimitiveText(node);
     }
 
-    private static bool IsPrimitiveText (XmlElement node) {
+    private static bool IsPrimitiveText(XmlElement node)
+    {
         if (!node.HasAttributes && node.ChildNodes.Count == 1)
         {
             var child = node.ChildNodes[0];
@@ -317,16 +319,19 @@ internal class AmlToRdfConverter
         value = System.Text.RegularExpressions.Regex.Replace(value, @"\r\n?|\n", " ");
         return amlGraph.CreateLiteralNode(value, new Uri(XmlSpecsHelper.XmlSchemaDataTypeString));
     }
-    private XmlDocument validateAndGenerateAmlDocument(Stream amlStream, Stream XsdStream)
+    private XmlDocument validateAndGenerateAmlDocument(Stream amlStream)
     {
         XmlReaderSettings settings = new XmlReaderSettings();
         ValidationEventHandler eventHandler = new ValidationEventHandler(amlValidationHandler);
         var reader = XmlReader.Create(amlStream, settings);
         var aml = new XmlDocument();
         aml.Load(reader);
-        var schemaReader = XmlReader.Create(XsdStream);
-        aml.Schemas.Add("http://www.dke.de/CAEX", schemaReader);
-        aml.Validate(eventHandler);
+        using (FileStream fs = new FileStream("Schemas/CAEX_ClassModel_V.3.0.xsd", FileMode.Open))
+        {
+            var schemaReader = XmlReader.Create(fs);
+            aml.Schemas.Add("http://www.dke.de/CAEX", schemaReader);
+            aml.Validate(eventHandler);
+        }
         return aml;
     }
     void amlValidationHandler(object? sender, ValidationEventArgs args)
