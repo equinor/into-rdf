@@ -8,7 +8,7 @@ namespace IntoRdf.DomReaderServices.ExcelDomReaderServices;
 
 internal class ExcelDomReaderService : IExcelDomReaderService
 {
-    public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails spreadsheetDetails, string? identityColumn)
+    public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails spreadsheetDetails)
     {
         if (spreadsheetDetails.SheetName == null) throw new InvalidOperationException("Failed to transform spreadsheet. Missing spreadsheet name in SpreadsheetContext");
 
@@ -18,7 +18,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
 
         var headerRow = GetHeaderRow(worksheetPart, workbookPart, spreadsheetDetails);
 
-        var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetDetails, identityColumn);
+        var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetDetails);
 
         var data = CreateDataTable(spreadsheetDetails.DataStartRow, headerRow, dataRows, spreadsheetDetails.SheetName);
 
@@ -27,28 +27,23 @@ internal class ExcelDomReaderService : IExcelDomReaderService
 
     private List<string> GetHeaderRow(WorksheetPart worksheetPart, WorkbookPart workbookPart, SpreadsheetDetails spreadsheetDetails)
     {
-        var columnSkip = spreadsheetDetails.StartColumn - 1;
-        var columnTake = spreadsheetDetails.EndColumn - columnSkip;
-
-        var completeHeaderRow = worksheetPart
+        var headerRow = worksheetPart
             .Worksheet
             .Descendants<Row>()
-            .First(r => (r.RowIndex ?? 0) == spreadsheetDetails.HeaderRow)
-            .Skip(columnSkip);
+            .FirstOrDefault(r => (r.RowIndex ?? 0) == spreadsheetDetails.HeaderRow);
 
-        var trimmedHeaderRow = columnTake > 0 ? completeHeaderRow.Take(columnTake) : completeHeaderRow;
+        if (headerRow == null)
+        {
+            throw new Exception($"Looks like the specified header row, row {spreadsheetDetails.HeaderRow}, is empty.");
+        }
 
-        return trimmedHeaderRow
-            .Select(xmlElement => GetCellValue((Cell)xmlElement, workbookPart))
-            .Where(xmlElement => xmlElement != "")
-            .ToList();
+        return GetCompleteRow(workbookPart, headerRow, spreadsheetDetails.StartColumn, spreadsheetDetails.EndColumn).ToList();
     }
 
     private List<List<string>> GetDataRows(WorksheetPart worksheetPart,
                                             WorkbookPart workbookPart,
                                             List<string> headerRow,
-                                            SpreadsheetDetails spreadsheetDetails,
-                                            string? identityColumn)
+                                            SpreadsheetDetails spreadsheetDetails)
     {
         var rowSkip = spreadsheetDetails.DataStartRow - 1;
         var rowTake = spreadsheetDetails.DataEndRow - rowSkip;
@@ -61,35 +56,9 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         var trimmedDataRows = rowTake > 0 ? completeDataRows.Take(rowTake) : completeDataRows;
 
         return trimmedDataRows
-            .Where(row => ValidRow(workbookPart, row, headerRow, identityColumn))
-            .Select(row => GetCompleteRow(workbookPart, row, spreadsheetDetails.StartColumn, headerRow.Count).ToList())
+            .Where(r => r.Descendants<Cell>().Any())
+            .Select(row => GetCompleteRow(workbookPart, row, spreadsheetDetails.StartColumn, spreadsheetDetails.StartColumn + headerRow.Count).ToList())
             .ToList();
-    }
-
-    private bool ValidRow(WorkbookPart workBookPart, Row row, List<string> headerRow, string? identityColumn)
-    {
-        var descendants = row.Descendants<Cell>();
-
-        if (identityColumn != null)
-        {
-            var identityIndex = headerRow.FindIndex(x => x == identityColumn);
-
-            if (identityIndex == -1)
-            {
-                throw new InvalidOperationException("Failed to find specified identity column: {identityColumn}");
-            }
-
-            if (descendants.Count() < identityIndex)
-            {
-                return false;
-            }
-
-            var cell = descendants.ElementAt(identityIndex);
-
-            return cell.CellValue != null && GetCellValue(cell, workBookPart) != "BOTTOM LINE";
-        }
-
-        return descendants.Count() > 0;
     }
 
     private IEnumerable<string> GetCompleteRow(WorkbookPart wbPart, Row row, int startColumn, int endColumn)
@@ -101,7 +70,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         // maintaining a negative offset to pass to ElementAt which is zero-indexed. If we hit
         // empty cell they will not be stored in descendants and the difference between actual
         // excel columns and what we are iterating through using ElementAt will increase.
-        var offset = -1;
+        var offset = -startColumn;
 
         for (int i = startColumn; i <= endColumn && i + offset < descendants.Count(); i++)
         {
@@ -118,8 +87,8 @@ internal class ExcelDomReaderService : IExcelDomReaderService
                 offset--;
                 yield return string.Empty;
             }
-
-            yield return GetCellValue(cell, wbPart);
+            var value = GetCellValue(cell, wbPart);
+            yield return value;
         }
     }
 
@@ -133,7 +102,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
             .Descendants<Sheet>();
 
         var sheet = sheets
-            .First(s => s.Name?.ToString()?.Contains(sheetName) ?? false);
+            .FirstOrDefault(s => s.Name?.ToString()?.Contains(sheetName) ?? false);
 
         //Handling nullable warning for GetPartById
         var sheetId = String.Empty;
@@ -144,7 +113,8 @@ internal class ExcelDomReaderService : IExcelDomReaderService
 
         if (string.IsNullOrEmpty(sheetId))
         {
-            throw new InvalidOperationException($"Spreadsheet does not contain sheet {sheetName}");
+            var otherSheetNames = sheets.Select(s => s.Name);
+            throw new InvalidOperationException($"Did not find sheet with name {sheetName} among [{string.Join(",", otherSheetNames)}]");
         }
 
         var worksheetPart = (WorksheetPart)doc.WorkbookPart.GetPartById(sheetId);

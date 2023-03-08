@@ -24,45 +24,26 @@ internal class SpreadsheetService : ISpreadsheetService
         _rdfGraphService = rdfGraphService;
     }
 
-    public Graph ConvertToRdf(SpreadsheetTransformationDetails transformationDetails, Stream content)
+    public Graph ConvertToRdf(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content)
     {
-      
-        var contentTable = GetSpreadsheetContent(content, transformationDetails);
-
+        var contentTable = GetSpreadsheetContent(content, spreadsheetDetails, transformationDetails);
         var processedTable = PreprocessContent(transformationDetails, contentTable);
-        
-        var sourceGraph = CreateGraphFromSource(processedTable);
-
-        return sourceGraph;
+        return CreateGraphFromSource(processedTable);
     }
 
-    private DataTable GetSpreadsheetContent(Stream content, SpreadsheetTransformationDetails transformationDetails)
+    private DataTable GetSpreadsheetContent(Stream content, SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails)
     {
-        var identityTargetPath = transformationDetails.TargetPathSegments.Where(x => x.IsIdentity == true);
-        var identityColumn = identityTargetPath.Count() == 1 ? identityTargetPath.First().Target : null;
-        return _excelDomReaderService.GetSpreadsheetData(content, transformationDetails.SpreadsheetDetails, identityColumn);
+        return _excelDomReaderService.GetSpreadsheetData(content, spreadsheetDetails);
     }
 
-    private DataTable PreprocessContent(SpreadsheetTransformationDetails transformationDetails, DataTable content)
+    private DataTable PreprocessContent(TransformationDetails transformationDetails, DataTable content)
     {
-        var dataContentUri = CreateDataContentUri(transformationDetails.IriSegments);
-        return _excelTableBuilderService.GetInputDataTable(dataContentUri, transformationDetails, content);
+        return _excelTableBuilderService.GetInputDataTable(transformationDetails, content);
     }
 
     private Graph CreateGraphFromSource(DataTable content)
     {
         _rdfGraphService.AssertDataTable(content);
        return _rdfGraphService.GetGraph(); 
-    }
-
-    private Uri CreateDataContentUri(List<string> iriSegments)
-    {
-        var dataContentPath = Public.Utils.PrefixToUri["equinor"].AbsoluteUri;
-
-        if (iriSegments.Count > 0)
-        {
-            iriSegments.ForEach(s => dataContentPath += $"{s}/");
-        }
-        return new Uri(dataContentPath);
     }
 }

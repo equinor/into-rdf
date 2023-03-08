@@ -9,7 +9,7 @@ using IntoRdf.TransformationServices.RecordService;
 namespace IntoRdf.DependencyInjection;
 internal static class SetupServices
 {
-    internal static IServiceCollection AddSplinterServices(this IServiceCollection services)
+    internal static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddTransient<IExcelDomReaderService, ExcelDomReaderService>();
         services.AddTransient<IRdfGraphService, RdfGraphService>();

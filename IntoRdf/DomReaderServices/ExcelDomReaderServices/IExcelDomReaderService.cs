@@ -5,5 +5,5 @@ namespace IntoRdf.DomReaderServices.ExcelDomReaderServices;
 
 internal interface IExcelDomReaderService
 {
-    public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails details, string? identityColumn);
+    public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails details);
 }
