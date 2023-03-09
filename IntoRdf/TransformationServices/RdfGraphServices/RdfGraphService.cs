@@ -93,13 +93,17 @@ internal class RdfGraphService : IRdfGraphService
     }
     private IList<INode> CreateBooleanLiteral(bool booleanLiteral)
     {
-        return new List<INode>() {_graph.CreateLiteralNode(booleanLiteral.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeBoolean))};
+        return new List<INode>() { _graph.CreateLiteralNode(booleanLiteral.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeBoolean)) };
     }
     private IList<INode> CreateLiteralsTypedByArray(Array arrayLiteral)
     {
         List<INode> returnList = new List<INode>();
-        foreach(object obj in arrayLiteral){
-            returnList.AddRange(CreateNode(obj));
+        foreach (object obj in arrayLiteral)
+        {
+            if (obj is not null)
+            {
+                returnList.AddRange(CreateNode(obj));
+            }
         }
         return returnList;
     }
