@@ -81,6 +81,7 @@ internal class RdfGraphService : IRdfGraphService
             Uri uri => CreateUriNode(uri),
             DateTime dateTime => CreateDateTimeLiteral(dateTime),
             Array arrayLiteral => CreateLiteralsTypedByArray(arrayLiteral),
+            Boolean booleanLiteral => CreateBooleanLiteral(booleanLiteral),
             _ => HandleError(value)
         };
     }
@@ -89,6 +90,10 @@ internal class RdfGraphService : IRdfGraphService
     private static IList<INode> HandleError(object value)
     {
         throw new Exception($"Unknown datatype {value.GetType()}");
+    }
+    private IList<INode> CreateBooleanLiteral(bool booleanLiteral)
+    {
+        return new List<INode>() {_graph.CreateLiteralNode(booleanLiteral.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeBoolean))};
     }
     private IList<INode> CreateLiteralsTypedByArray(Array arrayLiteral)
     {
