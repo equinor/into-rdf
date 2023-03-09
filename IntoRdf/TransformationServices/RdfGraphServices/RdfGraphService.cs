@@ -30,6 +30,11 @@ internal class RdfGraphService : IRdfGraphService
         _graph.Merge(AssertRawData(dataTable));
     }
 
+    public void AssertDataTable(DataTable dataTable, string subjectColumn)
+    {
+        _graph.Merge(AssertRawData(dataTable, subjectColumn));
+    }
+
     public Graph GetGraph()
     {
         return _graph;
@@ -37,15 +42,20 @@ internal class RdfGraphService : IRdfGraphService
 
     private Graph AssertRawData(DataTable dataTable)
     {
+        return AssertRawData(dataTable, "id");
+    }
+
+    private Graph AssertRawData(DataTable dataTable, string subjectColumn)
+    {
         Graph graph = InitializeGraph();
         foreach (DataRow row in dataTable.Rows)
         {
-            var test = row["id"];
-            var rdfSubject = CreateUriNode((Uri)row["id"]);
+            var test = row[subjectColumn];
+            var rdfSubject = CreateUriNode((Uri)row[subjectColumn]);
 
             foreach (DataColumn header in dataTable.Columns)
             {
-                if (header.ColumnName == "id" || IsNull(row[header]))
+                if (header.ColumnName == subjectColumn || IsNull(row[header]))
                 {
                     continue;
                 }
@@ -53,7 +63,10 @@ internal class RdfGraphService : IRdfGraphService
                 var rdfPredicate = CreateUriNode(new Uri(header.ColumnName));
                 var rdfObject = CreateNode(row[header]);
 
-                graph.Assert(new Triple(rdfSubject, rdfPredicate, rdfObject));
+                foreach (INode node in rdfObject)
+                {
+                    graph.Assert(new Triple(rdfSubject.First(), rdfPredicate.First(), node));
+                }
             }
         }
         return graph;
@@ -64,40 +77,60 @@ internal class RdfGraphService : IRdfGraphService
         return value == null || value == DBNull.Value || value.ToString() == string.Empty;
     }
 
-    private INode CreateNode(object value)
+    private IList<INode> CreateNode(object value)
     {
         return value switch
         {
             string stringLiteral => CreateStringLiteralNode(stringLiteral),
             int intLiteral => CreateIntLiteral(intLiteral),
+            Int64 intLiteral => CreateLongLiteral(intLiteral),
+            Double doubleLiteral => CreateDoubleLiteral(doubleLiteral),
             Uri uri => CreateUriNode(uri),
             DateTime dateTime => CreateDateTimeLiteral(dateTime),
+            Array arrayLiteral => CreateLiteralsTypedByArray(arrayLiteral),
             _ => HandleError(value)
         };
     }
 
-    private static INode HandleError(object value)
+
+    private static IList<INode> HandleError(object value)
     {
         throw new Exception($"Unknown datatype {value.GetType()}");
     }
-
-    private ILiteralNode CreateDateTimeLiteral(DateTime literal)
+    private IList<INode> CreateLiteralsTypedByArray(Array arrayLiteral)
     {
-        return _graph.CreateLiteralNode(literal.ToUniversalTime().ToString("o"), new Uri(XmlSpecsHelper.XmlSchemaDataTypeDateTime));
+        List<INode> returnList = new List<INode>();
+        foreach(object obj in arrayLiteral){
+            returnList.AddRange(CreateNode(obj));
+        }
+        return returnList;
     }
 
-    private ILiteralNode CreateIntLiteral(int literal)
+    private IList<INode> CreateDateTimeLiteral(DateTime literal)
     {
-        return _graph.CreateLiteralNode(literal.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeInt));
+        return new List<INode>() { _graph.CreateLiteralNode(literal.ToUniversalTime().ToString("o"), new Uri(XmlSpecsHelper.XmlSchemaDataTypeDateTime)) };
     }
 
-    private ILiteralNode CreateStringLiteralNode(string literal)
+    private IList<INode> CreateIntLiteral(int literal)
     {
-        return _graph.CreateLiteralNode(literal, new Uri(XmlSpecsHelper.XmlSchemaDataTypeString));
+        return new List<INode>() { _graph.CreateLiteralNode(literal.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeInt)) };
+    }
+    private IList<INode> CreateLongLiteral(Int64 literal)
+    {
+        return new List<INode>() { _graph.CreateLiteralNode(literal.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeLong)) };
+    }
+    private IList<INode> CreateDoubleLiteral(Double literal)
+    {
+        return new List<INode>() { _graph.CreateLiteralNode(literal.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeDouble)) };
     }
 
-    private IUriNode CreateUriNode(Uri uri)
+    private IList<INode> CreateStringLiteralNode(string literal)
     {
-        return _graph.CreateUriNode(uri);
+        return new List<INode>() { _graph.CreateLiteralNode(literal, new Uri(XmlSpecsHelper.XmlSchemaDataTypeString)) };
+    }
+
+    private IList<INode> CreateUriNode(Uri uri)
+    {
+        return new List<INode>() { _graph.CreateUriNode(uri) };
     }
 }

@@ -18,6 +18,7 @@ internal static class SetupServices
         services.AddTransient<IOntologyService, OntologyService>();
         services.AddTransient<IRecordTransformationService, RecordTransformationService>();
         services.AddTransient<ITransformerService, TransformerService>();
+        services.AddTransient<ITabularJsonTransformationService, TabularJsonTransformationService>();
         return services;
     }
 }
