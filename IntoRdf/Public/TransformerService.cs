@@ -34,10 +34,10 @@ public class TransformerService : ITransformerService
         return _tabularJsonTransformationService.TransformTabularJson(content, outputFormat,subjectProperty, transformationDetails);
     }
 
-    public string TransformSpreadsheet(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content, RdfFormat outputFormat)
+    public string TransformSpreadsheet(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content)
     {
         var graph = _spreadsheetService.ConvertToRdf(spreadsheetDetails, transformationDetails, content);
-        return GraphSupportFunctions.WriteGraphToString(graph, outputFormat);
+        return GraphSupportFunctions.WriteGraphToString(graph, transformationDetails.OutputFormat);
     }
 
     public string InferFromOntology(string ontologyString, string graphString, RdfFormat outputFormat)
@@ -62,7 +62,7 @@ public class TransformerService : ITransformerService
 
     public string TransformAml(AmlTransformationDetails transformationDetails, Stream content, RdfFormat outputFormat)
     {
-        var amlTransformer = new AmlToRdfConverter(transformationDetails.BaseUri, transformationDetails.Scopes, transformationDetails.IdentityCollectionsAndPatternsArgs);
+        var amlTransformer = new AmlToRdfConverter(transformationDetails.BaseUri, transformationDetails.IdentityCollectionsAndPatternsArgs);
         var graph = amlTransformer.Convert(content);
         return GraphSupportFunctions.WriteGraphToString(graph, outputFormat);
     }

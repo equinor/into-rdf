@@ -15,14 +15,7 @@ internal class RdfGraphService : IRdfGraphService
 
     private Graph InitializeGraph()
     {
-        var graph = new Graph();
-
-        foreach (var pair in Public.Utils.PrefixToUri)
-        {
-            graph.NamespaceMap.AddNamespace(pair.Key, pair.Value);
-        }
-
-        return graph;
+        return new Graph();
     }
 
     public void AssertDataTable(DataTable dataTable)
