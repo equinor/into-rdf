@@ -1,19 +1,61 @@
-﻿using System;
+﻿using IntoRdf.Public.Models;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using VDS.RDF;
 using VDS.RDF.Query;
 using VDS.RDF.Query.Builder;
 using VDS.RDF.Query.Patterns;
+using VDS.RDF.Writing;
 using Xunit;
 
 namespace IntoRdf.Tests
 {
-    internal class RdfTestUtils
+    internal class RdfTestUtil
     {
-        internal void AssertTripleAsserted(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject)
+        private Graph _graph;
+        private TransformationDetails _transformationDetails;
+
+        public RdfTestUtil(string testFile, SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails)
         {
-            var ok = Ask(graph, rdfSubject, rdfPredicate, rdfObject);
+            _transformationDetails = transformationDetails;
+
+            using var stream = File.Open(testFile, FileMode.Open, FileAccess.Read);
+            var turtle = new TransformerService().TransformSpreadsheet(spreadsheetDetails, transformationDetails, stream);
+            _graph = new Graph();
+            _graph.LoadFromString(turtle);
+        }
+
+        internal string WriteGraphToString(RdfFormat writerType)
+        {
+            using MemoryStream outputStream = new MemoryStream();
+            switch (writerType)
+            {
+                case RdfFormat.Trig:
+                    _graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new TriGWriter());
+                    break;
+                case RdfFormat.Jsonld:
+                    _graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new JsonLdWriter());
+                    break;
+                case RdfFormat.Turtle:
+                    _graph.SaveToStream(new StreamWriter(outputStream, new UTF8Encoding(false)), new CompressingTurtleWriter());
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unknown RDF writer type {writerType}");
+            }
+            return Encoding.UTF8.GetString(outputStream.ToArray());
+        }
+
+        internal void AssertTripleAsserted(string subjectSuffix, string predicateSuffix, object rdfObject)
+        {
+            AssertTripleAsserted(new Uri(_transformationDetails.BaseUri, subjectSuffix), new Uri(_transformationDetails.SourcePredicateBaseUri, predicateSuffix), rdfObject);
+        }
+
+        internal void AssertTripleAsserted(Uri rdfSubject, Uri rdfPredicate, object rdfObject)
+        {
+            var ok = Ask(_graph, rdfSubject, rdfPredicate, rdfObject);
             if (ok)
             {
                 return;
@@ -21,9 +63,9 @@ namespace IntoRdf.Tests
             // Rest of method is for debug purposes
 
             // query to list which part of triples we are missing
-            var subjectOk = Ask(graph, rdfSubject, null, null);
-            var predicateOk = Ask(graph, null, rdfPredicate, null);
-            var objectOk = Ask(graph, null, null, rdfObject);
+            var subjectOk = Ask(_graph, rdfSubject, null, null);
+            var predicateOk = Ask(_graph, null, rdfPredicate, null);
+            var objectOk = Ask(_graph, null, null, rdfObject);
 
             var errorMsg = subjectOk && predicateOk && objectOk ?
                 $"All parts of triple: {rdfSubject} {rdfPredicate} {rdfObject} exists, but this combination does not\n" :
@@ -38,7 +80,7 @@ namespace IntoRdf.Tests
 
             if (subjectOk || predicateOk || objectOk)
             {
-                errorMsg += "Suggestions: \n" + string.Join("\n", Select(graph, debugQuerySubject, debugQueryPredicate, debugQueryObject, 10));
+                errorMsg += "Suggestions: \n" + string.Join("\n", Select(_graph, debugQuerySubject, debugQueryPredicate, debugQueryObject, 10));
             }
 
             Assert.True(ok, errorMsg);
@@ -144,11 +186,6 @@ namespace IntoRdf.Tests
         private static NodeMatchPattern CreateUriPattern(Graph graph, Uri uri)
         {
             return new NodeMatchPattern(graph.CreateUriNode(uri));
-        }
-
-        private static NodeMatchPattern CreateLiteralPattern(Graph graph, string literal)
-        {
-            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString()));
         }
 
         private static NodeMatchPattern CreateStringLiteralPattern(Graph graph, string literal)
