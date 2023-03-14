@@ -3,7 +3,7 @@ namespace IntoRdf.Public.Models;
 ///<summary>
 ///Class to aid in the creation of RDF individuals from literals
 ///</summary>
-public class TargetPathSegment
+public class TargetPathSegment : IEquatable<TargetPathSegment>
 {
     ///<summary> 
     ///Target is the property name of the literal to turn into an individual. 
@@ -19,5 +19,13 @@ public class TargetPathSegment
     {
         Target = target;
         UriSegment = segment;
+    }
+
+    public bool Equals(TargetPathSegment? other)
+    {
+        if(other is not null && this.Target.Equals(other.Target, StringComparison.InvariantCultureIgnoreCase) && this.UriSegment.Equals(other.UriSegment, StringComparison.InvariantCultureIgnoreCase)) {
+            return true;
+        }
+        return false;
     }
 }
