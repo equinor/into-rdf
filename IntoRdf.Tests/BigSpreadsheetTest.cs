@@ -59,9 +59,7 @@ public class BigSpreadsheetTest
         return new TransformationDetails(DataUri,
          PredicateUri,
          identitySegment,
-         new List<TargetPathSegment> {
-            identitySegment
-            }
+         new List<TargetPathSegment>()
             , RdfFormat.Turtle);
     }
 }

@@ -41,7 +41,7 @@ public class SpreadsheetEscapingTests
     private static TransformationDetails CreateTransformationDetails()
     {
         var segment = new TargetPathSegment("Name", "");
-        return new TransformationDetails(DataUri, PredicateUri,segment, new List<TargetPathSegment> { segment }, RdfFormat.Turtle);
+        return new TransformationDetails(DataUri, PredicateUri,segment, new List<TargetPathSegment>(), RdfFormat.Turtle);
     }
 }
 
