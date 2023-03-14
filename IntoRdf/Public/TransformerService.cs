@@ -16,6 +16,7 @@ public class TransformerService : ITransformerService
     private readonly ISpreadsheetService _spreadsheetService;
     private readonly IOntologyService _ontologyService;
     private readonly IRecordTransformationService _recordTransformationService;
+    private readonly ITabularJsonTransformationService _tabularJsonTransformationService;
 
     public TransformerService()
     {
@@ -26,6 +27,11 @@ public class TransformerService : ITransformerService
         _spreadsheetService = provider.GetService<ISpreadsheetService>() ?? throw new Exception("Unable to resolve ISpreadsheetService");
         _ontologyService = provider.GetService<IOntologyService>() ?? throw new Exception("Unable to resolve IOntologyService");
         _recordTransformationService = provider.GetService<IRecordTransformationService>() ?? throw new Exception("Unable to resolve IRecordTransformationService");
+        _tabularJsonTransformationService = provider.GetService<ITabularJsonTransformationService>() ?? throw new Exception("Unable to resolve ITabularJsonTransofrmationService");
+    }
+
+    public string TransformTabularJson(Stream content, RdfFormat outputFormat, string subjectProperty, TransformationDetails transformationDetails) {
+        return _tabularJsonTransformationService.TransformTabularJson(content, outputFormat, subjectProperty, transformationDetails);
     }
 
     public string TransformSpreadsheet(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content)

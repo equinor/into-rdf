@@ -1,0 +1,110 @@
+[
+    {
+      "id": 1,
+      "name": "Apple",
+      "price": 0.99
+    },
+    {
+      "id": 2,
+      "name": "Banana",
+      "price": 0.75
+    },
+    {
+      "id": 3,
+      "name": "Orange",
+      "price": 1.25
+    },
+    {
+      "id": 4,
+      "name": "Pear",
+      "price": 1.10
+    },
+    {
+      "id": 5,
+      "name": "Peach",
+      "price": 1.50
+    },
+    {
+      "id": 6,
+      "name": "Grape",
+      "price": 2.25
+    },
+    {
+      "id": 7,
+      "name": "Watermelon",
+      "price": 5.99
+    },
+    {
+      "id": 8,
+      "name": "Cantaloupe",
+      "price": 3.99
+    },
+    {
+      "id": 9,
+      "name": "Pineapple",
+      "price": 2.99
+    },
+    {
+      "id": 10,
+      "name": "Mango",
+      "price": 1.75
+    },
+    {
+      "id": 11,
+      "name": "Kiwi",
+      "price": 0.99
+    },
+    {
+      "id": 12,
+      "name": "Lemon",
+      "price": 0.50
+    },
+    {
+      "id": 13,
+      "name": "Lime",
+      "price": 0.75
+    },
+    {
+      "id": 14,
+      "name": "Blueberry",
+      "price": 3.50
+    },
+    {
+      "id": 15,
+      "name": "Raspberry",
+      "price": 4.25
+    },
+    {
+      "id": 16,
+      "name": "Strawberry",
+      "price": 2.99
+    },
+    {
+      "id": 17,
+      "name": "Blackberry",
+      "price": 3.75
+    },
+    {
+      "id": 18,
+      "name": "Cherry",
+      "price": 1.99
+    },
+    {
+      "id": 19,
+      "name": "Plum",
+      "price": 1.25
+    },
+    {
+      "id": 20,
+      "name": "Apricot",
+      "price": 1.50
+    },
+    {
+      "id": 21,
+      "name": "Avocado",
+      "price": 2.99,
+      "color": "green",
+      "ripe": true
+    }
+  ]
+  
