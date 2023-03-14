@@ -21,4 +21,4 @@ jobs:
       - name: Build Solution
         run: dotnet build /p:TreatWarningsAsErrors="true" --no-restore --configuration Release IntoRdf.sln
       - name: Tests
-        run: dotnet test --no-restore --no-build --filter UnitTests --configuration Release IntoRdf.sln
+        run: dotnet test --no-restore --no-build --configuration Release IntoRdf.sln
