@@ -31,7 +31,7 @@ public class TransformerService : ITransformerService
     }
 
     public string TransformTabularJson(Stream content, RdfFormat outputFormat, string subjectProperty, TransformationDetails transformationDetails) {
-        return _tabularJsonTransformationService.TransformTabularJson(content, outputFormat,subjectProperty, transformationDetails);
+        return _tabularJsonTransformationService.TransformTabularJson(content, outputFormat, subjectProperty, transformationDetails);
     }
 
     public string TransformSpreadsheet(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content)
