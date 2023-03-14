@@ -30,7 +30,7 @@ internal class TransformExcelSettings : CommandSettings
     [CommandOption("-f|--output-format")]
     public RdfFormat RdfFormat { get; set; } = RdfFormat.Turtle;
 
-    [Description("A list of colon separated entries indicating target, segement and a boolean set to true if it is the identity. Identifier column must be the first entry. For example Tag no:tag:true")]
+    [Description("A list of colon separated entries indicating target and url segment. Identifier column must be the first entry. For example -t 'SomeId:IdSegment' -t 'SomeOtherField:SomeField'")]
     [CommandOption("-t |--target-path-segment")]
     public string[] TargetPathSegments { get; set; } = new string[0];
 }
