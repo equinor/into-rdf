@@ -16,7 +16,7 @@ public class SpreadsheetEscapingTests
     [Theory]
     [InlineData("slash", "v/v", "v%2fv")]
     [InlineData("backslash", "v\\v", "v%5cv")]
-    [InlineData("singleQuote", $"""v'v""", $"""v'v""")]
+    [InlineData("singleQuote", "v'v", "v'v")]
     [InlineData("doubleQuote", $"""v"v""", $"""v"v""")]
     [InlineData("leftParenthesis", "v(v", "v(v")]
     [InlineData("rightParanthesis", "v)v", "v)v")]
@@ -24,7 +24,11 @@ public class SpreadsheetEscapingTests
     [InlineData("newLine", "v\nv", "v\nv")]
     [InlineData("tab", "v\tv", "v\tv")]
     [InlineData("tripleQuote", $""""v"""v"""", $""""v"""v"""")]
-    public void EscapeValues(string name, string literalValue, string uriValue)
+    [InlineData("dot", "v.v", "v.v")]
+    [InlineData("comma", "v,v", "v,v")]
+    [InlineData("trailing1", "vv1 ", "vv1")]
+    [InlineData("trailing2", "vv2  ", "vv2")]
+    public void Escaping(string name, string literalValue, string uriValue)
     {
         _valueTester.AssertTripleAsserted(name, "Value", literalValue);
         _uriTester.AssertTripleAsserted(uriValue, "Name", name);
@@ -42,4 +46,3 @@ public class SpreadsheetEscapingTests
         return new TransformationDetails(DataUri, PredicateUri, new List<TargetPathSegment> { segment }, RdfFormat.Turtle);
     }
 }
-
