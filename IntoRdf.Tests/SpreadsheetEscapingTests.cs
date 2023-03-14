@@ -14,20 +14,20 @@ public class SpreadsheetEscapingTests
     private readonly RdfTestUtil _uriTester = new RdfTestUtil("TestData/escaping.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails("Value"));
 
     [Theory]
-    [InlineData("slash", "v/v")]
-    [InlineData("backslash", "v\\v")]
-    [InlineData("singleQuote", $"""v'v""")]
-    [InlineData("doubleQuote", $"""v"v""")]
-    [InlineData("leftParenthesis", "v(v")]
-    [InlineData("rightParanthesis", "v)v")]
-    [InlineData("space", "v v")]
-    [InlineData("newLine", "v\nv")]
-    [InlineData("tab", "v\tv")]
-    [InlineData("tripleQuote", $""""v"""v"""")]
-    public void EscapeValues(string name, string value)
+    [InlineData("slash", "v/v", "v%2fv")]
+    [InlineData("backslash", "v\\v", "v%5cv")]
+    [InlineData("singleQuote", $"""v'v""", $"""v'v""")]
+    [InlineData("doubleQuote", $"""v"v""", $"""v"v""")]
+    [InlineData("leftParenthesis", "v(v", "v(v")]
+    [InlineData("rightParanthesis", "v)v", "v)v")]
+    [InlineData("space", "v v", "v v")]
+    [InlineData("newLine", "v\nv", "v\nv")]
+    [InlineData("tab", "v\tv", "v\tv")]
+    [InlineData("tripleQuote", $""""v"""v"""", $""""v"""v"""")]
+    public void EscapeValues(string name, string literalValue, string uriValue)
     {
-        _valueTester.AssertTripleAsserted(name, "Value", value);
-        _uriTester.AssertTripleAsserted(value, "Name", name);
+        _valueTester.AssertTripleAsserted(name, "Value", literalValue);
+        _uriTester.AssertTripleAsserted(uriValue, "Name", name);
 
     }
 
