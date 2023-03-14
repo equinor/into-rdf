@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace IntoRdf.Tests
 {
-    public class tabularJsonTests
+    public class TabularJsonTests
     {
         [Fact]
         internal void FruitsToRdf()
