@@ -53,7 +53,8 @@ internal class ExcelRdfTableBuilderService : IExcelRdfTableBuilderService
 
         foreach (DataRow row in inputData.Rows)
         {
-            var itemUri = new Uri($"{dataCollectionUri.AbsoluteUri}{row[targetIdColumn.Target]}");
+            var itemString = Escape($"{row[targetIdColumn.Target]}");
+            var itemUri = new Uri($"{dataCollectionUri.AbsoluteUri}{itemString}");
             var existingId = _dataTable.AsEnumerable().Any(row => itemUri.ToString() == row.Field<Uri>("id")?.ToString());
 
             if (existingId)
@@ -73,6 +74,20 @@ internal class ExcelRdfTableBuilderService : IExcelRdfTableBuilderService
 
             _dataTable.Rows.Add(dataRow);
         }
+    }
+
+    private string Escape(string value)
+    {
+        var dict = new Dictionary<string, string>()
+        {
+            {"/", "%2f" },
+            {"\\", "%5c" },
+            {"#", "%23" },
+            {":", "%3a" },
+            {"|", "%7c" }
+        };
+
+        return dict.Aggregate(value, (acc, current) => acc.Replace(current.Key, current.Value));
     }
 
     private TargetPathSegment GetIdentificationColumn(TransformationDetails transformationSettings, DataColumnCollection columns)
