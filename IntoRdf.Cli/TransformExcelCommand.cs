@@ -30,7 +30,7 @@ internal class TransformExcelSettings : CommandSettings
     [CommandOption("-f|--output-format")]
     public RdfFormat RdfFormat { get; set; } = RdfFormat.Turtle;
 
-    [Description("A list of colon separated entries indicating target, segement and a boolean set to true if it is the identity. For example Tag no:tag:true")]
+    [Description("A list of colon separated entries indicating target and url segment. Identifier column must be the first entry. For example -t 'SomeId:IdSegment' -t 'SomeOtherField:SomeField'")]
     [CommandOption("-t |--target-path-segment")]
     public string[] TargetPathSegments { get; set; } = new string[0];
 }
@@ -42,13 +42,14 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
         var details = new SpreadsheetDetails(settings.SheetName, settings.PredicateRow, settings.DataRow, settings.StartColumn) { EndColumn = settings.EndColumn};
         var segments = settings.TargetPathSegments
                 .Select(raw => raw.Split(":"))
-                .Select(array => new TargetPathSegment(array[0], array[1], Boolean.Parse(array[2])))
+                .Select(array => new TargetPathSegment(array[0], array[1]))
                 .ToList();
 
         var transformationDetails = new TransformationDetails(
             new Uri(settings.BaseUri),
             new Uri(settings.BaseUri), 
-            segments,
+            segments.FirstOrDefault(),
+            segments.Skip(1).ToList(),
             settings.RdfFormat
         );
 

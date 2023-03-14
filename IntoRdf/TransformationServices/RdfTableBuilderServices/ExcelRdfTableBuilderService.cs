@@ -92,16 +92,13 @@ internal class ExcelRdfTableBuilderService : IExcelRdfTableBuilderService
 
     private TargetPathSegment GetIdentificationColumn(TransformationDetails transformationSettings, DataColumnCollection columns)
     {
-        var targetPaths = transformationSettings.TargetPathSegments.Where(x => x.IsIdentity == true);
+        var targetPath = transformationSettings.IdentifierTargetPathSegment;
 
-        if (targetPaths.Count() > 1) { throw new InvalidOperationException($"Wrong number of identity columns. Expected 1 got {targetPaths.Count()}"); }
-
-        if (targetPaths.Count() == 1 && !columns.Contains(targetPaths.First().Target))
+        if (targetPath != null && !columns.Contains(targetPath.Target))
         {
-            throw new InvalidOperationException($"Failed to parse spreadsheet. Unable to find column with identifiers for train type {targetPaths.First().Target}");
+            throw new InvalidOperationException($"Failed to parse spreadsheet. Unable to find column with identifiers for train type {targetPath.Target}");
         }
-
-        var identityColumn = targetPaths.Count() == 1 ? targetPaths.First() : new TargetPathSegment("id", "row", true);
+        var identityColumn = targetPath ?? new TargetPathSegment("id", "row");
 
         return identityColumn;
     }

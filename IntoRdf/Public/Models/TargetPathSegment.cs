@@ -3,7 +3,7 @@ namespace IntoRdf.Public.Models;
 ///<summary>
 ///Class to aid in the creation of RDF individuals from literals
 ///</summary>
-public class TargetPathSegment
+public class TargetPathSegment : IEquatable<TargetPathSegment>
 {
     ///<summary> 
     ///Target is the property name of the literal to turn into an individual. 
@@ -15,16 +15,17 @@ public class TargetPathSegment
     ///For instance: http://example.com (baseUri) + animal (uriSegment) + MyDog (from data) returns http://example.com/animal/MyDog
     ///<summary>
     public string UriSegment { get; }
-    ///<summary>
-    ///Setting the identity flag to true, means that the individuals created from the target become subject for all related triples.
-    /// A dataset can maximum contain 1 identity target.
-    ///<summary>
-    public bool IsIdentity { get; }
-
-    public TargetPathSegment(string target, string segment, bool isIdentity)
+    public TargetPathSegment(string target, string segment)
     {
         Target = target;
         UriSegment = segment;
-        IsIdentity = isIdentity;
+    }
+
+    public bool Equals(TargetPathSegment? other)
+    {
+        if(other is not null && this.Target.Equals(other.Target, StringComparison.InvariantCultureIgnoreCase) && this.UriSegment.Equals(other.UriSegment, StringComparison.InvariantCultureIgnoreCase)) {
+            return true;
+        }
+        return false;
     }
 }

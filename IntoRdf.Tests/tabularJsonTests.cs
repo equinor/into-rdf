@@ -17,7 +17,8 @@ namespace IntoRdf.Tests
         internal void FruitsToRdf()
         {
             FileStream fruits = new FileStream("TestData/tabular.json", FileMode.Open);
-            var td = new TransformationDetails(new Uri("https://IAmTabularJson.Something/"), new Uri("https://IAmTabularJson.Something/"), new List<TargetPathSegment>(), RdfFormat.Turtle);
+            var identifierSegment = new TargetPathSegment("id", "id");
+            var td = new TransformationDetails(new Uri("https://IAmTabularJson.Something/"), new Uri("https://IAmTabularJson.Something/"), identifierSegment, new List<TargetPathSegment>(), RdfFormat.Turtle);
             var fruitTransformer = new TransformerService();
             var fruitsAsRdf = fruitTransformer.TransformTabularJson(fruits, RdfFormat.Turtle, "id", td);
             var graph = new VDS.RDF.Graph();
@@ -28,7 +29,8 @@ namespace IntoRdf.Tests
         internal void FruitsWithNestingToRdf()
         {
             FileStream fruits = new FileStream("TestData/tabular-nestedArray.json", FileMode.Open);
-            var td = new TransformationDetails(new Uri("https://IAmTabularJson.Something/"), new Uri("https://IAmTabularJson.Something/"), new List<TargetPathSegment>(), RdfFormat.Turtle);
+            var identifierSegment = new TargetPathSegment("id", "id");
+            var td = new TransformationDetails(new Uri("https://IAmTabularJson.Something/"), new Uri("https://IAmTabularJson.Something/"), identifierSegment, new List<TargetPathSegment>(), RdfFormat.Turtle);
             var fruitTransformer = new TransformerService();
             var fruitsAsRdf = fruitTransformer.TransformTabularJson(fruits, RdfFormat.Turtle, "id", td);
             var graph = new VDS.RDF.Graph();
