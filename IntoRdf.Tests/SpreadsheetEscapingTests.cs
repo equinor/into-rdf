@@ -10,12 +10,8 @@ public class SpreadsheetEscapingTests
     private static readonly Uri DataUri = new Uri("http://example.com/");
     private static readonly Uri PredicateUri = new Uri("http://example.com/predicate/");
     private const string SheetName = "test";
-    private readonly RdfTestUtil _rdfTestUtils;
-
-    public SpreadsheetEscapingTests()
-    {
-        _rdfTestUtils = new RdfTestUtil("TestData/escaping.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails());
-    }
+    private readonly RdfTestUtil _valueTester = new RdfTestUtil("TestData/escaping.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails("Name"));
+    private readonly RdfTestUtil _uriTester = new RdfTestUtil("TestData/escaping.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails("Value"));
 
     [Theory]
     [InlineData("slash", "v/v")]
@@ -28,9 +24,11 @@ public class SpreadsheetEscapingTests
     [InlineData("newLine", "v\nv")]
     [InlineData("tab", "v\tv")]
     [InlineData("tripleQuote", $""""v"""v"""")]
-    public void Escaping(string name, string value)
+    public void EscapeValues(string name, string value)
     {
-        _rdfTestUtils.AssertTripleAsserted(name, "Value", value);
+        _valueTester.AssertTripleAsserted(name, "Value", value);
+        _uriTester.AssertTripleAsserted(value, "Name", name);
+
     }
 
     private static SpreadsheetDetails CreateSpreadsheetDetails()
@@ -38,9 +36,9 @@ public class SpreadsheetEscapingTests
         return new SpreadsheetDetails(SheetName, 1, 2, 1) { EndColumn = int.MaxValue };
     }
 
-    private static TransformationDetails CreateTransformationDetails()
+    private static TransformationDetails CreateTransformationDetails(string idColumn)
     {
-        var segment = new TargetPathSegment("Name", "", true);
+        var segment = new TargetPathSegment(idColumn, "", true);
         return new TransformationDetails(DataUri, PredicateUri, new List<TargetPathSegment> { segment }, RdfFormat.Turtle);
     }
 }
