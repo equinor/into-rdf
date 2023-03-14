@@ -26,12 +26,12 @@ internal class SpreadsheetService : ISpreadsheetService
 
     public Graph ConvertToRdf(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content)
     {
-        var contentTable = GetSpreadsheetContent(content, spreadsheetDetails, transformationDetails);
+        var contentTable = GetSpreadsheetContent(content, spreadsheetDetails);
         var processedTable = PreprocessContent(transformationDetails, contentTable);
         return CreateGraphFromSource(processedTable);
     }
 
-    private DataTable GetSpreadsheetContent(Stream content, SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails)
+    private DataTable GetSpreadsheetContent(Stream content, SpreadsheetDetails spreadsheetDetails)
     {
         return _excelDomReaderService.GetSpreadsheetData(content, spreadsheetDetails);
     }

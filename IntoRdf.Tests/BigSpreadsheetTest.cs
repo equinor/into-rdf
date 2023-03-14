@@ -55,6 +55,13 @@ public class BigSpreadsheetTest
 
     private TransformationDetails CreateTransformationDetails()
     {
-        return new TransformationDetails(DataUri, PredicateUri, new List<TargetPathSegment> { new TargetPathSegment ("Tag Number", "test", true) }, RdfFormat.Turtle);
+        var identitySegment = new TargetPathSegment ("Tag Number", "test");
+        return new TransformationDetails(DataUri,
+         PredicateUri,
+         identitySegment,
+         new List<TargetPathSegment> {
+            identitySegment
+            }
+            , RdfFormat.Turtle);
     }
 }
