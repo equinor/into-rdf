@@ -49,7 +49,7 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
             new Uri(settings.BaseUri),
             new Uri(settings.BaseUri), 
             segments.FirstOrDefault(),
-            segments,
+            segments.Skip(1).ToList(),
             settings.RdfFormat
         );
 
