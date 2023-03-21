@@ -75,7 +75,6 @@ internal class DataTableProcessor : IDataTableProcessor
         return table.AsEnumerable().Any(row => id.AbsoluteUri.Equals(row.Field<string>(SubjectColumnName)));
     }
 
-    /// Keep in mind that dataColumnNames may include idColumnName
     private static DataTable InitDataTable(TransformationDetails transformationDetails, List<string> rawColumnNames)
     {
         var processedData = new DataTable();
