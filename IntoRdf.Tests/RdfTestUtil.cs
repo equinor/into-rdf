@@ -50,7 +50,10 @@ namespace IntoRdf.Tests
 
         internal void AssertTripleAsserted(string subjectSuffix, string predicateSuffix, object rdfObject)
         {
-            AssertTripleAsserted(new Uri(_transformationDetails.BaseUri, subjectSuffix), new Uri(_transformationDetails.SourcePredicateBaseUri, predicateSuffix), rdfObject);
+            AssertTripleAsserted(
+                new Uri($"{_transformationDetails.BaseUri}{subjectSuffix}"),
+                new Uri($"{_transformationDetails.SourcePredicateBaseUri}{predicateSuffix}"),
+                rdfObject);
         }
 
         internal void AssertTripleAsserted(Uri rdfSubject, Uri rdfPredicate, object rdfObject)

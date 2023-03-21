@@ -3,7 +3,7 @@ using System.Data;
 
 namespace IntoRdf.TransformationServices.RdfTableBuilderServices;
 
-internal interface IExcelRdfTableBuilderService
+internal interface IDataTableProcessor
 {
-    DataTable GetInputDataTable(TransformationDetails transformationSettings, DataTable inputData);
+    DataTable ProcessDataTable(TransformationDetails transformationSettings, DataTable inputData);
 }

@@ -1,3 +1,4 @@
+using IntoRdf.TransformationServices.RdfTableBuilderServices;
 using System.Data;
 using VDS.RDF;
 using VDS.RDF.Parsing;
@@ -25,7 +26,7 @@ internal class RdfGraphService : IRdfGraphService
 
     public void AssertDataTable(DataTable dataTable, string subjectColumn)
     {
-        _graph.Merge(AssertRawData(dataTable, subjectColumn));
+        _graph.Merge(AssertProcessedData(dataTable, subjectColumn));
     }
 
     public Graph GetGraph()
@@ -35,16 +36,17 @@ internal class RdfGraphService : IRdfGraphService
 
     private Graph AssertRawData(DataTable dataTable)
     {
-        return AssertRawData(dataTable, "id");
+        return AssertProcessedData(dataTable, DataTableProcessor.SubjectColumnName);
     }
 
-    private Graph AssertRawData(DataTable dataTable, string subjectColumn)
+    private Graph AssertProcessedData(DataTable dataTable, string subjectColumn)
     {
         Graph graph = InitializeGraph();
         foreach (DataRow row in dataTable.Rows)
         {
-            var test = row[subjectColumn];
-            var rdfSubject = CreateUriNode((Uri)row[subjectColumn]);
+            var data = row[subjectColumn];
+
+            var rdfSubject = CreateUriNode(new Uri(data.ToString()));
 
             foreach (DataColumn header in dataTable.Columns)
             {

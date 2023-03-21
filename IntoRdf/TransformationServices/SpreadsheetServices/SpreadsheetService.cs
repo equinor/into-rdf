@@ -11,34 +11,29 @@ namespace IntoRdf.TransformationServices.SpreadsheetServices;
 internal class SpreadsheetService : ISpreadsheetService
 {
     private readonly IExcelDomReaderService _excelDomReaderService;
-    private readonly IExcelRdfTableBuilderService _excelTableBuilderService;
+    private readonly IDataTableProcessor _dataTableProcessor;
     private readonly IRdfGraphService _rdfGraphService;
 
     public SpreadsheetService(
         IExcelDomReaderService excelDomReaderService, 
-        IExcelRdfTableBuilderService excelTableBuilderService,
+        IDataTableProcessor excelTableBuilderService,
         IRdfGraphService rdfGraphService)
     {
         _excelDomReaderService = excelDomReaderService;
-        _excelTableBuilderService = excelTableBuilderService;
+        _dataTableProcessor = excelTableBuilderService;
         _rdfGraphService = rdfGraphService;
     }
 
     public Graph ConvertToRdf(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content)
     {
         var contentTable = GetSpreadsheetContent(content, spreadsheetDetails);
-        var processedTable = PreprocessContent(transformationDetails, contentTable);
+        var processedTable = _dataTableProcessor.ProcessDataTable(transformationDetails, contentTable);
         return CreateGraphFromSource(processedTable);
     }
 
     private DataTable GetSpreadsheetContent(Stream content, SpreadsheetDetails spreadsheetDetails)
     {
         return _excelDomReaderService.GetSpreadsheetData(content, spreadsheetDetails);
-    }
-
-    private DataTable PreprocessContent(TransformationDetails transformationDetails, DataTable content)
-    {
-        return _excelTableBuilderService.GetInputDataTable(transformationDetails, content);
     }
 
     private Graph CreateGraphFromSource(DataTable content)

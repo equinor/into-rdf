@@ -13,7 +13,7 @@ internal static class SetupServices
     {
         services.AddTransient<IExcelDomReaderService, ExcelDomReaderService>();
         services.AddTransient<IRdfGraphService, RdfGraphService>();
-        services.AddTransient<IExcelRdfTableBuilderService, ExcelRdfTableBuilderService>();
+        services.AddTransient<IDataTableProcessor, DataTableProcessor>();
         services.AddTransient<ISpreadsheetService, SpreadsheetService>();
         services.AddTransient<IOntologyService, OntologyService>();
         services.AddTransient<IRecordTransformationService, RecordTransformationService>();

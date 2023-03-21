@@ -188,8 +188,6 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         var inputDataTable = new DataTable();
         inputDataTable.TableName = sheetName ?? "InputData";
 
-        inputDataTable.Columns.Add("id");
-
         foreach (var header in headers)
         {
             inputDataTable.Columns.Add(header);
@@ -198,12 +196,11 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         for (int i = 0; i < data.Count(); i++)
         {
             var row = inputDataTable.NewRow();
-            row[0] = (startRow + i).ToString();
 
             var dataColumns = data[i].Count > headers.Count ? headers.Count : data[i].Count;
-            for (int j = 1; j <= dataColumns; j++)
+            for (int j = 0; j < dataColumns; j++)
             {
-                row[j] = data[i][j - 1];
+                row[j] = data[i][j];
             }
             inputDataTable.Rows.Add(row);
         }
