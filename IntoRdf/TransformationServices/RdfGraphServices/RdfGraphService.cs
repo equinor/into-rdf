@@ -44,9 +44,10 @@ internal class RdfGraphService : IRdfGraphService
         Graph graph = InitializeGraph();
         foreach (DataRow row in dataTable.Rows)
         {
-            var data = row[subjectColumn];
+            var data = row[subjectColumn].ToString();
+            if (data == null) continue;
 
-            var rdfSubject = CreateUriNode(new Uri(data.ToString()));
+            var rdfSubject = CreateUriNode(new Uri(data));
 
             foreach (DataColumn header in dataTable.Columns)
             {

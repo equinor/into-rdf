@@ -24,7 +24,7 @@ internal class DataTableProcessor : IDataTableProcessor
                 var processedColumnIndex = rawColumnIndex + 1;
                 var rawColumnHeader = rawData.Columns[processedColumnIndex - 1].ColumnName;
                 var matchingConfig = transformationDetails.TargetPathSegments.Find(t => t.Target == rawColumnHeader);
-                var data = inputRow[processedColumnIndex - 1].ToString();
+                var data = inputRow[processedColumnIndex - 1].ToString() ?? "";
 
                 if (matchingConfig == null)
                 {
