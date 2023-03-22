@@ -17,7 +17,6 @@ namespace IntoRdf.Tests
         internal void AssertThrowsOnMalformedAML()
         {
             var serviceProvider = new ServiceCollection()
-                .AddLogging()
                 .BuildServiceProvider();
             var amlDetails = new AmlTransformationDetails(
                     new Uri("https://IAmTest/scd/"),
