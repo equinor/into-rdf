@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using IntoRdf.TransformationServices.RdfGraphServices;
 using IntoRdf.DomReaderServices.ExcelDomReaderServices;
-using IntoRdf.TransformationServices.RdfTableBuilderServices;
+using IntoRdf.TransformationServices;
 using IntoRdf.TransformationServices.SpreadsheetServices;
 using IntoRdf.TransformationServices.OntologyServices;
 using IntoRdf.TransformationServices.RecordService;

@@ -1,4 +1,3 @@
-using IntoRdf.TransformationServices.RdfTableBuilderServices;
 using System.Data;
 using VDS.RDF;
 using VDS.RDF.Parsing;

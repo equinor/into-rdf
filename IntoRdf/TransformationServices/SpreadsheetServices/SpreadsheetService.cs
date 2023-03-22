@@ -1,5 +1,4 @@
 using IntoRdf.DomReaderServices.ExcelDomReaderServices;
-using IntoRdf.TransformationServices.RdfTableBuilderServices;
 using IntoRdf.TransformationServices.RdfGraphServices;
 
 using System.Data;

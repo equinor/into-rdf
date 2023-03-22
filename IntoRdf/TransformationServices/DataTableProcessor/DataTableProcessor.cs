@@ -2,7 +2,7 @@ using IntoRdf.Public.Models;
 using System.Data;
 using VDS.RDF;
 
-namespace IntoRdf.TransformationServices.RdfTableBuilderServices;
+namespace IntoRdf.TransformationServices;
 
 internal class DataTableProcessor : IDataTableProcessor
 {
@@ -22,7 +22,7 @@ internal class DataTableProcessor : IDataTableProcessor
             for (var rawColumnIndex = 0; rawColumnIndex < rawData.Columns.Count; rawColumnIndex++)
             {
                 var processedColumnIndex = rawColumnIndex + 1;
-                var rawColumnHeader = rawData.Columns[processedColumnIndex - 1].ColumnName;
+                var rawColumnHeader = rawData.Columns[rawColumnIndex].ColumnName;
                 var matchingConfig = transformationDetails.TargetPathSegments.Find(t => t.Target == rawColumnHeader);
                 var data = inputRow[processedColumnIndex - 1].ToString() ?? "";
 

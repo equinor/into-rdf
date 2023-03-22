@@ -1,7 +1,7 @@
 using IntoRdf.Public.Models;
 using System.Data;
 
-namespace IntoRdf.TransformationServices.RdfTableBuilderServices;
+namespace IntoRdf.TransformationServices;
 
 internal interface IDataTableProcessor
 {
