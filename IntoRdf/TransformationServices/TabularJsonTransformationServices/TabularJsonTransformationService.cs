@@ -1,15 +1,15 @@
 using System.Data;
 using IntoRdf.Public.Models;
-using IntoRdf.TransformationServices.RdfGraphServices;
+using IntoRdf.TransformationServices;
 using IntoRdf.Utils;
 using Newtonsoft.Json;
 
 internal class TabularJsonTransformationService : ITabularJsonTransformationService
 {
-    private readonly IRdfGraphService _rdfGraphService;
-    public TabularJsonTransformationService(IRdfGraphService rdfGraphService)
+    private readonly IRdfAssertionService _rdfAssertionService;
+    public TabularJsonTransformationService(IRdfAssertionService rdfAssertionService)
     {
-        _rdfGraphService = rdfGraphService;
+        _rdfAssertionService = rdfAssertionService;
     }
     public string TransformTabularJson(Stream content, RdfFormat outputFormat, string subjectProperty, TransformationDetails transformationDetails)
     {
@@ -38,8 +38,8 @@ internal class TabularJsonTransformationService : ITabularJsonTransformationServ
                 dc.ColumnName = new Uri($"{transformationDetails.SourcePredicateBaseUri}{dc.ColumnName}").ToString();
             }
         }
-        _rdfGraphService.AssertDataTable(dt, $"id_{subjectProperty}");
+        var graph = _rdfAssertionService.AssertProcessedData(dt, $"id_{subjectProperty}");
 
-        return GraphSupportFunctions.WriteGraphToString(_rdfGraphService.GetGraph(), outputFormat);
+        return GraphSupportFunctions.WriteGraphToString(graph, outputFormat);
     }
 }

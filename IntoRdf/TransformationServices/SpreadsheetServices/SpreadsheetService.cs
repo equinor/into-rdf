@@ -1,5 +1,5 @@
 using IntoRdf.DomReaderServices.ExcelDomReaderServices;
-using IntoRdf.TransformationServices.RdfGraphServices;
+using IntoRdf.TransformationServices;
 
 using System.Data;
 using VDS.RDF;
@@ -11,16 +11,16 @@ internal class SpreadsheetService : ISpreadsheetService
 {
     private readonly IExcelDomReaderService _excelDomReaderService;
     private readonly IDataTableProcessor _dataTableProcessor;
-    private readonly IRdfGraphService _rdfGraphService;
+    private readonly IRdfAssertionService _rdfAssertionService;
 
     public SpreadsheetService(
         IExcelDomReaderService excelDomReaderService, 
         IDataTableProcessor excelTableBuilderService,
-        IRdfGraphService rdfGraphService)
+        IRdfAssertionService rdfAssertionService)
     {
         _excelDomReaderService = excelDomReaderService;
         _dataTableProcessor = excelTableBuilderService;
-        _rdfGraphService = rdfGraphService;
+        _rdfAssertionService = rdfAssertionService;
     }
 
     public Graph ConvertToRdf(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content)
@@ -37,7 +37,6 @@ internal class SpreadsheetService : ISpreadsheetService
 
     private Graph CreateGraphFromSource(DataTable content)
     {
-        _rdfGraphService.AssertDataTable(content);
-       return _rdfGraphService.GetGraph(); 
+        return _rdfAssertionService.AssertProcessedData(content);
     }
 }
