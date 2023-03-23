@@ -117,7 +117,6 @@ internal class RdfAssertionService : IRdfAssertionService
 
     private static IList<INode> CreateUriNode(Graph graph, Uri uri)
     {
-        Console.WriteLine(uri);
         return new List<INode>() { graph.CreateUriNode(uri) };
     }
 }
