@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using IntoRdf.TransformationServices.RdfGraphServices;
 using IntoRdf.DomReaderServices.ExcelDomReaderServices;
 using IntoRdf.TransformationServices;
 using IntoRdf.TransformationServices.SpreadsheetServices;
@@ -12,7 +11,7 @@ internal static class SetupServices
     internal static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddTransient<IExcelDomReaderService, ExcelDomReaderService>();
-        services.AddTransient<IRdfGraphService, RdfGraphService>();
+        services.AddTransient<IRdfAssertionService, RdfAssertionService>();
         services.AddTransient<IDataTableProcessor, DataTableProcessor>();
         services.AddTransient<ISpreadsheetService, SpreadsheetService>();
         services.AddTransient<IOntologyService, OntologyService>();
