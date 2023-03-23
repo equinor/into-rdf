@@ -1,5 +1,6 @@
 using IntoRdf.Public.Models;
 using Spectre.Console.Cli;
+using Spectre.Console.Rendering;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 
@@ -30,7 +31,11 @@ internal class TransformExcelSettings : CommandSettings
     [CommandOption("-f|--output-format")]
     public RdfFormat RdfFormat { get; set; } = RdfFormat.Turtle;
 
-    [Description("A list of colon separated entries indicating target and url segment. Identifier column must be the first entry. For example -t 'SomeId:IdSegment' -t 'SomeOtherField:SomeField'")]
+    [Description("A colon separated entry indicating target and url segment of identifier column. For example -i 'SomeId:IdSegment'")]
+    [CommandOption("-i |--identifier-segment")]
+    public string? IdSegment { get; set; } = null;
+
+    [Description("A list of colon separated entries indicating target and url segment. Identifier column must be the first entry. For example -t 'SomeField:SomeField' -t 'SomeOtherField:SomeOtherField'")]
     [CommandOption("-t |--target-path-segment")]
     public string[] TargetPathSegments { get; set; } = new string[0];
 }
@@ -39,17 +44,18 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
 {
     public override int Execute([NotNull] CommandContext context, [NotNull] TransformExcelSettings settings)
     {
-        var details = new SpreadsheetDetails(settings.SheetName, settings.PredicateRow, settings.DataRow, settings.StartColumn) { EndColumn = settings.EndColumn};
+        var details = new SpreadsheetDetails(settings.SheetName, settings.PredicateRow, settings.DataRow, settings.StartColumn) { EndColumn = settings.EndColumn };
+        TargetPathSegment? idSegment = GetIdSegment(settings);
+
         var segments = settings.TargetPathSegments
-                .Select(raw => raw.Split(":"))
-                .Select(array => new TargetPathSegment(array[0], array[1]))
+                .Select(raw => GetSegment(raw, "--target-path-segment"))
                 .ToList();
 
         var transformationDetails = new TransformationDetails(
             new Uri(settings.BaseUri),
-            new Uri(settings.BaseUri), 
-            segments.FirstOrDefault(),
-            segments.Skip(1).ToList(),
+            new Uri(settings.BaseUri),
+            idSegment,
+            segments.ToList(),
             settings.RdfFormat
         );
 
@@ -60,12 +66,28 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
         {
             var rdf = transformer.TransformSpreadsheet(details, transformationDetails, inputStream);
             Console.WriteLine(rdf);
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            Console.WriteLine(ex.StackTrace);
         }
 
         return 0;
+    }
+
+    private static TargetPathSegment? GetIdSegment(TransformExcelSettings settings)
+    {
+        if (string.IsNullOrEmpty(settings.IdSegment)) { return null; }
+        return GetSegment(settings.IdSegment, "--identifier-segment");
+    }
+
+    private static TargetPathSegment GetSegment(string segment, string paramNameForDebug)
+    {
+        var split = segment.Split(":");
+        if (split.Length != 2)
+        {
+            throw new Exception($"Expected a ':' in {paramNameForDebug}");
+        }
+        return new TargetPathSegment(split[0], split[1]);
     }
 }
