@@ -1,10 +1,10 @@
 name: Publish
 on:
-workflow_call:
-  inputs:
-    artifact:
-      required: true
-      type: string
+  workflow_call:
+    inputs:
+      artifact:
+        required: true
+        type: string
 
 jobs:
   publish:
