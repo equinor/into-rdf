@@ -32,7 +32,8 @@ internal class DataTableProcessor : IDataTableProcessor
                 }
                 else
                 {
-                    var dataUriPrefix = new Uri($"{transformationDetails.BaseUri.AbsoluteUri}{matchingConfig.UriSegment}/");
+                    var slashedUriSegment = string.IsNullOrEmpty(matchingConfig.UriSegment) ? "" : $"{matchingConfig.UriSegment}/";
+                    var dataUriPrefix = new Uri($"{transformationDetails.BaseUri.AbsoluteUri}{slashedUriSegment}");
                     var dataUri = CreateUri(dataUriPrefix, data);
                     processedRow[processedColumnIndex] = dataUri;
                 }
@@ -47,7 +48,7 @@ internal class DataTableProcessor : IDataTableProcessor
     {
         if (details.IdentifierTargetPathSegment == null)
         {
-            return new Uri($"{details.BaseUri.AbsoluteUri}{Guid.NewGuid()}");
+            return new Uri($"{details.BaseUri.AbsoluteUri}{Guid.NewGuid()}/");
         }
         else
         {

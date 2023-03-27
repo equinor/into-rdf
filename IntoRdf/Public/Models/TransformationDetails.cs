@@ -1,5 +1,4 @@
 namespace IntoRdf.Public.Models;
-using IntoRdf.Public.Exceptions;
 
 public class TransformationDetails
 {
