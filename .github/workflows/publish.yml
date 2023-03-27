@@ -1,7 +1,11 @@
 name: Publish
-
 on:
-  workflow_dispatch:
+workflow_call:
+  inputs:
+    artifact:
+      required: true
+      type: string
+
 jobs:
   publish:
     environment: ${{ inputs.env }}
