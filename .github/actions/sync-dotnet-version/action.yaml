@@ -1,0 +1,55 @@
+name: Sync CSPROJ Version
+description: Synchronize a CSPROJ file with a version.txt file.
+inputs:
+  branch:
+    required: true
+  csproj-path:
+    required: true
+  version-file-path:
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: refs/heads/${{ inputs.branch }}
+
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install dependencies
+      shell: bash
+      run: cd $GITHUB_ACTION_PATH && npm ci
+
+    - name: Sync version
+      shell: bash
+      id: sync
+      run: |
+        cd $GITHUB_ACTION_PATH
+        npx tsx sync-version.ts ${{ inputs.csproj-path }} ${{ inputs.version-file-path }} > sync_res.txt
+        echo "result=$(< sync_res.txt)" >> $GITHUB_OUTPUT
+        rm sync_res.txt
+
+    - name: Set sync result
+      shell: bash
+      run: |
+        echo "${{ fromJSON(steps.sync.outputs.result).info }}"
+        echo "FILE_UPDATED=${{ fromJSON(steps.sync.outputs.result).file_updated }}" >> $GITHUB_ENV
+        echo "${{ toJSON(steps.sync.outputs.result) }}"
+
+    - name: Setup git config
+      if: ${{ env.FILE_UPDATED == 'true' }}
+      shell: bash
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Commit changes
+      if: ${{ env.FILE_UPDATED == 'true' }}
+      shell: bash
+      run: |
+        git status
+        git add .
+        git commit -m "chore: Sync version.txt and .CSProj [skip ci]"
+        git push origin ${{ inputs.branch }}

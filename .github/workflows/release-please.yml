@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
 jobs:
   release_please:
     name: 🔖 Release Please
@@ -12,22 +14,22 @@ jobs:
         id: release
         uses: google-github-actions/release-please-action@v3
         with:
-          release-type: dotnet
+          release-type: simple
           package-name: intordf
-          changelog-types: >
-            [{"type":"feat","section":"Features","hidden":false},
-            {"type":"fix","section":"Bug Fixes","hidden":false},
-            {"type":"docs","section":"Documentation","hidden":false},
-            {"type":"chore", "section":"Other","hidden":false},
-            {"type":"test", "section":"Other","hidden":false},
-            {"type":"ci", "section":"CI/CD","hidden":false},
-            {"type":"perf", "section":"Optimalization","hidden":false},
-            {"type":"refactor", "section":"Other","hidden":false}]
+          release-as: 0.1.0
+          bootstrap-sha: 14982d47e93fcb692fe9dacc438a56fc0748f315
+          bump-minor-pre-major: true # Should breaking changes before 1.0.0 produce minor bumps? Default false
+          bump-patch-for-minor-pre-major: true # Should feat changes before 1.0.0 produce patch bumps instead of minor bumps? Default false
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
 
+  sync-csproj:
+    name: Sync CSPROJ file
+    needs: [release_please]
+    uses: equinor/into-rdf/.github/workflows/sync-csproj-version.yml@main
+
   build:
-    name: '🛠️ Build'
+    name: "🛠️ Build"
     if: ${{ needs.release_please.outputs.release_created }}
     needs: [release_please]
     uses: equinor/into-rdf/.github/workflows/build.yml@main
