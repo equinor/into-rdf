@@ -98,7 +98,7 @@ namespace IntoRdf.Tests
                 Assert.Fail(debugMsg);
             }
 
-            var actualProps = GetAllProperties(subjects.First());
+            var actualProps = GetAllProperties(subjects.Single());
             var debugMsgToBigObject = $"Expected to find a single object satisfing only the props: [\n{DebugProps(expectedProps, 2)}\n], but found an object containing additional props. Found props: [\n{DebugProps(actualProps, 2)}\n]";
             if (actualProps.Count > expectedProps.Count )
             {

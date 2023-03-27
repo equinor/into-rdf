@@ -25,12 +25,6 @@ public class SpreadsheetEmptyCellsTests
     [Fact]
     public void EmptyLiteralCells()
     {
-        //tester.AssertTripleAsserted(name, "Value", literalValue);
-        if (!written) {
-            Console.WriteLine(literalTester.WriteGraphToString(RdfFormat.Turtle));
-            written = true;
-        }
-
         var idPredicate = "http://example.com/predicate#id";
         var dataPredicate = "http://example.com/predicate#data";
         var emptyPredicate = "http://example.com/predicate#Column1";
@@ -54,10 +48,9 @@ public class SpreadsheetEmptyCellsTests
     [Fact]
     public void EmptyUriCells()
     {
-        //tester.AssertTripleAsserted(name, "Value", literalValue);
         if (!written)
         {
-            Console.WriteLine(uriTester.WriteGraphToString(RdfFormat.Turtle));
+            // Console.WriteLine(uriTester.WriteGraphToString(RdfFormat.Turtle));
             written = true;
         }
 
