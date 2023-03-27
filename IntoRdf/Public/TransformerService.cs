@@ -8,6 +8,7 @@ using IntoRdf.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using IntoRdf.Public.Models;
 using IntoRdf.TransformationServices.XMLTransformationServices.Converters;
+using IntoRdf.Validation;
 
 namespace IntoRdf;
 
@@ -31,11 +32,13 @@ public class TransformerService : ITransformerService
     }
 
     public string TransformTabularJson(Stream content, RdfFormat outputFormat, string subjectProperty, TransformationDetails transformationDetails) {
+        TransformationDetailsValidation.ValidateTransformationDetails(transformationDetails);
         return _tabularJsonTransformationService.TransformTabularJson(content, outputFormat, subjectProperty, transformationDetails);
     }
 
     public string TransformSpreadsheet(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content)
     {
+        TransformationDetailsValidation.ValidateTransformationDetails(transformationDetails);
         var graph = _spreadsheetService.ConvertToRdf(spreadsheetDetails, transformationDetails, content);
         return GraphSupportFunctions.WriteGraphToString(graph, transformationDetails.OutputFormat);
     }

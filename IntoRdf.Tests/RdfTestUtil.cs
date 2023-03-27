@@ -89,6 +89,73 @@ namespace IntoRdf.Tests
             Assert.True(ok, errorMsg);
         }
 
+        internal void AssertObjectExist(Dictionary<string, object> expectedProps)
+        {
+            var subjects = GetSubjects(expectedProps);
+            var debugMsg = $"Expected to find a single object, but found {subjects.Count} objects satisfing the predicate-object pairs: [\n{DebugProps(expectedProps, 2)}\n]";
+            if (subjects.Count != 1)
+            {
+                Assert.Fail(debugMsg);
+            }
+
+            var actualProps = GetAllProperties(subjects.Single());
+            var debugMsgToBigObject = $"Expected to find a single object satisfing only the props: [\n{DebugProps(expectedProps, 2)}\n], but found an object containing additional props. Found props: [\n{DebugProps(actualProps, 2)}\n]";
+            if (actualProps.Count > expectedProps.Count )
+            {
+                Assert.Fail(debugMsgToBigObject);
+            }
+        }
+
+        private string DebugProps(Dictionary<string, object> props, int tabCount)
+        {
+            var tabs = new string('\t', tabCount);
+            return tabs + string.Join("\n" + tabs, props.Select(pair => $"{pair.Key}: {pair.Value}"));
+        }
+
+        private List<Uri> GetSubjects(Dictionary<string, object> predicateObjectPairs)
+        {
+            var variable = "subject";
+            var (selectVar, whereVar) = CreateSelectAndPattern(_graph, null, "subject");
+            var patterns = predicateObjectPairs.Select(pair => new TriplePattern(
+                whereVar,
+                CreatePattern(_graph, new Uri(pair.Key)),
+                CreatePattern(_graph, pair.Value)
+            ));
+
+            var selectQuery = QueryBuilder
+                .Select(selectVar)
+                .Where(patterns.ToArray())
+            .BuildQuery();
+
+            var subjectResult = (SparqlResultSet) _graph.ExecuteQuery(selectQuery);
+            return subjectResult.Select(r => new Uri(r[variable].ToString())).ToList();
+        }
+
+        private Dictionary<string, object> GetAllProperties(Uri subject)
+        {
+            var predicateVar = "predicate";
+            var objectVar = "object";
+            var (selectPredicate, wherePredicate) = CreateSelectAndPattern(_graph, null, predicateVar);
+            var (selectObject, whereObject) = CreateSelectAndPattern(_graph, null, objectVar);
+
+            var pattern = new TriplePattern(
+                CreateUriPattern(_graph, subject),
+                wherePredicate,
+                whereObject
+            );
+
+            var propQuery = QueryBuilder
+                .Select(selectPredicate, selectObject)
+                .Where(pattern)
+            .BuildQuery();
+
+            var propQueryResult = (SparqlResultSet)_graph.ExecuteQuery(propQuery);
+            return propQueryResult.ToDictionary(
+                result => result[predicateVar].ToString(),
+                result => (object) result[objectVar].ToString()
+            );
+        }
+
         private bool Ask(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject)
         {
             var triplePattern = new TriplePattern(
@@ -107,7 +174,6 @@ namespace IntoRdf.Tests
 
         private List<string> Select(Graph graph, Uri rdfSubject, Uri rdfPredicate, object rdfObject, int limit)
         {
-
             var (subjectSelect, subjectPattern) = CreateSelectAndPattern(graph, rdfSubject, "subject");
             var (predicateSelect, predicatePattern) = CreateSelectAndPattern(graph, rdfPredicate, "predicate");
             var (objectSelect, objectPattern) = CreateSelectAndPattern(graph, rdfObject, "object");

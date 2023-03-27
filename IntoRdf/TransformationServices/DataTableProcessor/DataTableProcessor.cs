@@ -1,3 +1,4 @@
+using IntoRdf.Public.Exceptions;
 using IntoRdf.Public.Models;
 using System.Data;
 using VDS.RDF;
@@ -25,15 +26,23 @@ internal class DataTableProcessor : IDataTableProcessor
                 var rawColumnHeader = rawData.Columns[rawColumnIndex].ColumnName;
                 var matchingConfig = transformationDetails.TargetPathSegments.Find(t => t.Target == rawColumnHeader);
                 var data = inputRow[processedColumnIndex - 1].ToString() ?? "";
+                var trimmedData = data.Trim();
 
                 if (matchingConfig == null)
                 {
-                    processedRow[processedColumnIndex] = data;
+                    if (trimmedData == string.Empty)
+                    {
+                        processedRow[processedColumnIndex] = null;
+                    }
+                    else
+                    {
+                        processedRow[processedColumnIndex] = trimmedData;
+                    }
+
                 }
                 else
                 {
-                    var dataUriPrefix = new Uri($"{transformationDetails.BaseUri.AbsoluteUri}{matchingConfig.UriSegment}/");
-                    var dataUri = CreateUri(dataUriPrefix, data);
+                    var dataUri = CreateUri(transformationDetails.BaseUri, matchingConfig.UriSegment, trimmedData);
                     processedRow[processedColumnIndex] = dataUri;
                 }
             }
@@ -43,31 +52,33 @@ internal class DataTableProcessor : IDataTableProcessor
         return processedData;
     }
 
-    private static Uri CreateIdUri(TransformationDetails details, DataTable alreadyProcessedData, DataRow inputRow)
+    private static Uri? CreateIdUri(TransformationDetails details, DataTable alreadyProcessedData, DataRow inputRow)
     {
         if (details.IdentifierTargetPathSegment == null)
         {
-            return new Uri($"{details.BaseUri.AbsoluteUri}{Guid.NewGuid()}");
+            return new Uri($"{details.BaseUri.AbsoluteUri}{Guid.NewGuid()}/");
         }
         else
         {
-            var uriSegment = details.IdentifierTargetPathSegment.UriSegment;
-            var slashedUriSegment = string.IsNullOrEmpty(uriSegment) ? "" : $"{uriSegment}/";
-            var idPrefix = new Uri($"{details.BaseUri.AbsoluteUri}{slashedUriSegment}");
             var data = inputRow[details.IdentifierTargetPathSegment.Target].ToString();
             if (data == null)
             {
                 throw new ArgumentNullException("Cannot find column with name " + details.IdentifierTargetPathSegment.Target);
             }
-            var idUri = CreateUri(idPrefix, data);
+            var idUri = CreateUri(details.BaseUri, details.IdentifierTargetPathSegment.UriSegment, data);
+
+            if (idUri == null)
+            {
+                return null;
+            }
 
             if (ContainsId(alreadyProcessedData, idUri))
             {
-                return new Uri($"{idUri.AbsoluteUri}_row={inputRow["id"]}");
+                var msg = $"'{details.IdentifierTargetPathSegment.Target}' was specified to be a unique id column, but duplicate: '{data}' found";
+                throw new IntoRdfException(msg);
             }
             return idUri;
         }
-
     }
 
     private static bool ContainsId(DataTable table, Uri id)
@@ -80,24 +91,33 @@ internal class DataTableProcessor : IDataTableProcessor
         var processedData = new DataTable();
         processedData.Columns.Add(SubjectColumnName);
         processedData.Columns.AddRange(rawColumnNames
-            .Select(n => {
+            .Select(n =>
+            {
                 var matchingConfig = transformationDetails.TargetPathSegments.Find(t => t.Target == n);
                 var dataType = matchingConfig == null ? typeof(string) : typeof(Uri);
+
                 return new DataColumn(
-                    CreateUri(transformationDetails.SourcePredicateBaseUri, n).AbsoluteUri, dataType);
+                    CreateUri(transformationDetails.SourcePredicateBaseUri, null, n)?.AbsoluteUri, dataType);
             })
             .ToArray()
         );
         return processedData;
     }
 
-    private static Uri CreateUri(Uri prefix, string data)
+    private static Uri? CreateUri(Uri prefix, string? uriSegment, string data)
     {
-        return new Uri($"{prefix}{Escape(data)}");
+        if (string.IsNullOrEmpty(data))
+        {
+            return null;
+        }
+
+        var slashedUriSegment = string.IsNullOrEmpty(uriSegment) ? "" : $"{uriSegment}/";
+        var fullPrefix = new Uri($"{prefix}{slashedUriSegment}");
+        return new Uri($"{fullPrefix}{Escape(data)}");
     }
 
     private static string Escape(string value)
     {
-        return Uri.EscapeDataString(value.Trim());
+        return Uri.EscapeDataString(value);
     }
 }
