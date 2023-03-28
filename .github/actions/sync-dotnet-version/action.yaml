@@ -10,10 +10,18 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - run: echo "${{ env.GITHUB_ACTION_PATH }}"
+      shell: bash
+    - run: echo ${GITHUB_ACTION_PATH}
+      shell: bash
+    - run: echo $GITHUB_ACTION_PATH
+      shell: bash
+    - run: echo "${{ toJSON(github) }}"
+      shell: bash
     - uses: actions/checkout@v3
       with:
         ref: refs/heads/${{ inputs.branch }}
-    - run: echo "$GITHUB_ACTION_PATH"
+    - run: echo "${{ env.GITHUB_ACTION_PATH }}"
       shell: bash
     - uses: actions/setup-node@v3
       with:
