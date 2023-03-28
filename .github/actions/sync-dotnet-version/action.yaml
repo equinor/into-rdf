@@ -17,7 +17,11 @@ runs:
     - uses: actions/checkout@v3
     - name: Debug branch
       shell: bash
-      run: echo ${{ github.head_ref }}
+      run: echo "${{ toJSON(github) }}"
+    - name: Debug 2
+      shell: bash
+      working-directory: InfoRdf
+      run: ls -la
     - name: Update .csproj Version
       uses: actions/github-script@v6
       id: sync-version

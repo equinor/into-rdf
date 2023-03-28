@@ -15,4 +15,4 @@ jobs:
         uses: ./.github/actions/sync-dotnet-version
         with:
           branch: "release-please--branches--main--components--intordf"
-          csproj-path: "InfoRdf/IntoRdf.csproj"
+          csproj-path: "IntoRdf/IntoRdf.csproj"
