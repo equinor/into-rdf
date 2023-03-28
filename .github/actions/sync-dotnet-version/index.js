@@ -54,7 +54,7 @@ export default async ({ github, context, core }) => {
 		throw error;
 	}
 
-	cl(fileContent, core);
+	//cl(fileContent, core);
 
 	// Replace the variable with the new version number using the regular expression
 	const modifiedData = fileContent.replace(
@@ -62,12 +62,16 @@ export default async ({ github, context, core }) => {
 		`<Version>${newVersion}</Version>`
 	);
 
+	if (modifiedData === fileContent) {
+		cl("Version has not changed, skipping...", core);
+		return false;
+	}
+
 	try {
 		await writeFile(csprojPath, modifiedData, "utf-8");
 	} catch (error) {
-		cl("Error write", core);
-		console.log(error);
-		throw error;
+		core.error(error);
+		return false;
 	}
 
 	cl(`File ${csprojPath} has been successfully modified.`, core);
