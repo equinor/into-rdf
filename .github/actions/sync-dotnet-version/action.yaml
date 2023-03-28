@@ -26,7 +26,7 @@ runs:
     - uses: actions/setup-node@v3
       with:
         cache: "npm"
-        cache-dependency-path: $GITHUB_ACTION_PATH/package-lock.json
+        cache-dependency-path: ${{ env.GITHUB_ACTION_PATH }}/package-lock.json
         node-version: 18
 
     - name: Install dependencies
