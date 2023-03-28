@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - release-please--branches--main--components--intordf
+  pull_request:
+    types: [opened, reopened]
   pull_request_target:
     types:
       - opened
@@ -14,8 +16,10 @@ on:
 jobs:
   sync-version:
     name: Synchronize CSPROJ version
+    #if: ${{ github.head_ref == 'release-please--branches--main--components--intordf' }}
     runs-on: ubuntu-latest
     steps:
+      - run: echo "${{ github.head_ref }}"
       - uses: actions/checkout@v3
       - name: Sync
         uses: ./.github/actions/sync-dotnet-version
