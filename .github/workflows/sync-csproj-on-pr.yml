@@ -1,0 +1,17 @@
+name: Sync csproj Version
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - release-please--branches--main--components--intordf
+
+jobs:
+  sync-version:
+    name: Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync
+        uses: ./.github/actions/sync-dotnet-version
+        with:
+          branch: "release-please--branches--main--components--intordf"
+          csproj-path: "InfoRdf/IntoRdf.csproj"

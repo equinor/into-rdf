@@ -1,0 +1,40 @@
+name: Sync CSPROJ Version
+description: Jada jada
+inputs:
+  branch:
+    required: false
+  version:
+    required: false
+  csproj-path:
+    required: true
+outputs:
+  success:
+    description: Is synced?
+    value: ${{ steps.sync-version.outputs.result }}
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+    - name: Debug branch
+      run: echo ${{ github.head_ref }}
+    - name: Update .csproj Version
+      uses: actions/github-script@v6
+      id: sync-version
+      env:
+        VERSION: ${{ inputs.version }}
+        PATH: ${{ inputs.csproj-path }}
+      with:
+        script: |
+          const { default: syncVersion } = await import('${{ github.workspace }}/.github/actions/sync-dotnet-version/index.js')
+          return await syncVersion({github, context, core})
+    - name: setup git config
+      run: |
+        # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+    - name: Commit changes
+      # Stage the file, commit and push
+      run: |
+        git add ${{ github.workspace }}/${{ inputs.csproj-path }}
+        git commit -m "chore: Sync version.txt and CSProj [skip ci]"
+        git push origin ${{ inputs.branch }}
