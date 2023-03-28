@@ -27,14 +27,6 @@ runs:
         script: |
           const { default: syncVersion } = await import('${{ github.workspace }}/.github/actions/sync-dotnet-version/index.js')
           return await syncVersion({github, context, core})
-    #- name: Check if any changes
-    #  shell: bash
-    #  run: |
-    #    if [ -z "$(git diff)" ]; then
-    #      echo "CHANGES=false" >> $GITHUB_ENV
-    #    else
-    #      echo "CHANGES=true" >> $GITHUB_ENV
-    #    fi
     - name: Setup git config
       if: ${{ steps.sync-version.outputs.result }}
       shell: bash
@@ -47,5 +39,5 @@ runs:
       run: |
         git status
         git add .
-        git commit -m "chore: Sync version.txt and CSProj [skip ci]"
+        git commit -m "chore: Sync version.txt and .CSProj [skip ci]\nFile: ${{ inputs.csproj-path }}"
         git push origin ${{ inputs.branch }}
