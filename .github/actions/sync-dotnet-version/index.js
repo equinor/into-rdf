@@ -35,8 +35,8 @@ export default async ({ github, context, core }) => {
 
 	const csprojPath = toAbsPath(filePath);
 
-	cl(`Bumping .csproj version to ${newVersion}.`);
-	cl(`Filepath .csproj: ${csprojPath}`);
+	cl(`Bumping .csproj version to ${newVersion}.`, core);
+	cl(`Filepath .csproj: ${csprojPath}`, core);
 
 	// The regular expression to match the variable
 	const regex = /<Version>\d+\.\d+\.\d+(-[^+]+)?(\+.*)?<\/Version>/g;
@@ -55,7 +55,7 @@ export default async ({ github, context, core }) => {
 		writeFile(csprojPath, modifiedData, "utf-8", (err) => {
 			if (err) throw err;
 
-			cl(`File ${csprojPath} has been successfully modified.`);
+			cl(`File ${csprojPath} has been successfully modified.`, core);
 		});
 	});
 
