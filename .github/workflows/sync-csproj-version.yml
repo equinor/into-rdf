@@ -1,8 +1,10 @@
 name: Synchronize csproj Version
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
+  #pull_request:
+  #  types: [opened, synchronize]
+  pull_request_target:
+    types: [opened, synchronize]
 
 jobs:
   sync-version:
@@ -11,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "${{ github.head_ref }}"
+      - run: echo "${{ toJSON(github) }}"
       - uses: actions/checkout@v3
       - name: Sync
         uses: ./.github/actions/sync-dotnet-version
