@@ -46,8 +46,11 @@ export default async ({ github, context, core }) => {
 	let fileContent = "";
 
 	try {
+		cl("Reading", core);
 		fileContent = await readFile(csprojPath, "utf-8");
 	} catch (error) {
+		cl("Error", core);
+		console.log(error);
 		throw error;
 	}
 
@@ -62,6 +65,8 @@ export default async ({ github, context, core }) => {
 	try {
 		await writeFile(csprojPath, modifiedData, "utf-8");
 	} catch (error) {
+		cl("Error write", core);
+		console.log(error);
 		throw error;
 	}
 
