@@ -54,8 +54,6 @@ export default async ({ github, context, core }) => {
 		throw error;
 	}
 
-	//cl(fileContent, core);
-
 	// Replace the variable with the new version number using the regular expression
 	const modifiedData = fileContent.replace(
 		regex,
