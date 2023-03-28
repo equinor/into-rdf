@@ -1,3 +1,7 @@
 {
-	"type": "module"
+	"type": "module",
+	"devDependencies": {
+		"@types/node": "^18.15.10",
+		"tsx": "^3.12.6"
+	}
 }

@@ -16,3 +16,4 @@ jobs:
         with:
           branch: "release-please--branches--main--components--intordf"
           csproj-path: "IntoRdf/IntoRdf.csproj"
+          version-file-path: "version.txt"
