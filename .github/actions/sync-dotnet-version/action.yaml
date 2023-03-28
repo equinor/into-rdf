@@ -21,8 +21,8 @@ runs:
         ref: refs/heads/${{ inputs.branch }}
     - uses: actions/setup-node@v3
       with:
-        cache: "npm"
-        cache-dependency-path: ${GITHUB_ACTION_PATH}/package-lock.json
+        #cache: "npm"
+        #cache-dependency-path: ${GITHUB_ACTION_PATH}/package-lock.json
         node-version: 18
 
     - name: Install dependencies
