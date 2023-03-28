@@ -15,6 +15,8 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
+      #with:
+      #  ref: refs/heads/${{ inputs.branch }}
     - name: Debug branch
       shell: bash
       run: echo "${{ toJSON(github) }}"
