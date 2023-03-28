@@ -8,7 +8,9 @@ function cl(msg, core) {
 }
 
 export default async ({ github, context, core }) => {
-	const { VERSION: newVersion, PATH: filePath } = process.env;
+	const { PATH: filePath } = process.env;
+
+	let newVersion = "";
 
 	let version = "?";
 
