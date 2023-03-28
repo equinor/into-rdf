@@ -20,7 +20,6 @@ runs:
       run: echo "${{ toJSON(github) }}"
     - name: Debug 2
       shell: bash
-      working-directory: InfoRdf
       run: ls -la
     - name: Update .csproj Version
       uses: actions/github-script@v6
