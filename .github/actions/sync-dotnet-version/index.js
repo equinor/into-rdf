@@ -27,8 +27,8 @@ export default async ({ github, context, core }) => {
 		version = await readFile(toAbsPath("version.txt"), "utf-8");
 	} catch (error) {
 		console.error(error);
-		version = "0.0.0";
-		throw new Error("Failed to read contents of version.txt");
+		version = "0.1.0";
+		//throw new Error("Failed to read contents of version.txt");
 	}
 
 	newVersion = version.trim();
@@ -42,22 +42,30 @@ export default async ({ github, context, core }) => {
 	const regex = /<Version>\d+\.\d+\.\d+(-[^+]+)?(\+.*)?<\/Version>/g;
 
 	// Read the file
-	readFile(csprojPath, "utf-8", (err, data) => {
-		if (err) throw err;
 
-		// Replace the variable with the new version number using the regular expression
-		const modifiedData = data.replace(
-			regex,
-			`<Version>${newVersion}</Version>`
-		);
+	let fileContent = "";
 
-		// Save the modified data back to the file
-		writeFile(csprojPath, modifiedData, "utf-8", (err) => {
-			if (err) throw err;
+	try {
+		fileContent = readFile(csprojPath, "utf-8");
+	} catch (error) {
+		throw error;
+	}
 
-			cl(`File ${csprojPath} has been successfully modified.`, core);
-		});
-	});
+	cl(fileContent, core);
+
+	// Replace the variable with the new version number using the regular expression
+	const modifiedData = fileContent.replace(
+		regex,
+		`<Version>${newVersion}</Version>`
+	);
+
+	try {
+		await writeFile(csprojPath, modifiedData, "utf-8");
+	} catch (error) {
+		throw error;
+	}
+
+	cl(`File ${csprojPath} has been successfully modified.`, core);
 
 	return true;
 };
