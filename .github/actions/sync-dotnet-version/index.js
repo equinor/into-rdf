@@ -46,7 +46,7 @@ export default async ({ github, context, core }) => {
 	let fileContent = "";
 
 	try {
-		fileContent = readFile(csprojPath, "utf-8");
+		fileContent = await readFile(csprojPath, "utf-8");
 	} catch (error) {
 		throw error;
 	}
