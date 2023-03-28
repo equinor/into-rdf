@@ -24,7 +24,7 @@ jobs:
             {"type":"perf", "section":"Optimalization","hidden":false},
             {"type":"refactor", "section":"Other","hidden":false}]
       - name: Debug RP output
-        run: echo ${{ toJSON(fromJSON(steps.release.outputs)) }}
+        run: echo "${{ toJSON(fromJSON(steps.release.outputs)) }}"
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
 
