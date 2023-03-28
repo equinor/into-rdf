@@ -13,22 +13,22 @@ runs:
     - uses: actions/checkout@v3
       with:
         ref: refs/heads/${{ inputs.branch }}
-    - run: echo "${{github.action_path}}"
+    - run: echo "${{ env.GITHUB_ACTION_PATH }}"
       shell: bash
     - uses: actions/setup-node@v3
       with:
         cache: "npm"
-        cache-dependency-path: ${{ github.action_path }}/package-lock.json
+        cache-dependency-path: ${{ env.GITHUB_ACTION_PATH }}/package-lock.json
         node-version: 18
 
     - name: Install dependencies
       shell: bash
-      run: cd ${{github.action_path}} && npm ci
+      run: cd ${{env.GITHUB_ACTION_PATH}} && npm ci
 
     - name: Sync version
       shell: bash
       run: |
-        cd ${{github.action_path}}
+        cd ${{env.GITHUB_ACTION_PATH}}
         npx tsx sync-version.ts ${{ inputs.csproj-path }} ${{ inputs.version-file-path }}
         res=$?
         if [ $res -eq 0 ]; then
