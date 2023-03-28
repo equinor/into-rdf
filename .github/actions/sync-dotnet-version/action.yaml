@@ -18,9 +18,9 @@ runs:
     - name: Debug branch
       shell: bash
       run: echo "${{ toJSON(github) }}"
-    - name: Debug 2
+    - name: GS 1
       shell: bash
-      run: ls -la
+      run: git status
     - name: Update .csproj Version
       uses: actions/github-script@v6
       id: sync-version
@@ -31,16 +31,26 @@ runs:
         script: |
           const { default: syncVersion } = await import('${{ github.workspace }}/.github/actions/sync-dotnet-version/index.js')
           return await syncVersion({github, context, core})
+    - name: GS 2
+      shell: bash
+      run: git status
     - name: setup git config
       shell: bash
       run: |
         # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
         git config user.name "GitHub Actions Bot"
         git config user.email "<>"
-    - name: Commit changes
+    - name: Git commit
       shell: bash
       # Stage the file, commit and push
       run: |
-        git add ${{ github.workspace }}/${{ inputs.csproj-path }}
+        git status
         git commit -m "chore: Sync version.txt and CSProj [skip ci]"
+        git show
+    - name: Commit changes
+      shell: bash
+      # Stage the file, commit and push
+      #git add ${{ github.workspace }}/${{ inputs.csproj-path }}
+      run: |
+        git status
         git push origin ${{ inputs.branch }}
