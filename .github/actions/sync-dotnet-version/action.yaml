@@ -7,20 +7,18 @@ inputs:
     required: true
   version-file-path:
     required: true
-outputs:
-  success:
-    description: Is synced?
-    value: ${{ steps.sync-version.outputs.result }}
 runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
       with:
         ref: refs/heads/${{ inputs.branch }}
-
+    - run: echo "${{github.action_path}}"
+      shell: bash
     - uses: actions/setup-node@v3
       with:
         cache: "npm"
+        cache-dependency-path: ${{ github.action_path }}/package-lock.json
         node-version: 18
 
     - name: Install dependencies
