@@ -1,5 +1,5 @@
 name: Sync CSPROJ Version
-description: Jada jada
+description: Synchronize a CSPROJ file with a version.txt file.
 inputs:
   branch:
     required: true
@@ -10,19 +10,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: echo ${GITHUB_ACTION_PATH}
-      shell: bash
-    - run: echo $GITHUB_ACTION_PATH
-      shell: bash
-    - run: echo "${{ toJSON(github) }}"
-      shell: bash
     - uses: actions/checkout@v3
       with:
         ref: refs/heads/${{ inputs.branch }}
+
     - uses: actions/setup-node@v3
       with:
-        #cache: "npm"
-        #cache-dependency-path: ${GITHUB_ACTION_PATH}/package-lock.json
         node-version: 18
 
     - name: Install dependencies
@@ -54,5 +47,5 @@ runs:
       run: |
         git status
         git add .
-        git commit -m "chore: Sync version.txt and .CSProj [skip ci]\nSynced file: ${{ inputs.csproj-path }}"
+        git commit -m "chore: Sync version.txt and .CSProj [skip ci]"
         git push origin ${{ inputs.branch }}

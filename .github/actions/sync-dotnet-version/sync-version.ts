@@ -29,8 +29,8 @@ const csprojPath = toAbsPath(process.argv[2]);
 const versionTxtPath = toAbsPath(process.argv[3]);
 
 cl("Script path: " + scriptPath);
-console.info("Using .csproj file: ", csprojPath);
-console.info("Using version.txt file: ", versionTxtPath);
+cl("Using .csproj file: " + csprojPath);
+cl("Using version.txt file: " + versionTxtPath);
 
 let newVersion = "";
 
@@ -81,4 +81,4 @@ try {
 	process.exit(1);
 }
 
-console.log(`The .csproj has been successfully modified!`);
+cl(`The .csproj has been successfully modified!`);

@@ -1,13 +1,19 @@
-name: Sync csproj Version
+name: Synchronize csproj Version
 on:
   workflow_dispatch:
   push:
     branches:
       - release-please--branches--main--components--intordf
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+    branches:
+      - release-please--branches--main--components--intordf
 
 jobs:
   sync-version:
-    name: Sync
+    name: Synchronize CSPROJ version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
