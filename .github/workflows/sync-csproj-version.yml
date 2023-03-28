@@ -1,17 +1,8 @@
 name: Synchronize csproj Version
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - release-please--branches--main--components--intordf
   pull_request:
-    types: [opened, reopened]
-  pull_request_target:
-    types:
-      - opened
-      - synchronize
-    branches:
-      - release-please--branches--main--components--intordf
+    branches: [main]
 
 jobs:
   sync-version:
