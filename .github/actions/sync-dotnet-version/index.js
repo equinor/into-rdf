@@ -13,7 +13,7 @@ export default async ({ github, context, core }) => {
 	let version = "?";
 
 	try {
-		version = await fs.readFile("../../../version.txt", "utf-8");
+		version = await readFile("../../../version.txt", "utf-8");
 	} catch (error) {
 		console.error(error);
 		version = "0.0.0";
