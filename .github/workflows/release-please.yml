@@ -32,12 +32,12 @@ jobs:
     needs: [release_please]
     uses: equinor/into-rdf/.github/workflows/build.yml@main
 
-  #upload-nuget:
-  #  name: "📦 Upload nuget package"
-  #  needs: [build]
-  #  permissions:
-  #    id-token: write
-  #    contents: read
-  #  uses: equinor/into-rdf/.github/workflows/publish.yml@main
-  #  with:
-  #    ARTIFACT: ${{ needs.build.outputs.artifact-name }}
+  upload-nuget:
+    name: "📦 Upload nuget package"
+    needs: [build]
+    permissions:
+      id-token: write
+      contents: read
+    uses: equinor/into-rdf/.github/workflows/publish.yml@main
+    with:
+      ARTIFACT: ${{ needs.build.outputs.artifact-name }}
