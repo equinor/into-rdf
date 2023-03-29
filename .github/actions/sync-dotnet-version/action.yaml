@@ -27,19 +27,16 @@ runs:
       id: sync
       run: |
         cd $GITHUB_ACTION_PATH
-        npx tsx sync-version.ts ${{ inputs.csproj-path }} ${{ inputs.version-file-path }} > res.txt
-        res=$(< res.txt)
-        echo "result=$res" >> $GITHUB_OUTPUT
-        echo "res_test=$(< res.txt)" >> $GITHUB_OUTPUT
+        npx tsx sync-version.ts ${{ inputs.csproj-path }} ${{ inputs.version-file-path }} > sync_res.txt
+        echo "result=$(< sync_res.txt)" >> $GITHUB_OUTPUT
+        rm sync_res.txt
 
-    - name: Test
+    - name: Set sync result
       shell: bash
       run: |
-        echo "TEST: ${{ toJSON(steps.sync.outputs.res_test) }}"
-        echo "TEST2: ${{ toJSON(steps.sync.outputs.result) }}"
-        echo "${{ fromJSON(steps.sync.outputs.result).file_updated }}"
         echo "${{ fromJSON(steps.sync.outputs.result).info }}"
         echo "FILE_UPDATED=${{ fromJSON(steps.sync.outputs.result).file_updated }}" >> $GITHUB_ENV
+        echo "${{ toJSON(steps.sync.outputs.result) }}"
 
     - name: Setup git config
       if: ${{ env.FILE_UPDATED == 'true' }}
