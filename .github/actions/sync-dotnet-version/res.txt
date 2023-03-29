@@ -1,0 +1,1 @@
+{"file_updated":true,"script_path":"/home/runner/work/into-rdf/into-rdf/.github/actions/sync-dotnet-version/sync-version.ts","csproj_path":"/home/runner/work/into-rdf/into-rdf/IntoRdf/IntoRdf.csproj","version_path":"/home/runner/work/into-rdf/into-rdf/version.txt","info":"The .csproj has been successfully modified!"}
