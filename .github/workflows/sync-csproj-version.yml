@@ -6,13 +6,9 @@ on:
 jobs:
   sync-version:
     name: Synchronize CSPROJ version
-    # bump
-    #if: ${{ github.head_ref == 'release-please--branches--main--components--intordf' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: echo "${{ github.head_ref }}"
-      - run: echo "${{ toJSON(github) }}"
       - name: Synchronize CSPROJ version
         uses: ./.github/actions/sync-dotnet-version
         with:
