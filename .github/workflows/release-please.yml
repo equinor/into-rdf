@@ -26,11 +26,11 @@ jobs:
     needs: [release_please]
     uses: ./.github/workflows/sync-csproj-version.yml
 
-  #build:
-  #  name: "🛠️ Build"
-  #  if: ${{ needs.release_please.outputs.release_created }}
-  #  needs: [release_please]
-  #  uses: equinor/into-rdf/.github/workflows/build.yml@main
+  build:
+    name: "🛠️ Build"
+    if: ${{ needs.release_please.outputs.release_created }}
+    needs: [release_please]
+    uses: equinor/into-rdf/.github/workflows/build.yml@main
 
   #upload-nuget:
   #  name: "📦 Upload nuget package"
