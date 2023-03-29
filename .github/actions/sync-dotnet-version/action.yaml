@@ -31,7 +31,6 @@ runs:
         res=$(< res.txt)
         echo "$res"
         echo "result=$res" >> $GITHUB_OUTPUT
-        echo "file_updated=${{ fromJSON($res).file_updated }}" >> $GITHUB_ENV
 
     - name: Test
       shell: bash
