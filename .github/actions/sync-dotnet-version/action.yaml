@@ -30,7 +30,6 @@ runs:
         npx tsx sync-version.ts ${{ inputs.csproj-path }} ${{ inputs.version-file-path }} > sync_res.txt
         echo "result=$(< sync_res.txt)" >> $GITHUB_OUTPUT
         rm sync_res.txt
-        git status
 
     - name: Set sync result
       shell: bash
