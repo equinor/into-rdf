@@ -24,7 +24,7 @@ jobs:
 
   sync-csproj:
     name: Sync CSPROJ file
-    needs: [rp]
+    needs: [release_please]
     uses: ./.github/workflows/sync-csproj-version.yml
 
   #build:
