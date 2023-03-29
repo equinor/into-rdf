@@ -43,3 +43,5 @@ jobs:
     uses: equinor/into-rdf/.github/workflows/publish.yml@main
     with:
       ARTIFACT: ${{ needs.build.outputs.artifact-name }}
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
