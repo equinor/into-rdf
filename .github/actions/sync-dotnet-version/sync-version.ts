@@ -49,7 +49,7 @@ try {
 	const e = "Failed to read version file.";
 	result.error = typeof error === "string" ? e + " ERROR: " + error : e;
 	toStdout(result);
-	process.exit(1);
+	process.exit(0);
 }
 
 const newVersion = versionFileContent.trim();
@@ -66,7 +66,7 @@ try {
 	const e = "Failed to read .csproj file.";
 	result.error = typeof error === "string" ? e + " ERROR: " + error : e;
 	toStdout(result);
-	process.exit(1);
+	process.exit(0);
 }
 
 // Replace the variable with the new version number using the regular expression
@@ -87,7 +87,7 @@ try {
 	const e = "Failed to write .csproj file.";
 	result.error = typeof error === "string" ? e + " ERROR: " + error : e;
 	toStdout(result);
-	process.exit(1);
+	process.exit(0);
 }
 
 result.file_updated = true;
