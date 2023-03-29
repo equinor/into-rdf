@@ -70,7 +70,8 @@ const modifiedData = fileContent.replace(
 
 if (modifiedData === fileContent) {
 	console.log("Version has not changed, skipping...");
-	process.exit(1);
+	process.env["FILE_UPDATED"] = "false";
+	process.exit(0);
 }
 
 try {
@@ -82,3 +83,4 @@ try {
 }
 
 cl(`The .csproj has been successfully modified!`);
+process.env["FILE_UPDATED"] = "true";

@@ -27,22 +27,23 @@ runs:
       run: |
         cd $GITHUB_ACTION_PATH
         npx tsx sync-version.ts ${{ inputs.csproj-path }} ${{ inputs.version-file-path }}
-        res=$?
-        if [ $res -eq 0 ]; then
-          echo "file_updated=true" >> $GITHUB_ENV
-        else
-          echo "file_updated=false" >> $GITHUB_ENV
-        fi
+
+    - name: Test
+      shell: bash
+      run: |
+        echo "A: ${{ env.FILE_UPDATED == true }}"
+        echo "B: ${{ env.FILE_UPDATED == 'true' }}"
+        echo "C: ${{ env.FILE_UPDATED }}"
 
     - name: Setup git config
-      if: ${{ env.file_updated == 'true' }}
+      if: ${{ env.FILE_UPDATED == 'true' }}
       shell: bash
       run: |
         git config --global user.name "${{ github.actor }}"
         git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
     - name: Commit changes
-      if: ${{ env.file_updated == 'true' }}
+      if: ${{ env.FILE_UPDATED == 'true' }}
       shell: bash
       run: |
         git status
