@@ -1,0 +1,17 @@
+# Changelog
+
+## 0.1.0 (2023-03-29)
+
+
+### Features
+
+* add cli and fix lowhanging fruits ([#7](https://github.com/equinor/into-rdf/issues/7)) ([cd0eeee](https://github.com/equinor/into-rdf/commit/cd0eeeee0a5ec43ae4e60e965dfbd58c49f8557a))
+* Add public endpoint ([#4](https://github.com/equinor/into-rdf/issues/4)) ([26d91f2](https://github.com/equinor/into-rdf/commit/26d91f21ff27c71a9012e322d898777203b57db1))
+* do proper escaping of all URLs ([#13](https://github.com/equinor/into-rdf/issues/13)) ([ca23794](https://github.com/equinor/into-rdf/commit/ca23794fd8b650044026c0cf992e93c29df5e127))
+* Split spreadsheet and transformation details ([#6](https://github.com/equinor/into-rdf/issues/6)) ([9812645](https://github.com/equinor/into-rdf/commit/98126457c0ffaeefdeecf5f452ac35a42aa92caf))
+
+
+### Bug Fixes
+
+* correct handling of empty cells ([#19](https://github.com/equinor/into-rdf/issues/19)) ([4941f24](https://github.com/equinor/into-rdf/commit/4941f24f66a2e66144cf1017defd059fa92da318))
+* make into rdf compile ([#2](https://github.com/equinor/into-rdf/issues/2)) ([312f4c4](https://github.com/equinor/into-rdf/commit/312f4c4b8d224a2e22db5de042186067337c4efc))
