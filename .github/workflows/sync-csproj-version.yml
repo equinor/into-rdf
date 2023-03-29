@@ -4,7 +4,7 @@ on:
   #pull_request:
   #  types: [opened, synchronize]
   pull_request_target:
-    types: [opened, synchronize]
+    types: [opened, reopened]
 
 jobs:
   sync-version:
@@ -13,9 +13,11 @@ jobs:
     #if: ${{ github.head_ref == 'release-please--branches--main--components--intordf' }}
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.CI_PAT }}
       - run: echo "${{ github.head_ref }}"
       - run: echo "${{ toJSON(github) }}"
-      - uses: actions/checkout@v3
       - name: Synchronize CSPROJ version
         uses: ./.github/actions/sync-dotnet-version
         with:

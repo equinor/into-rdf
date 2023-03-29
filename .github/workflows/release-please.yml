@@ -16,17 +16,8 @@ jobs:
           package-name: intordf
           release-as: 0.1.0
           bootstrap-sha: 14982d47e93fcb692fe9dacc438a56fc0748f315
-          bump-minor-pre-major: true
-          bump-patch-for-minor-pre-major: true
-          changelog-types: >
-            [{"type":"feat","section":"Features","hidden":false},
-            {"type":"fix","section":"Bug Fixes","hidden":false},
-            {"type":"docs","section":"Documentation","hidden":false},
-            {"type":"chore", "section":"Other","hidden":false},
-            {"type":"test", "section":"Other","hidden":false},
-            {"type":"ci", "section":"CI/CD","hidden":false},
-            {"type":"perf", "section":"Optimalization","hidden":false},
-            {"type":"refactor", "section":"Other","hidden":false}]
+          bump-minor-pre-major: true # Should breaking changes before 1.0.0 produce minor bumps? Default false
+          bump-patch-for-minor-pre-major: true # Should feat changes before 1.0.0 produce patch bumps instead of minor bumps? Default false
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
 
