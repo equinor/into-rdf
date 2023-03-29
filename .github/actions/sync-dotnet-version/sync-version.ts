@@ -13,20 +13,9 @@ type Result = {
 
 const result: Result = {
 	file_updated: false,
-	// csproj_path: "?",
-	// script_path: "?",
-	// version_path: "?",
-	// info: "?",
 };
 
 const scriptPath = fileURLToPath(import.meta.url);
-
-const cyan = "\u001b[38;5;6m";
-const spy = "\u001b[38;5;10m";
-
-function cl(msg: string) {
-	console.log(cyan + msg);
-}
 
 function toStdout(res: Result) {
 	process.stdout.write(JSON.stringify(res));
@@ -42,9 +31,6 @@ const numArgs = process.argv.length - 2;
 if (numArgs !== 2) {
 	result.error = "Expected 2 arguments, but got " + numArgs + "!";
 	toStdout(result);
-	//console.log("Expected 2 arguments, but got " + numArgs + "!");
-	//console.log("Arg 1: Path to .csproj (relative to repo root)");
-	//console.log("Arg 2: Path to version.txt file (relative to repo root)");
 	process.exit(1);
 }
 
@@ -55,16 +41,10 @@ result.script_path = scriptPath;
 result.csproj_path = csprojPath;
 result.version_path = versionTxtPath;
 
-// cl("Script path: " + scriptPath);
-// cl("Using .csproj file: " + csprojPath);
-// cl("Using version.txt file: " + versionTxtPath);
-
-let newVersion = "";
-
-let version = "?";
+let versionFileContent = "";
 
 try {
-	version = await readFile(versionTxtPath, "utf-8");
+	versionFileContent = await readFile(versionTxtPath, "utf-8");
 } catch (error) {
 	const e = "Failed to read version file.";
 	result.error = typeof error === "string" ? e + " ERROR: " + error : e;
@@ -72,19 +52,16 @@ try {
 	process.exit(1);
 }
 
-newVersion = version.trim();
-
-//cl(`Bumping .csproj version to ${newVersion}.`);
+const newVersion = versionFileContent.trim();
 
 // The regular expression to match the variable
 const regex = /<Version>\d+\.\d+\.\d+(-[^+]+)?(\+.*)?<\/Version>/g;
 
 // Read the file
-
-let fileContent = "";
+let csprojFileContent = "";
 
 try {
-	fileContent = await readFile(csprojPath, "utf-8");
+	csprojFileContent = await readFile(csprojPath, "utf-8");
 } catch (error) {
 	const e = "Failed to read .csproj file.";
 	result.error = typeof error === "string" ? e + " ERROR: " + error : e;
@@ -93,12 +70,12 @@ try {
 }
 
 // Replace the variable with the new version number using the regular expression
-const modifiedData = fileContent.replace(
+const modifiedData = csprojFileContent.replace(
 	regex,
 	`<Version>${newVersion}</Version>`
 );
 
-if (modifiedData === fileContent) {
+if (modifiedData === csprojFileContent) {
 	result.info = "Version has not changed, skipping...";
 	toStdout(result);
 	process.exit(0);

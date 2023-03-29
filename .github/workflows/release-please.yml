@@ -14,7 +14,7 @@ jobs:
         with:
           release-type: simple
           package-name: intordf
-          #bootstrap-sha:
+          bootstrap-sha: 14982d47e93fcb692fe9dacc438a56fc0748f315
           bump-minor-pre-major: true
           bump-patch-for-minor-pre-major: true
           changelog-types: >

@@ -15,7 +15,7 @@ jobs:
       - run: echo "${{ github.head_ref }}"
       - run: echo "${{ toJSON(github) }}"
       - uses: actions/checkout@v3
-      - name: Sync
+      - name: Synchronize CSPROJ version
         uses: ./.github/actions/sync-dotnet-version
         with:
           branch: "release-please--branches--main--components--intordf"
