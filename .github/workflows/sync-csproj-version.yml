@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Synchronize CSPROJ version
-        uses: ./.github/actions/sync-dotnet-version
+        uses: equinor/into-rdf/.github/actions/sync-dotnet-version@main
         with:
           branch: "release-please--branches--main--components--intordf"
           csproj-path: "IntoRdf/IntoRdf.csproj"
