@@ -7,7 +7,6 @@ jobs:
   release_please:
     name: 🔖 Release Please
     runs-on: ubuntu-latest
-    id: rp
     steps:
       - name: Create Release
         id: release
