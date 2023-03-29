@@ -27,7 +27,7 @@ jobs:
         run: dotnet test --no-restore --no-build --configuration Release
 
       - name: Create nuget Artifact
-        run: dotnet pack IntoRdf --no-restore --no-build --configuration Release --output ${{ github.workspace }}/out/intordf
+        run: dotnet pack IntoRdf --no-restore --no-build --configuration Release --output ${{ github.workspace }}/out
 
       - name: Resolve build version
         run: echo "BUILD_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
