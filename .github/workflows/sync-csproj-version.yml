@@ -3,15 +3,24 @@ on:
   workflow_dispatch:
   workflow_call:
 
+env:
+  PR_BRANCH: release-please--branches--main--components--intordf
+
 jobs:
   sync-version:
     name: Synchronize CSPROJ version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Check if PR branch exists
+        run: |
+          if git show-ref --quiet refs/heads/${{ env.PR_BRANCH }}; then
+            echo "PR_BRANCH_EXISTS=true" >> $GITHUB_ENV
+          fi
       - name: Synchronize CSPROJ version
+        if: ${{ env.PR_BRANCH_EXISTS == 'true' }}
         uses: ./.github/actions/sync-dotnet-version
         with:
-          branch: "release-please--branches--main--components--intordf"
+          branch: ${{ env.PR_BRANCH }}
           csproj-path: "IntoRdf/IntoRdf.csproj"
           version-file-path: "version.txt"
