@@ -6,7 +6,7 @@ using VDS.RDF.Parsing;
 using IntoRdf.Utils;
 using IntoRdf.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using IntoRdf.Public.Models;
+using IntoRdf.Models;
 using IntoRdf.TransformationServices.XMLTransformationServices.Converters;
 using IntoRdf.Validation;
 

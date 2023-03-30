@@ -1,11 +1,8 @@
 using System;
 using System.IO;
-using System.Linq;
 using Xunit;
 using System.Collections.Generic;
-using VDS.RDF;
-using VDS.RDF.Writing;
-using IntoRdf.Public.Models;
+using IntoRdf.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IntoRdf.Tests

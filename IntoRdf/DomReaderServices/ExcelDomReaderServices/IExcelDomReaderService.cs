@@ -1,4 +1,4 @@
-using IntoRdf.Public.Models;
+using IntoRdf.Models;
 using System.Data;
 
 namespace IntoRdf.DomReaderServices.ExcelDomReaderServices;

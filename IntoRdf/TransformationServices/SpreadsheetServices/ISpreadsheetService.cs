@@ -1,4 +1,4 @@
-using IntoRdf.Public.Models;
+using IntoRdf.Models;
 using VDS.RDF;
 
 namespace IntoRdf.TransformationServices.SpreadsheetServices;

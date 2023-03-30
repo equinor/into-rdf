@@ -1,6 +1,6 @@
-namespace IntoRdf.Public
+namespace IntoRdf.Utils
 {
-    public class Utils
+    internal class Prefixes
     {
         public static Dictionary<string, Uri> PrefixToUri = new Dictionary<string, Uri>()
         {

@@ -1,4 +1,4 @@
-﻿using IntoRdf.Public.Models;
+﻿using IntoRdf.Models;
 using System;
 using System.Collections.Generic;
 using Xunit;

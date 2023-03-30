@@ -1,5 +1,5 @@
 using System.Data;
-using IntoRdf.Public.Models;
+using IntoRdf.Models;
 using IntoRdf.TransformationServices;
 using IntoRdf.Utils;
 using Newtonsoft.Json;
