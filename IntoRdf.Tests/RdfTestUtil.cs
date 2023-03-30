@@ -1,4 +1,4 @@
-﻿using IntoRdf.Public.Models;
+﻿using IntoRdf.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,6 +17,7 @@ namespace IntoRdf.Tests
     {
         private Graph _graph;
         private TransformationDetails _transformationDetails;
+        private const string xsdPrefix = "http://www.w3.org/2001/XMLSchema#";
 
         public RdfTestUtil(string testFile, SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails)
         {
@@ -259,17 +260,17 @@ namespace IntoRdf.Tests
 
         private static NodeMatchPattern CreateStringLiteralPattern(Graph graph, string literal)
         {
-            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(Public.Utils.PrefixToUri["xsd"].ToString() + "string")));
+            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(xsdPrefix + "string")));
         }
 
         private static NodeMatchPattern CreateDoubleLiteralPattern(Graph graph, double literal)
         {
-            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(Public.Utils.PrefixToUri["xsd"].ToString() + "double")));
+            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(xsdPrefix + "double")));
         }
 
         private static NodeMatchPattern CreateIntLiteralPattern(Graph graph, int literal)
         {
-            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(Public.Utils.PrefixToUri["xsd"].ToString() + "int")));
+            return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(xsdPrefix + "int")));
         }
     }
 }

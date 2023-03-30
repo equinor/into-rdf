@@ -4,10 +4,7 @@ using System.Linq;
 using Xunit;
 using System.Collections.Generic;
 using VDS.RDF;
-using VDS.RDF.Writing;
-using IntoRdf.Public.Models;
-using IntoRdf.Public;
-using Microsoft.Extensions.DependencyInjection;
+using IntoRdf.Models;
 
 namespace IntoRdf.Tests
 {

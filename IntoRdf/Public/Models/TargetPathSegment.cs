@@ -1,4 +1,4 @@
-namespace IntoRdf.Public.Models;
+namespace IntoRdf.Models;
 
 ///<summary>
 ///Class to aid in the creation of RDF individuals from literals

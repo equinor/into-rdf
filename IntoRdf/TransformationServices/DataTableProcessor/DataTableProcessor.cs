@@ -1,5 +1,5 @@
-using IntoRdf.Public.Exceptions;
-using IntoRdf.Public.Models;
+using IntoRdf.Exceptions;
+using IntoRdf.Models;
 using System.Data;
 using VDS.RDF;
 

@@ -1,6 +1,5 @@
-using IntoRdf.Public.Models;
+using IntoRdf.Models;
 using Spectre.Console.Cli;
-using Spectre.Console.Rendering;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 

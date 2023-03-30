@@ -17,7 +17,7 @@ internal class OntologyService : IOntologyService
     private Graph InitializeGraph()
     {
         _graph = new Graph();
-        foreach (var pair in Public.Utils.PrefixToUri)
+        foreach (var pair in Utils.Prefixes.PrefixToUri)
         {
             _graph.NamespaceMap.AddNamespace(pair.Key, pair.Value);
         }

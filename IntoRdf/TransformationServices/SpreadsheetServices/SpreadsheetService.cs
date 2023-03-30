@@ -1,9 +1,8 @@
 using IntoRdf.DomReaderServices.ExcelDomReaderServices;
-using IntoRdf.TransformationServices;
 
 using System.Data;
 using VDS.RDF;
-using IntoRdf.Public.Models;
+using IntoRdf.Models;
 
 namespace IntoRdf.TransformationServices.SpreadsheetServices;
 

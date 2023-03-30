@@ -2,7 +2,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Data;
 using System.Text.RegularExpressions;
-using IntoRdf.Public.Models;
+using IntoRdf.Models;
 
 namespace IntoRdf.DomReaderServices.ExcelDomReaderServices;
 

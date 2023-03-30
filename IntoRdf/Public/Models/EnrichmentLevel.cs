@@ -1,4 +1,4 @@
-namespace IntoRdf.Public.Models;
+namespace IntoRdf.Models;
 
 public enum EnrichmentLevel
 {

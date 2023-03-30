@@ -1,4 +1,4 @@
-namespace IntoRdf.Public.Exceptions
+namespace IntoRdf.Exceptions
 {
     public class IntoRdfException : Exception
     {

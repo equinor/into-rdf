@@ -2,7 +2,7 @@ using System.Text;
 using VDS.RDF;
 using VDS.RDF.Writing;
 using VDS.RDF.Query;
-using IntoRdf.Public.Models;
+using IntoRdf.Models;
 
 namespace IntoRdf.Utils;
 
