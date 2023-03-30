@@ -30,6 +30,7 @@ jobs:
   deploy:
     name: Deploy
     needs: [release_please]
+    if: ${{ needs.release_please.outputs.release_created }}
     uses: equinor/into-rdf/.github/workflows/deploy.yml@main
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
