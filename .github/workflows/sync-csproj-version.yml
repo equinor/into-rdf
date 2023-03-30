@@ -14,11 +14,15 @@ jobs:
       - uses: actions/checkout@v3
       - name: Check if PR branch exists
         run: |
+          git branch -a
           if git show-ref --quiet refs/heads/${{ env.PR_BRANCH }}; then
             echo "PR_BRANCH_EXISTS=true" >> $GITHUB_ENV
+            echo "PR Branch exists: ${{ env.PR_BRANCH }}"
+          else
+            echo "PR Branch does not exist, skipping..."
           fi
       - name: Synchronize CSPROJ version
-        if: ${{ env.PR_BRANCH_EXISTS == 'true' }}
+        #if: ${{ env.PR_BRANCH_EXISTS == 'true' }}
         uses: ./.github/actions/sync-dotnet-version
         with:
           branch: ${{ env.PR_BRANCH }}
