@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0](https://github.com/equinor/into-rdf/compare/v0.1.0...v0.2.0) (2023-03-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* ns IntoRdf.Public -> IntoRdf ([#38](https://github.com/equinor/into-rdf/issues/38))
+
+### Features
+
+* ns IntoRdf.Public -&gt; IntoRdf ([#38](https://github.com/equinor/into-rdf/issues/38)) ([a1eeb32](https://github.com/equinor/into-rdf/commit/a1eeb321e5b47e44b281cffc8a9c888e86305586))
+
 ## 0.1.0 (2023-03-29)
 
 
