@@ -6,6 +6,7 @@ namespace IntoRdf
     {
         public string TransformAml(AmlTransformationDetails transformationDetails, Stream content, RdfFormat outputFormat);
         public string TransformSpreadsheet(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content);
+        public string TransformTabularJson(Stream content, RdfFormat outputFormat, TransformationDetails transformationDetails);
         public string InferFromOntology(string ontology, string graphString, RdfFormat outputFormat);
         public string CreateProtoRecord(Uri record, string graphString, RdfFormat outputFormat);
     }

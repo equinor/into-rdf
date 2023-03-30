@@ -58,13 +58,13 @@ internal class RdfAssertionService : IRdfAssertionService
     {
         return value switch
         {
+            Array arrayLiteral => CreateLiteralsTypedByArray(graph, arrayLiteral),
             string stringLiteral => CreateStringLiteralNode(graph, stringLiteral),
             int intLiteral => CreateIntLiteral(graph, intLiteral),
             Int64 intLiteral => CreateLongLiteral(graph, intLiteral),
             Double doubleLiteral => CreateDoubleLiteral(graph, doubleLiteral),
             Uri uri => CreateUriNode(graph, uri),
             DateTime dateTime => CreateDateTimeLiteral(graph, dateTime),
-            Array arrayLiteral => CreateLiteralsTypedByArray(graph, arrayLiteral),
             Boolean booleanLiteral => CreateBooleanLiteral(graph, booleanLiteral),
             _ => HandleError(value)
         };

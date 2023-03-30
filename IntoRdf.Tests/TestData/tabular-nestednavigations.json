@@ -1,0 +1,51 @@
+[
+    {
+        "id": 1,
+        "name": "Apple",
+        "color": "Red",
+        "taste": "Sweet",
+        "count" : 2 ,
+        "related_fruits": [
+            2,
+            3
+        ]
+    },
+    {
+        "id": 2,
+        "name": "Banana",
+        "color": "Yellow",
+        "count" : 2 ,
+        "taste": "Sweet",
+        "related_fruits": [
+            1,
+            3
+        ]
+    },
+    {
+        "id": 3,
+        "name": "Orange",
+        "count" : 2 ,
+        "color": "Orange",
+        "taste": "Citrusy",
+        "related_fruits": [
+            1,
+            2
+        ]
+    },
+    {
+        "id": 4,
+        "name": "Lemon",
+        "color": "Yellow",
+        "taste": "Sour",
+        "count" : 7 ,
+        "related_fruits": []
+    },
+    {
+        "id": 5,
+        "name": "Tomato",
+        "color": "Red",
+        "count" : 8 ,
+        "taste": "Savory",
+        "related_fruits": []
+    }
+]

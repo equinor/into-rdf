@@ -11,7 +11,7 @@ internal class TabularJsonTransformationService : ITabularJsonTransformationServ
     {
         _rdfAssertionService = rdfAssertionService;
     }
-    public string TransformTabularJson(Stream content, RdfFormat outputFormat, string subjectProperty, TransformationDetails transformationDetails)
+    public string TransformTabularJson(Stream content, RdfFormat outputFormat, TransformationDetails transformationDetails)
     {
         StreamReader reader = new StreamReader(content);
         string json = reader.ReadToEnd();
@@ -24,22 +24,87 @@ internal class TabularJsonTransformationService : ITabularJsonTransformationServ
         {
             throw new ArgumentException("Attempting to parse the JSON resulted in a null value");
         }
-        var identityColumn = new DataColumn($"id_{subjectProperty}", typeof(Uri));
-        identityColumn.ColumnName = $"id_{subjectProperty}";
+        var pdt = ProcessDataTable(transformationDetails, dt);
+        var graph = _rdfAssertionService.AssertProcessedData(pdt, "subject");
+        return GraphSupportFunctions.WriteGraphToString(graph, outputFormat);
+    }
+
+    private static DataTable ProcessDataTable(TransformationDetails transformationDetails, DataTable dt)
+    {
+        var identityColumn = new DataColumn($"subject", typeof(Uri));
+        identityColumn.ColumnName = $"subject";
         dt.Columns.Add(identityColumn);
-        foreach (DataRow dr in dt.Rows)
+        if (transformationDetails.IdentifierTargetPathSegment is not null)
         {
-            dr[$"id_{subjectProperty}"] = new Uri($"{transformationDetails.BaseUri}{dr[subjectProperty]}");
-        }
-        foreach (DataColumn dc in dt.Columns)
-        {
-            if (dc.ColumnName != $"id_{subjectProperty}")
+            foreach (DataRow dr in dt.Rows)
             {
-                dc.ColumnName = new Uri($"{transformationDetails.SourcePredicateBaseUri}{dc.ColumnName}").ToString();
+                dr["subject"] = new Uri($"{transformationDetails.BaseUri}{dr[transformationDetails.IdentifierTargetPathSegment.Target]}");
             }
         }
-        var graph = _rdfAssertionService.AssertProcessedData(dt, $"id_{subjectProperty}");
-
-        return GraphSupportFunctions.WriteGraphToString(graph, outputFormat);
+        else
+        {
+            foreach (DataRow dr in dt.Rows)
+            {
+                dr["subject"] = new Uri($"{transformationDetails.BaseUri}{Guid.NewGuid()}");
+            }
+        }
+        List<(string from, string to)> columnPairs = new List<(string, string)>();
+        List<DataColumn> newCols = new List<DataColumn>();
+        foreach (DataColumn dc in dt.Columns)
+        {
+            Console.WriteLine(dc.ColumnName);
+            if (dc.ColumnName != "subject")
+            {
+                var columnPredicateName = new Uri($"{transformationDetails.SourcePredicateBaseUri}{dc.ColumnName}").ToString();
+                if (transformationDetails.TargetPathSegments.Select(e => e.Target).Contains(dc.ColumnName))
+                {
+                    if (dc.DataType.IsArray)
+                    {
+                        var newColumn = new DataColumn(columnPredicateName, typeof(Uri[]));
+                        newCols.Add(newColumn);
+                        columnPairs.Add((dc.ColumnName, columnPredicateName));
+                    }
+                    else
+                    {
+                        var newColumn = new DataColumn(columnPredicateName, typeof(Uri));
+                        newCols.Add(newColumn);
+                        columnPairs.Add((dc.ColumnName, columnPredicateName));
+                    }
+                }
+                else
+                {
+                    dc.ColumnName = columnPredicateName;
+                }
+            }
+        }
+        dt.Columns.AddRange(newCols.ToArray());
+        foreach (DataRow dr in dt.Rows)
+        {
+            foreach ((string from, string to) in columnPairs)
+            {
+                var dc = dt.Columns[from];
+                if (dc != null && !dc.DataType.IsArray)
+                {
+                    dr[to] = new Uri($"{transformationDetails.BaseUri}{dr[from]}");
+                }
+                else
+                {
+                    if (dr[from].GetType().IsArray)
+                    {
+                        List<Uri> uris = new List<Uri>();
+                        foreach (object element in (Array) dr[from])
+                        {
+                            uris.Add(new Uri($"{transformationDetails.BaseUri}{element}"));
+                        }
+                        dr[to] = uris.ToArray();
+                    }
+                }
+            }
+        }
+        foreach ((string from, _) in columnPairs)
+        {
+            dt.Columns.Remove(from);
+        }
+        return dt;
     }
 }

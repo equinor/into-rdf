@@ -1,5 +1,5 @@
 using IntoRdf.Public.Models;
 
 public interface ITabularJsonTransformationService {
-    string TransformTabularJson(Stream content, RdfFormat outputFormat, string subjectProperty, TransformationDetails transformationDetails);
+    string TransformTabularJson(Stream content, RdfFormat outputFormat, TransformationDetails transformationDetails);
 }
