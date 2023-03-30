@@ -14,6 +14,7 @@ runs:
       with:
         fetch-depth: 0
     - name: Check if PR branch exists
+      shell: bash
       run: |
         git branch -a
         if git show-ref --quiet refs/heads/${{ env.PR_BRANCH }}; then
