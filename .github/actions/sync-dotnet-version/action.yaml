@@ -25,6 +25,7 @@ runs:
 
     - name: Checkout PR Branch
       if: ${{ env.PR_BRANCH_EXISTS == 'true' }}
+      shell: bash
       run: git checkout ${{ inputs.branch }}
     # - uses: actions/checkout@v3
     #   with:
