@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Check if PR branch exists
         run: |
           git branch -a
@@ -22,7 +24,7 @@ jobs:
             echo "PR Branch does not exist, skipping..."
           fi
       - name: Synchronize CSPROJ version
-        #if: ${{ env.PR_BRANCH_EXISTS == 'true' }}
+        if: ${{ env.PR_BRANCH_EXISTS == 'true' }}
         uses: ./.github/actions/sync-dotnet-version
         with:
           branch: ${{ env.PR_BRANCH }}
