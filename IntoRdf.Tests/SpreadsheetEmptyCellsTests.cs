@@ -76,6 +76,6 @@ public class SpreadsheetEmptyCellsTests
 
     private static SpreadsheetDetails CreateSpreadsheetDetails()
     {
-        return new SpreadsheetDetails(SheetName, 1, 2, 1) { EndColumn = int.MaxValue };
+        return new SpreadsheetDetails(SheetName, 1, 2, 1);
     }
 }

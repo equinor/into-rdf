@@ -50,7 +50,7 @@ public class BigSpreadsheetTest
 
     private SpreadsheetDetails CreateSpreadsheetDetails()
     {
-        return new SpreadsheetDetails(SheetName, 1, 2, 1) { EndColumn = int.MaxValue };
+        return new SpreadsheetDetails(SheetName, 1, 2, 1);
     }
 
     private TransformationDetails CreateTransformationDetails()

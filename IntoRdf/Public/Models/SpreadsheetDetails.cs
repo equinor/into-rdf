@@ -14,6 +14,6 @@ public class SpreadsheetDetails
     public int HeaderRow { get; }
     public int DataStartRow { get;  }
     public int StartColumn { get; }
-    public int DataEndRow { get; set; }
-    public int EndColumn { get; set; }
+    public int? DataEndRow { get; set; }
+    public int? EndColumn { get; set; }
 }
