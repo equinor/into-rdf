@@ -1,5 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Target Name="SetPackageReleaseNotes" BeforeTargets="GenerateNuspec">
+    <PropertyGroup>
+        <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../CHANGELOG.md"))</PackageReleaseNotes>
+    </PropertyGroup>
+  </Target>
+
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -8,7 +14,8 @@
     <Version>0.2.0</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageReadMeFile>README.md</PackageReadMeFile>
-    <PackageReleaseNotes>CHANGELOG.md</PackageReleaseNotes>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,5 +33,6 @@
   <ItemGroup>
       <None Include="docs\README.md" Pack="true" PackagePath="\" />
       <None Include="..\CHANGELOG.md" Pack="true" PackagePath="\" />
+      <None Include="..\LICENSE.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>
