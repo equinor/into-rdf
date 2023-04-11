@@ -9,11 +9,13 @@ using Microsoft.Extensions.DependencyInjection;
 using IntoRdf.Models;
 using IntoRdf.TransformationServices.XMLTransformationServices.Converters;
 using IntoRdf.Validation;
+using IntoRdf.TransformationServices;
 
 namespace IntoRdf;
 
 public class TransformerService : ITransformerService
 {
+    private readonly ICsvService _csvService;
     private readonly ISpreadsheetService _spreadsheetService;
     private readonly IOntologyService _ontologyService;
     private readonly IRecordTransformationService _recordTransformationService;
@@ -25,6 +27,7 @@ public class TransformerService : ITransformerService
         collection.AddServices();
         var provider = collection.BuildServiceProvider();
 
+        _csvService = provider.GetService<ICsvService>() ?? throw new Exception("Unable to resolve ICsvService");
         _spreadsheetService = provider.GetService<ISpreadsheetService>() ?? throw new Exception("Unable to resolve ISpreadsheetService");
         _ontologyService = provider.GetService<IOntologyService>() ?? throw new Exception("Unable to resolve IOntologyService");
         _recordTransformationService = provider.GetService<IRecordTransformationService>() ?? throw new Exception("Unable to resolve IRecordTransformationService");
@@ -40,6 +43,13 @@ public class TransformerService : ITransformerService
     {
         TransformationDetailsValidation.ValidateTransformationDetails(transformationDetails);
         var graph = _spreadsheetService.ConvertToRdf(spreadsheetDetails, transformationDetails, content);
+        return GraphSupportFunctions.WriteGraphToString(graph, transformationDetails.OutputFormat);
+    }
+
+    public string TransformCsv(CsvDetails csvDetails, TransformationDetails transformationDetails, Stream content)
+    {
+        TransformationDetailsValidation.ValidateTransformationDetails(transformationDetails);
+        var graph = _csvService.ConvertToRdf(csvDetails, transformationDetails, content);
         return GraphSupportFunctions.WriteGraphToString(graph, transformationDetails.OutputFormat);
     }
 
