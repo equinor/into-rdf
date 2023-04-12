@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/equinor/into-rdf/compare/v0.2.0...v0.2.1) (2023-04-12)
+
+
+### Features
+
+* add support for csv ([#42](https://github.com/equinor/into-rdf/issues/42)) ([c532398](https://github.com/equinor/into-rdf/commit/c5323982fd01ca56e662bd2c12b017780ad2ebac))
+* Make end-column optional ([#41](https://github.com/equinor/into-rdf/issues/41)) ([e7fe5c3](https://github.com/equinor/into-rdf/commit/e7fe5c36883eda31ce85196e67b5ac9cc025a686))
+
 ## [0.2.0](https://github.com/equinor/into-rdf/compare/v0.1.0...v0.2.0) (2023-03-30)
 
 
