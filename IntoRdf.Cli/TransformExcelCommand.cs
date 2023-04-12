@@ -101,10 +101,13 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
         var spreadsheetDetails = new SpreadsheetDetails(
                                 settings.SheetName,
                                 settings.PredicateRow,
-                                settings.DataRow,
+                                settings.DataStartRow,
                                 settings.StartColumn
                             )
-        { EndColumn = settings.EndColumn };
+        {
+            EndColumn = settings.EndColumn,
+            DataEndRow = settings.DataEndRow,
+        };
         return transformer.TransformSpreadsheet(spreadsheetDetails, transformationDetails, inputStream);
     }
 
