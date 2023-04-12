@@ -13,8 +13,11 @@ internal class TransformExcelSettings : CommandSettings
     [CommandOption("-p|--predicate-row")]
     public int PredicateRow { get; set; } = 1;
 
-    [CommandOption("-d|--data-row")]
-    public int DataRow { get; set; } = 2;
+    [CommandOption("-d|--data-start-row")]
+    public int DataStartRow { get; set; } = 2;
+
+    [CommandOption("--data-end-row")]
+    public int DataEndRow { get; set; } = int.MaxValue;
 
     [CommandOption("-c|--start-column")]
     public int StartColumn { get; set; } = 1;
@@ -47,6 +50,11 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
 {
     public override int Execute([NotNull] CommandContext context, [NotNull] TransformExcelSettings settings)
     {
+        var details = new SpreadsheetDetails(settings.SheetName, settings.PredicateRow, settings.DataStartRow, settings.StartColumn)
+        {
+            DataEndRow = settings.DataEndRow,
+            EndColumn = settings.EndColumn,
+        };
         TargetPathSegment? idSegment = GetIdSegment(settings);
 
         var segments = settings.TargetPathSegments
@@ -93,10 +101,13 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
         var spreadsheetDetails = new SpreadsheetDetails(
                                 settings.SheetName,
                                 settings.PredicateRow,
-                                settings.DataRow,
+                                settings.DataStartRow,
                                 settings.StartColumn
                             )
-        { EndColumn = settings.EndColumn };
+        {
+            EndColumn = settings.EndColumn,
+            DataEndRow = settings.DataEndRow,
+        };
         return transformer.TransformSpreadsheet(spreadsheetDetails, transformationDetails, inputStream);
     }
 

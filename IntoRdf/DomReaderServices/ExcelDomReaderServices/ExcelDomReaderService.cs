@@ -46,7 +46,13 @@ internal class ExcelDomReaderService : IExcelDomReaderService
                                             SpreadsheetDetails spreadsheetDetails)
     {
         var rowSkip = spreadsheetDetails.DataStartRow - 1;
-        var rowTake = spreadsheetDetails.DataEndRow - rowSkip;
+        var rows = worksheetPart
+            .Worksheet
+            .Descendants<Row>();
+
+        var endRow = Math.Min(spreadsheetDetails.DataEndRow ?? int.MaxValue, rows.Count());
+
+        var rowTake = endRow - rowSkip;
 
         var completeDataRows = worksheetPart
             .Worksheet
@@ -61,30 +67,38 @@ internal class ExcelDomReaderService : IExcelDomReaderService
             .ToList();
     }
 
-    private IEnumerable<string> GetCompleteRow(WorkbookPart wbPart, Row row, int startColumn, int endColumn)
+    private IEnumerable<string> GetCompleteRow(WorkbookPart wbPart, Row row, int startColumn, int? endColumn)
     {
+        // When looping through an excel sheet reperesented as xml we need to keep two indexes distinct:
+        //      - what we refer to as `excelIndex`, this is simply A = 1, B = 2 and so on
+        //      - what we refer to as `xmlIndex`, this is the current child number of the `row` we are passed
+        // These two differs:
+        //      - xmlIndex is 0-indexed (starting at 0) while excelIndex is 1-indexed (starting at 1)
+        //      - if we leave excelcells empty they will not be a part of the xml. This means that if
+        //        some cells are left empty in one row and not the header row, a trivial go through will
+        //        cause the row to be misalligned with the header, thereby the corresponding data table
+        //        will use incorrect headers to describe the data. The property `CellReference` does
+        //        however give us the excelIndex which we can use to yield empty cells until the two
+        //        indexes matches again. See:
+        //        https://stackoverflow.com/questions/36100011/c-sharp-open-xml-empty-cells-are-getting-skipped-while-getting-data-from-excel
+
+
         var descendants = row.Descendants<Cell>();
+        var xmlCount = descendants.Count();
 
-        // `i` in the loop below should always be the actual column I am looking at in excel
-        // (A = 1, B = 2, ...)
-        // maintaining a negative offset to pass to ElementAt which is zero-indexed. If we hit
-        // empty cell they will not be stored in descendants and the difference between actual
-        // excel columns and what we are iterating through using ElementAt will increase.
-        var offset = -startColumn;
+        var excelEndColumn = endColumn ?? int.MaxValue;
 
-        for (int i = startColumn; i <= endColumn && i + offset < descendants.Count(); i++)
+        var excelIndex = startColumn;
+        var xmlIndex = startColumn - 1;
+        for (; excelIndex <= excelEndColumn && xmlIndex < xmlCount; excelIndex++, xmlIndex++)
         {
-            var cell = descendants.ElementAt(i + offset) ?? throw new InvalidOperationException("Spreadsheet does not contain cell");
+            var cell = descendants.ElementAt(xmlIndex) ?? throw new InvalidOperationException("Spreadsheet does not contain cell");
             var reference = cell.CellReference?.ToString()?.ToLower() ?? throw new InvalidOperationException("Spreadsheet cell does not contain cell reference");
             var columnLetters = Regex.Match(reference, @"[a-z]+").Value;
             var columnNumber = NumberFromExcelColumn(columnLetters);
 
-            // row.Descendants<Cell> will not give us empty cells so if we notice skip in
-            // cell reference yield empty cells until we catch up. See
-            // https://stackoverflow.com/questions/36100011/c-sharp-open-xml-empty-cells-are-getting-skipped-while-getting-data-from-excel
-            for (; i < columnNumber; i++)
+            for (; excelIndex <= excelEndColumn && excelIndex < columnNumber; excelIndex++)
             {
-                offset--;
                 yield return string.Empty;
             }
             var value = GetCellValue(cell, wbPart);
