@@ -14,6 +14,7 @@ internal static class SetupServices
         services.AddTransient<IRdfAssertionService, RdfAssertionService>();
         services.AddTransient<IDataTableProcessor, DataTableProcessor>();
         services.AddTransient<ISpreadsheetService, SpreadsheetService>();
+        services.AddTransient<ICsvService, CsvService>();
         services.AddTransient<IOntologyService, OntologyService>();
         services.AddTransient<IRecordTransformationService, RecordTransformationService>();
         services.AddTransient<ITransformerService, TransformerService>();

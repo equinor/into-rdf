@@ -29,9 +29,13 @@ internal class TransformExcelSettings : CommandSettings
     [CommandOption("-b|--base-uri")]
     public string BaseUri { get; set; } = "http://example.com";
 
+    [Description("inputformat, csv or xlsx, defaults to xlsx")]
+    [CommandOption("--input-format")]
+    public ExcelFormat InputFormat { get; set; } = ExcelFormat.Xlsx;
+
     [Description("jsonld, turtle or trig")]
     [CommandOption("-f|--output-format")]
-    public RdfFormat RdfFormat { get; set; } = RdfFormat.Turtle;
+    public RdfFormat OutputFormat { get; set; } = RdfFormat.Turtle;
 
     [Description("A colon separated entry indicating target and url segment of identifier column. For example -i 'SomeId:IdSegment'")]
     [CommandOption("-i |--identifier-segment")]
@@ -62,7 +66,7 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
             new Uri(settings.BaseUri),
             idSegment,
             segments.ToList(),
-            settings.RdfFormat
+            settings.OutputFormat
         );
 
         var inputStream = Console.OpenStandardInput();
@@ -70,7 +74,12 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
 
         try
         {
-            var rdf = transformer.TransformSpreadsheet(details, transformationDetails, inputStream);
+            var rdf = settings.InputFormat switch
+            {
+                ExcelFormat.Xlsx => HandleXlsx(settings, transformationDetails, inputStream, transformer),
+                ExcelFormat.Csv => HandleCsv(settings, transformationDetails, inputStream, transformer),
+                _ => throw new Exception("Unknown " + nameof(ExcelFormat))
+            };
             Console.WriteLine(rdf);
         }
         catch (Exception ex)
@@ -79,6 +88,24 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
         }
 
         return 0;
+    }
+
+     private static string HandleCsv(TransformExcelSettings settings, TransformationDetails transformationDetails, Stream inputStream, TransformerService transformer)
+    {
+        var csvDetails = new CsvDetails();
+        return transformer.TransformCsv(csvDetails, transformationDetails, inputStream);
+    }
+
+    private static string HandleXlsx(TransformExcelSettings settings, TransformationDetails transformationDetails, Stream inputStream, TransformerService transformer)
+    {
+        var spreadsheetDetails = new SpreadsheetDetails(
+                                settings.SheetName,
+                                settings.PredicateRow,
+                                settings.DataRow,
+                                settings.StartColumn
+                            )
+        { EndColumn = settings.EndColumn };
+        return transformer.TransformSpreadsheet(spreadsheetDetails, transformationDetails, inputStream);
     }
 
     private static TargetPathSegment? GetIdSegment(TransformExcelSettings settings)
