@@ -15,6 +15,11 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageReadMeFile>README.md</PackageReadMeFile>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <RepositoryUrl>https://github.com/equinor/into-rdf</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Description>
+        IntoRdf is a library for converting Excel (XLSX) files into RDF triples, supporting Turtle, and JSON-LD formats. It provides a simple and flexible interface for defining spreadsheet structures and RDF output configurations.
+    </Description>
   </PropertyGroup>
 
   <ItemGroup>
