@@ -6,8 +6,6 @@ namespace IntoRdf
     {
         public string TransformAml(AmlTransformationDetails transformationDetails, Stream content, RdfFormat outputFormat);
         public string TransformSpreadsheet(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content);
-        public string InferFromOntology(string ontology, string graphString, RdfFormat outputFormat);
-        public string CreateProtoRecord(Uri record, string graphString, RdfFormat outputFormat);
         public string TransformCsv(CsvDetails csvDetails, TransformationDetails transformationDetails, Stream content);
     }
 }
