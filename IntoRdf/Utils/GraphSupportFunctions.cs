@@ -60,7 +60,7 @@ internal static class GraphSupportFunctions
                 }
                 else 
                 {
-                    queryString.SetLiteral("name", name);
+                    queryString.SetLiteral("name", name, false);
                 }
                 break;
             default:
