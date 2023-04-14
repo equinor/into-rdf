@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0](https://github.com/equinor/into-rdf/compare/v0.2.1...v0.3.0) (2023-04-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* Functions that where previously part of the interface is now removed
+
+### Miscellaneous Chores
+
+* remove ontology and record from interface ([#50](https://github.com/equinor/into-rdf/issues/50)) ([0f98076](https://github.com/equinor/into-rdf/commit/0f9807603fe72f9b13fdc9b1ce7354c9d5fb6632))
+
 ## [0.2.1](https://github.com/equinor/into-rdf/compare/v0.2.0...v0.2.1) (2023-04-12)
 
 
