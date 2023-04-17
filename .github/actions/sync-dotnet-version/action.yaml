@@ -54,5 +54,5 @@ runs:
       run: |
         git status
         git add .
-        git commit -m "chore: Sync version.txt and .CSProj [skip ci]"
+        git commit -m "chore: Sync version.txt and .CSProj"
         git push origin ${{ inputs.branch }}
