@@ -13,37 +13,19 @@ runs:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: Check if PR branch exists
-      shell: bash
-      run: |
-        git branch -a
-        if git show-ref --quiet refs/heads/${{ env.PR_BRANCH }}; then
-          echo "PR_BRANCH_EXISTS=true" >> $GITHUB_ENV
-          echo "PR Branch exists: ${{ env.PR_BRANCH }}"
-        else
-          echo "PR Branch does not exist, skipping..."
-        fi
-
     - name: Checkout PR Branch
-      if: ${{ env.PR_BRANCH_EXISTS == 'true' }}
       shell: bash
       run: git checkout ${{ inputs.branch }}
-    # - uses: actions/checkout@v3
-    #   with:
-    #     ref: refs/heads/${{ inputs.branch }}
 
     - uses: actions/setup-node@v3
-      if: ${{ env.PR_BRANCH_EXISTS == 'true' }}
       with:
         node-version: 18
 
     - name: Install dependencies
-      if: ${{ env.PR_BRANCH_EXISTS == 'true' }}
       shell: bash
       run: cd $GITHUB_ACTION_PATH && npm ci
 
     - name: Sync version
-      if: ${{ env.PR_BRANCH_EXISTS == 'true' }}
       shell: bash
       id: sync
       run: |
@@ -53,7 +35,6 @@ runs:
         rm sync_res.txt
 
     - name: Set sync result
-      if: ${{ env.PR_BRANCH_EXISTS == 'true' }}
       shell: bash
       run: |
         echo "${{ fromJSON(steps.sync.outputs.result).info }}"
@@ -61,14 +42,14 @@ runs:
         echo "${{ toJSON(steps.sync.outputs.result) }}"
 
     - name: Setup git config
-      if: ${{ env.FILE_UPDATED == 'true' && env.PR_BRANCH_EXISTS == 'true' }}
+      if: ${{ env.FILE_UPDATED == 'true' }}
       shell: bash
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
     - name: Commit changes
-      if: ${{ env.FILE_UPDATED == 'true' && env.PR_BRANCH_EXISTS == 'true' }}
+      if: ${{ env.FILE_UPDATED == 'true' }}
       shell: bash
       run: |
         git status
