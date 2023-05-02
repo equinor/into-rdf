@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/equinor/into-rdf/compare/v0.3.0...v0.3.1) (2023-05-02)
+
+
+### Bug Fixes
+
+* remove BOM at the start of jsonld ([#53](https://github.com/equinor/into-rdf/issues/53)) ([97da9dd](https://github.com/equinor/into-rdf/commit/97da9dd97cdbd04db45ffb851bc1285ccbbad453))
+
 ## [0.3.0](https://github.com/equinor/into-rdf/compare/v0.2.1...v0.3.0) (2023-04-14)
 
 
