@@ -14,10 +14,10 @@ internal static class GraphSupportFunctions
         switch (writerType)
         {
             case RdfFormat.Trig:
-                graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new TriGWriter());
+                graph.SaveToStream(new StreamWriter(outputStream, new UTF8Encoding(false)), new TriGWriter());
                 break;
             case RdfFormat.Jsonld:
-                graph.SaveToStream(new StreamWriter(outputStream, Encoding.UTF8), new JsonLdWriter());
+                graph.SaveToStream(new StreamWriter(outputStream, new UTF8Encoding(false)), new JsonLdWriter());
                 break;
             case RdfFormat.Turtle:
                 graph.SaveToStream(new StreamWriter(outputStream, new UTF8Encoding(false)), new CompressingTurtleWriter());
