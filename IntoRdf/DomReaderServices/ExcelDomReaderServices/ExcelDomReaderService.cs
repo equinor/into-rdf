@@ -1,5 +1,6 @@
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml;
 using System.Data;
 using System.Text.RegularExpressions;
 using IntoRdf.Models;
@@ -45,23 +46,14 @@ internal class ExcelDomReaderService : IExcelDomReaderService
                                             List<string> headerRow,
                                             SpreadsheetDetails spreadsheetDetails)
     {
-        var rowSkip = spreadsheetDetails.DataStartRow - 1;
-        var rows = worksheetPart
-            .Worksheet
-            .Descendants<Row>();
+        var endRow = spreadsheetDetails.DataEndRow ?? int.MaxValue;
 
-        var endRow = Math.Min(spreadsheetDetails.DataEndRow ?? int.MaxValue, rows.Count());
-
-        var rowTake = endRow - rowSkip;
-
-        var completeDataRows = worksheetPart
+        var dataRows = worksheetPart
             .Worksheet
             .Descendants<Row>()
-            .Skip(rowSkip);
+            .Where(r => (r.RowIndex ?? 0) >= spreadsheetDetails.DataStartRow && (r.RowIndex ?? 0) <= endRow);
 
-        var trimmedDataRows = rowTake > 0 ? completeDataRows.Take(rowTake) : completeDataRows;
-
-        return trimmedDataRows
+        return dataRows
             .Where(r => r.Descendants<Cell>().Any())
             .Select(row => GetCompleteRow(workbookPart, row, spreadsheetDetails.StartColumn, spreadsheetDetails.StartColumn + headerRow.Count).ToList())
             .ToList();
