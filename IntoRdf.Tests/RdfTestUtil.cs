@@ -49,6 +49,11 @@ namespace IntoRdf.Tests
             return Encoding.UTF8.GetString(outputStream.ToArray());
         }
 
+        internal void AssertTripleCount(int number)
+        {
+            Assert.Equal(number, _graph.Triples.Count());
+        }
+
         internal void AssertTripleAsserted(string subjectSuffix, string predicateSuffix, object rdfObject)
         {
             AssertTripleAsserted(

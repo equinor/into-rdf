@@ -49,9 +49,10 @@
     <None Update="TestData\revisionTestTrain.ttl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\revisionTestTrainSiemens.ttl">
+    <None Update="TestData\emptyColumnsAndRows.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+
   </ItemGroup>
 
   <ItemGroup>
