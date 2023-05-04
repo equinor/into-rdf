@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/equinor/into-rdf/compare/v0.3.1...v0.3.2) (2023-05-04)
+
+
+### Bug Fixes
+
+* selecting correct data rows ([#55](https://github.com/equinor/into-rdf/issues/55)) ([f3f2d7c](https://github.com/equinor/into-rdf/commit/f3f2d7cbab1544614675a85b71be621dd2ecc9e7))
+
 ## [0.3.1](https://github.com/equinor/into-rdf/compare/v0.3.0...v0.3.1) (2023-05-02)
 
 
