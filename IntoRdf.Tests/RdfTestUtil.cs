@@ -112,6 +112,22 @@ namespace IntoRdf.Tests
             }
         }
 
+        internal List<string> GetAllSubjects()
+        {
+            const string subject = "subject";
+            var (selectSubject, whereSubject) = CreateSelectAndPattern(_graph, null, subject);
+            var (_selectPredicate, wherePredicate) = CreateSelectAndPattern(_graph, null, "predicate");
+            var (_selectObject, whereObject) = CreateSelectAndPattern(_graph, null, "object");
+
+            var query = QueryBuilder
+                .Select(selectSubject)
+                .Where(new TriplePattern (whereSubject, wherePredicate, whereObject))
+            .BuildQuery();
+
+            var result = (SparqlResultSet)_graph.ExecuteQuery(query);
+            return result.Select(r => r[subject].ToString()).Distinct().ToList();
+        }
+
         private string DebugProps(Dictionary<string, object> props, int tabCount)
         {
             var tabs = new string('\t', tabCount);
