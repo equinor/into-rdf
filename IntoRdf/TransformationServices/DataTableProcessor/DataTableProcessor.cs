@@ -56,7 +56,7 @@ internal class DataTableProcessor : IDataTableProcessor
     {
         if (details.IdentifierTargetPathSegment == null)
         {
-            return new Uri($"{details.BaseUri.AbsoluteUri}{Guid.NewGuid()}/");
+            return new Uri($"{details.BaseUri.AbsoluteUri}{Guid.NewGuid()}");
         }
         else
         {
