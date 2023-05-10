@@ -25,6 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="TestData\basic.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestData\emptycells.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
