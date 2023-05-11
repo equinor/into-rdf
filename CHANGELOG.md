@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/equinor/into-rdf/compare/v0.3.2...v0.3.3) (2023-05-10)
+
+
+### Bug Fixes
+
+* trailing slash bug ([#57](https://github.com/equinor/into-rdf/issues/57)) ([54c3ae1](https://github.com/equinor/into-rdf/commit/54c3ae188c0e40e52a604335d4e4fa7be329be4d))
+
 ## [0.3.2](https://github.com/equinor/into-rdf/compare/v0.3.1...v0.3.2) (2023-05-04)
 
 
