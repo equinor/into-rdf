@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <PackageReference Include="Spectre.Console" Version="0.46.0" />
-    <PackageReference Include="Spectre.Console.Cli" Version="0.46.0" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.47.0" />
   </ItemGroup>
 
   <ItemGroup>
