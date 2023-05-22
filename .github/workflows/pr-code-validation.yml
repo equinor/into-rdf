@@ -22,3 +22,21 @@ jobs:
         run: dotnet build /p:TreatWarningsAsErrors="true" --no-restore --configuration Release IntoRdf.sln
       - name: Tests
         run: dotnet test --no-restore --no-build --configuration Release IntoRdf.sln
+    snyk-test:
+      name: 🐩 Snyk Security Scan
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+
+        - name: Setup Snyk
+          uses: snyk/actions/setup@master
+
+        - name: Authenticator
+          run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+        - name: Dotnet restore
+          run: dotnet restore
+
+        - name: Test dependencies for known issues
+          run: snyk test --all-projects
