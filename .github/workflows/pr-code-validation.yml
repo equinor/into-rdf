@@ -39,4 +39,4 @@ jobs:
         run: dotnet restore
 
       - name: Test dependencies for known issues
-        run: snyk test --all-projects --exclude=IntoRdf.Tests,IntoRdf.Cli
+        run: snyk test --all-projects --exclude=IntoRdf.Tests
