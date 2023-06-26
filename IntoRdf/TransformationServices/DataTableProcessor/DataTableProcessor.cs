@@ -42,7 +42,7 @@ internal class DataTableProcessor : IDataTableProcessor
                 }
                 else
                 {
-                    var dataUri = CreateUri(transformationDetails.BaseUri, matchingConfig.UriSegment, trimmedData);
+                    var dataUri = CreateUri(transformationDetails.BaseUri, matchingConfig.UriSegment, trimmedData, transformationDetails.CustomEncoding);
                     processedRow[processedColumnIndex] = dataUri;
                 }
             }
@@ -65,7 +65,7 @@ internal class DataTableProcessor : IDataTableProcessor
             {
                 throw new ArgumentNullException("Cannot find column with name " + details.IdentifierTargetPathSegment.Target);
             }
-            var idUri = CreateUri(details.BaseUri, details.IdentifierTargetPathSegment.UriSegment, data);
+            var idUri = CreateUri(details.BaseUri, details.IdentifierTargetPathSegment.UriSegment, data, details.CustomEncoding);
 
             if (idUri == null)
             {
@@ -95,16 +95,16 @@ internal class DataTableProcessor : IDataTableProcessor
             {
                 var matchingConfig = transformationDetails.TargetPathSegments.Find(t => t.Target == n);
                 var dataType = matchingConfig == null ? typeof(string) : typeof(Uri);
+                var uri = CreateUri(transformationDetails.SourcePredicateBaseUri, null, n, transformationDetails.CustomEncoding);
 
-                return new DataColumn(
-                    CreateUri(transformationDetails.SourcePredicateBaseUri, null, n)?.AbsoluteUri, dataType);
+                return new DataColumn(uri?.AbsoluteUri, dataType);
             })
             .ToArray()
         );
         return processedData;
     }
 
-    private static Uri? CreateUri(Uri prefix, string? uriSegment, string data)
+    private static Uri? CreateUri(Uri prefix, string? uriSegment, string data, IDictionary<string, string> customEncoding)
     {
         if (string.IsNullOrEmpty(data))
         {
@@ -113,11 +113,14 @@ internal class DataTableProcessor : IDataTableProcessor
 
         var slashedUriSegment = string.IsNullOrEmpty(uriSegment) ? "" : $"{uriSegment}/";
         var fullPrefix = new Uri($"{prefix}{slashedUriSegment}");
-        return new Uri($"{fullPrefix}{Escape(data)}");
+        return new Uri($"{fullPrefix}{Escape(data, customEncoding)}");
     }
 
-    private static string Escape(string value)
+    private static string Escape(string value, IDictionary<string, string> customEncoding)
     {
-        return Uri.EscapeDataString(value);
+        var customEscaped = customEncoding.Aggregate(value, (current, pair) => {
+            return current.Replace(pair.Key, pair.Value);
+        });
+        return Uri.EscapeDataString(customEscaped);
     }
 }
