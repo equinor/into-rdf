@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.4](https://github.com/equinor/into-rdf/compare/v0.3.3...v0.3.4) (2023-06-26)
+
+
+### Bug Fixes
+
+* add option to custom escape certain chars ([#66](https://github.com/equinor/into-rdf/issues/66)) ([ac6c523](https://github.com/equinor/into-rdf/commit/ac6c52348fd839d8b301d00c1949186c39d3f223))
+
 ## [0.3.3](https://github.com/equinor/into-rdf/compare/v0.3.2...v0.3.3) (2023-05-10)
 
 
