@@ -5,7 +5,8 @@ Completion of all the items on the list below and reviewing of a pull request in
 - [ ] Admin Role of Github Repo transferred to SSI (Spine Semantic Infrastucture)
   - [ ] 1. SSI promoted to Admin
   - [ ] 2. Dugtrio demoted / removed from team access list
-- [ ] Ensure that ownership of the nuget publishing pipeline is owned by SSI
+- [ ] Ensure that the nuget publishing pipeline is owned by SSI
+- [ ] Ensure that snyk project is transferred to SSI
 - [ ] Atleast one specific resource on the SSI team is onboarded to the XML Vs Excel Index problem.
 - [ ] Atleast one specific resource on the SSI team is onboarded to ° ² ³ Encoding problem.
 - [ ] Dugtrio describes what they think is legacy code.
