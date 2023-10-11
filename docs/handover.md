@@ -7,6 +7,9 @@ Completion of all the items on the list below and reviewing of a pull request in
   - [ ] 2. Dugtrio demoted / removed from team access list
 - [ ] Ensure that ownership of the nuget publishing pipeline is owned by SSI
 - [ ] Atleast one specific resource on the SSI team is onboarded to the XML Vs Excel Index problem.
+- [ ] Atleast one specific resource on the SSI team is onboarded to ° ² ³ Encoding problem.
+- [ ] Dugtrio describes what they think is legacy code.
+- [ ] Dugtrio present their ideas for further work .
 - [x] Atleast one contribution to the repository has been made by a member of the SSI team.
   -  https://github.com/equinor/into-rdf/commit/41808d149e80e7c001829470b13328df34991c2f - Coauthored by Markus
 - [ ] At least one resource on the SSI team has released a new version of Into-RDF using ReleasePlease
