@@ -56,6 +56,7 @@ Transforms the input spreadsheet into RDF format based on the provided transform
 
 ### SpreadsheetDetails
 `SpreadsheetDetails(string sheetName, int headerRow, int dataStartRow, int startColumn)`
+
 Constructor to create a new SpreadsheetDetails object.
 
 * `sheetName`: The name of the sheet containing the data in the input spreadsheet.
