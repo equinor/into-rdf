@@ -24,6 +24,9 @@ Completion of all the items on the list below and reviewing of a pull request in
       - If datasheet / electtrical loadlist / other excel formats can go into this nuget package, we need some new structures in IntoRdf
 - [x] Atleast one contribution to the repository has been made by a member of the SSI team.
   -  https://github.com/equinor/into-rdf/commit/41808d149e80e7c001829470b13328df34991c2f - Coauthored by Markus
-- [ ] At least one resource on the SSI team has released a new version of Into-RDF using ReleasePlease
+- [x] At least one resource on the SSI team has released a new version of Into-RDF using ReleasePlease
+  - Johannes, Henriette and Dag released version 0.3.6. There where some issues with releaseplease:
+    - Automatic update of csproj did not work
+    - We needed to included chores in releases to test this flow
 
 Thanks to earlier work when the Nuget package was made this handover has had a head start and SSI is already up to speed on the inner workings of the functionality.
