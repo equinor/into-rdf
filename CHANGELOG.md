@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.5](https://github.com/equinor/into-rdf/compare/v0.3.4...v0.3.5) (2023-10-11)
+
+
+### Other
+
+* fix indentation ([#76](https://github.com/equinor/into-rdf/issues/76)) ([e29bfca](https://github.com/equinor/into-rdf/commit/e29bfca81775f49454364855c6595dcda19c1eb7))
+* Remove sync csproj step ([#74](https://github.com/equinor/into-rdf/issues/74)) ([707efc0](https://github.com/equinor/into-rdf/commit/707efc0318ee54b91f4e48a6bd21f75d69c82fde))
+* small change to trigger release please ([#73](https://github.com/equinor/into-rdf/issues/73)) ([09b3b13](https://github.com/equinor/into-rdf/commit/09b3b13499734fedc040b782df8753311461f58e))
+* Upgraded available nuget packages ([#72](https://github.com/equinor/into-rdf/issues/72)) ([c635635](https://github.com/equinor/into-rdf/commit/c63563596f58e21672bd3e611f20a4d7575f4d05))
+
+
+### CI/CD
+
+* Update release please ([#75](https://github.com/equinor/into-rdf/issues/75)) ([f37cc23](https://github.com/equinor/into-rdf/commit/f37cc23ee734b24d9720225511f59151a78bc748))
+
 ## [0.3.4](https://github.com/equinor/into-rdf/compare/v0.3.3...v0.3.4) (2023-06-26)
 
 
