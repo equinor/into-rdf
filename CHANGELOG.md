@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6](https://github.com/equinor/into-rdf/compare/v0.3.5...v0.3.6) (2023-10-11)
+
+
+### Other
+
+* Upgrade githb action setup dotnet to v3 ([#78](https://github.com/equinor/into-rdf/issues/78)) ([a10902e](https://github.com/equinor/into-rdf/commit/a10902ed9fbd2adebe5151441cfb18b402b7f2c7))
+
 ## [0.3.5](https://github.com/equinor/into-rdf/compare/v0.3.4...v0.3.5) (2023-10-11)
 
 
