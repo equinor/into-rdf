@@ -20,7 +20,8 @@ Completion of all the items on the list below and reviewing of a pull request in
       - Johannes, Henriette and Dag was onboarded to this problem 11. October 2023, see https://dev.azure.com/EquinorASA/Spine/_workitems/edit/118069
 - [x] Dugtrio describes what they think is legacy code.
       - All AML related code
-- [ ] Dugtrio present their ideas for further work .
+- [x] Dugtrio present their ideas for further work .
+      - If datasheet / electtrical loadlist / other excel formats can go into this nuget package, we need some new structures in IntoRdf
 - [x] Atleast one contribution to the repository has been made by a member of the SSI team.
   -  https://github.com/equinor/into-rdf/commit/41808d149e80e7c001829470b13328df34991c2f - Coauthored by Markus
 - [ ] At least one resource on the SSI team has released a new version of Into-RDF using ReleasePlease
