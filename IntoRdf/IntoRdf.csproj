@@ -11,7 +11,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>IntoRdf</PackageId>
-    <Version>0.3.4</Version>
+    <Version>0.3.5</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageReadMeFile>README.md</PackageReadMeFile>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
