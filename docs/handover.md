@@ -16,9 +16,10 @@ Completion of all the items on the list below and reviewing of a pull request in
     - Verified that github action snyk scan still worked
 - [x] Atleast one specific resource on the SSI team is onboarded to the XML Vs Excel Index problem.
       - Johannes, Henriette and Dag was onboarded to this problem 11. October 2023
-- [ ] Atleast one specific resource on the SSI team is onboarded to ° ² ³ Encoding problem.
+- [x] Atleast one specific resource on the SSI team is onboarded to ° ² ³ Encoding problem.
       - Johannes, Henriette and Dag was onboarded to this problem 11. October 2023, see https://dev.azure.com/EquinorASA/Spine/_workitems/edit/118069
-- [ ] Dugtrio describes what they think is legacy code.
+- [x] Dugtrio describes what they think is legacy code.
+      - All AML related code
 - [ ] Dugtrio present their ideas for further work .
 - [x] Atleast one contribution to the repository has been made by a member of the SSI team.
   -  https://github.com/equinor/into-rdf/commit/41808d149e80e7c001829470b13328df34991c2f - Coauthored by Markus
