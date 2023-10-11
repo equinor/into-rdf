@@ -8,8 +8,14 @@ Completion of all the items on the list below and reviewing of a pull request in
   - [ ] 2. Dugtrio demoted / removed from team access list
 - [x] Ensure that the nuget publishing pipeline is owned by SSI
     Nuget is published using dotnet cli inside github action with a secret that we got from Markus
-- [ ] Ensure that snyk project is transferred to SSI
-- [ ] Atleast one specific resource on the SSI team is onboarded to the XML Vs Excel Index problem.
+- [x] Ensure that snyk project is transferred to SSI
+    - SSI has added IntoRdf to their organsization
+    - Dugtrio has removed IntoRdf from their organization
+    - Deleted dugtrios snyk token from github secret
+    - Added SSIs newly generated snyk token to github secret
+    - Verified that github action snyk scan still worked
+- [x] Atleast one specific resource on the SSI team is onboarded to the XML Vs Excel Index problem.
+      - Johannes, Henriette and Dag was onboarded to this problem 11. October 2023
 - [ ] Atleast one specific resource on the SSI team is onboarded to ° ² ³ Encoding problem.
 - [ ] Dugtrio describes what they think is legacy code.
 - [ ] Dugtrio present their ideas for further work .
