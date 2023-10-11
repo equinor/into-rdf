@@ -3,7 +3,8 @@
 Completion of all the items on the list below and reviewing of a pull request indicates a successful and complete handover.
 
 - [ ] Admin Role of Github Repo transferred to SSI (Spine Semantic Infrastucture)
-  - [ ] 1. SSI promoted to Admin
+  - [x] 1. SSI promoted to Admin
+    - SSI team is promoted to Admin
   - [ ] 2. Dugtrio demoted / removed from team access list
 - [ ] Ensure that the nuget publishing pipeline is owned by SSI
 - [ ] Ensure that snyk project is transferred to SSI
