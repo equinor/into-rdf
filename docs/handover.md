@@ -6,7 +6,8 @@ Completion of all the items on the list below and reviewing of a pull request in
   - [x] 1. SSI promoted to Admin
     - SSI team is promoted to Admin
   - [ ] 2. Dugtrio demoted / removed from team access list
-- [ ] Ensure that the nuget publishing pipeline is owned by SSI
+- [x] Ensure that the nuget publishing pipeline is owned by SSI
+    Nuget is published using dotnet cli inside github action with a secret that we got from Markus
 - [ ] Ensure that snyk project is transferred to SSI
 - [ ] Atleast one specific resource on the SSI team is onboarded to the XML Vs Excel Index problem.
 - [ ] Atleast one specific resource on the SSI team is onboarded to ° ² ³ Encoding problem.
