@@ -22,12 +22,6 @@ jobs:
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
 
-  sync-csproj:
-    name: Sync CSPROJ file
-    needs: [release_please]
-    if: ${{ ! needs.release_please.outputs.release_created }}
-    uses: equinor/into-rdf/.github/workflows/sync-csproj-version.yml@main
-
   deploy:
     name: Deploy
     needs: [release_please]
