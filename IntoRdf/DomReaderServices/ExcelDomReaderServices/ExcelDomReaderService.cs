@@ -136,6 +136,17 @@ internal class ExcelDomReaderService : IExcelDomReaderService
             return "";
         }
         string value = cell.InnerText;
+
+        
+
+        if (cell.CellFormula is not null && cell.CellValue.Text=="0")
+        {
+            string cellReference = cell.CellReference.InnerText;
+            string columnName = Regex.Replace(cellReference, "[0-9]", "");
+            int rowNumber = int.Parse(Regex.Replace(cellReference, "[^0-9]", ""));
+            throw new Exception($"Cell contains formula with empty formula at {columnName} {rowNumber}.");
+        }
+
         if (cell.DataType != null)
         {
             switch (cell.DataType.Value)
@@ -222,7 +233,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
             if (string.IsNullOrEmpty(headerRow[i]))
             {
                 string missingColumn = GetExcelColumnLetter(i + 1);
-                throw new Exception($"Missing column header at column {missingColumn}.");
+                throw new Exception($"Missing column header at column {missingColumn}.{headerRow[i-1]}");
             }
         }
         return false;
