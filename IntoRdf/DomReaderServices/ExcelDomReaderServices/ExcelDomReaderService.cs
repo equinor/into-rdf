@@ -19,6 +19,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
 
         var headerRow = GetHeaderRow(worksheetPart, workbookPart, spreadsheetDetails);
 
+        CheckIfMissingColumnHeaders(headerRow);
         var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetDetails);
 
         var data = CreateDataTable(spreadsheetDetails.DataStartRow, headerRow, dataRows, spreadsheetDetails.SheetName);
@@ -212,5 +213,32 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         }
 
         return inputDataTable;
+    }
+
+    private bool CheckIfMissingColumnHeaders(List<string> headerRow)
+    {
+        for (int i = 0; i < headerRow.Count; i++)
+        {
+            if (string.IsNullOrEmpty(headerRow[i]))
+            {
+                string missingColumn = GetExcelColumnLetter(i + 1);
+                throw new Exception($"Missing column header at column {missingColumn}.");
+            }
+        }
+        return false;
+    }
+    private string GetExcelColumnLetter(int columnNumber)
+    {
+        int dividend = columnNumber;
+        string columnLetter = string.Empty;
+
+        while (dividend > 0)
+        {
+            int modulo = (dividend - 1) % 26;
+            columnLetter = Convert.ToChar(65 + modulo).ToString() + columnLetter;
+            dividend = (dividend - modulo) / 26;
+        }
+
+        return columnLetter;
     }
 }
