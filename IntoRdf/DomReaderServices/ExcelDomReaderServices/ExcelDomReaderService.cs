@@ -25,7 +25,12 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         CheckIfMissingColumnHeaders(headerRow);
         var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetDetails);
         CheckForEmptyFormulaCells(invalidFormulaCellPositions);
-        if (cellsWithDataNoHeader.Any())
+        if (cellsWithDataNoHeader.Count > 5 || emptyHeaderCellPositions.Count>3)
+        {
+            var columnLetters = emptyHeaderCellPositions.Select(columnIndex => GetExcelColumnLetter(columnIndex));
+            throw new Exception($"No column header at {string.Join(", ", columnLetters)}. but data is present in column.");
+        }
+        else if (cellsWithDataNoHeader.Any())
         {
             throw new Exception($"The cell at position(s) {string.Join(", ", cellsWithDataNoHeader)} contains data but column has no header.");
         }
@@ -257,6 +262,20 @@ internal class ExcelDomReaderService : IExcelDomReaderService
                 emptyHeaderCellPositions.Add(i+1);
             }
         }
+    }
+    private string GetExcelColumnLetter(int columnNumber)
+    {
+        int dividend = columnNumber;
+        string columnLetter = string.Empty;
+
+        while (dividend > 0)
+        {
+            int modulo = (dividend - 1) % 26;
+            columnLetter = Convert.ToChar(65 + modulo).ToString() + columnLetter;
+            dividend = (dividend - modulo) / 26;
+        }
+
+        return columnLetter;
     }
 
 }
