@@ -25,7 +25,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         CheckIfMissingColumnHeaders(headerRow);
         var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetDetails);
         CheckForEmptyFormulaCells(invalidFormulaCellPositions);
-        if (cellsWithDataNoHeader.Count > 5 || emptyHeaderCellPositions.Count>3)
+        if (emptyHeaderCellPositions.Count>3  || cellsWithDataNoHeader.Count > 5)
         {
             var columnLetters = emptyHeaderCellPositions.Select(columnIndex => GetExcelColumnLetter(columnIndex));
             throw new Exception($"No column header at {string.Join(", ", columnLetters)}. but data is present in column.");
