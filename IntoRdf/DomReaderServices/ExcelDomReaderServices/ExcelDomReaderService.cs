@@ -254,6 +254,16 @@ internal class ExcelDomReaderService : IExcelDomReaderService
     }
     private void CheckIfMissingColumnHeaders(List<string> headerRow)
     {
+        //Remove trailing empty cells until data is present
+        for (int i = headerRow.Count - 1; i >= 0; i--)
+        {
+            if (!string.IsNullOrEmpty(headerRow[i]))
+            {
+                break;
+            }
+
+            headerRow.RemoveAt(i);
+        }
 
         for (int i = 0; i < headerRow.Count; i++)
         {
