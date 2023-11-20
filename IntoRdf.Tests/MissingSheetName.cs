@@ -14,7 +14,7 @@ public class MissingSheetName
     [Fact]
     public void ValidateSheet__ShouldNotify__WhenSheetNameIsNOtPresent()
     {
-        var exception = Assert.Throws<InvalidOperationException>(() => new RdfTestUtil("C:\\Users\\johannes.telle\\source\\repos\\into-rdf\\IntoRdf.Tests\\TestData\\missingSheetName.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails()));
+        var exception = Assert.Throws<InvalidOperationException>(() => new RdfTestUtil("TestData/missingSheetName.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails()));
 
         // Assert that the exception message contains the expected string
         Assert.Contains("Did not find sheet with name sheetName among [Sheet1]", exception.Message);

@@ -14,7 +14,7 @@ public class EmptyFormulaCellstest
     [Fact]
     public void ValidateSheet__ShouldNotify__WhenSheetContainsEmptyFormulas()
     {
-        var exception = Assert.Throws<Exception>(() => new RdfTestUtil("C:\\Users\\johannes.telle\\source\\repos\\into-rdf\\IntoRdf.Tests\\TestData\\EmptyFormulaCells.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails()));
+        var exception = Assert.Throws<Exception>(() => new RdfTestUtil("TestData/EmptyFormulaCells.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails()));
 
         // Assert that the exception message contains the expected string
         Assert.Contains("The cell at position(s) C6, C7 contains a formula but has no value.", exception.Message);

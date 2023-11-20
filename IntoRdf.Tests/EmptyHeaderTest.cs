@@ -14,7 +14,7 @@ public class EmptyHeaderTest
     [Fact]
     public void ValidateSheet__ShouldNotify__WhenSheetContainsEmptyHeader()
     {
-        var exception = Assert.Throws<Exception>(() => new RdfTestUtil("C:\\Users\\johannes.telle\\source\\repos\\into-rdf\\IntoRdf.Tests\\TestData\\emptyHeaderRow.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails()));
+        var exception = Assert.Throws<Exception>(() => new RdfTestUtil("TestData//emptyHeaderRow.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails()));
 
         // Assert that the exception message contains the expected string
         Assert.Contains("The cell at position(s) b3 contains data but column has no header.", exception.Message);
