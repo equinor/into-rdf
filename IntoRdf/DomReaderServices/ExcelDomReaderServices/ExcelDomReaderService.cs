@@ -156,11 +156,15 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         {
             return "";
         }
+        else
+        {
+
+        }
         string value = cell.InnerText;
         
-        if (cell.CellFormula is not null && cell.CellValue.Text=="0")
+        if (cell.CellFormula is not null && cell.CellValue?.Text=="0")
         {
-            string cellReference = cell.CellReference.InnerText;
+            string cellReference = cell.CellReference?.InnerText?? "";
             string columnName = Regex.Replace(cellReference, "[0-9]", "");
             int rowNumber = int.Parse(Regex.Replace(cellReference, "[^0-9]", ""));
             invalidFormulaCellPositions.Add($"{columnName}{rowNumber}");
