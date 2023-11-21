@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.7](https://github.com/equinor/into-rdf/compare/v0.3.6...v0.3.7) (2023-11-21)
+
+
+### Documentation
+
+* Initial handover document ([#71](https://github.com/equinor/into-rdf/issues/71)) ([a3b9507](https://github.com/equinor/into-rdf/commit/a3b950720d9803513097aa80fa71c9ec967412e1))
+
 ## [0.3.6](https://github.com/equinor/into-rdf/compare/v0.3.5...v0.3.6) (2023-10-11)
 
 
