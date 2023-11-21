@@ -106,7 +106,7 @@ namespace IntoRdf.Tests
 
             var actualProps = GetAllProperties(subjects.Single());
             var debugMsgToBigObject = $"Expected to find a single object satisfing only the props: [\n{DebugProps(expectedProps, 2)}\n], but found an object containing additional props. Found props: [\n{DebugProps(actualProps, 2)}\n]";
-            if (actualProps.Count > expectedProps.Count )
+            if (actualProps.Count > expectedProps.Count)
             {
                 Assert.Fail(debugMsgToBigObject);
             }
@@ -121,7 +121,7 @@ namespace IntoRdf.Tests
 
             var query = QueryBuilder
                 .Select(selectSubject)
-                .Where(new TriplePattern (whereSubject, wherePredicate, whereObject))
+                .Where(new TriplePattern(whereSubject, wherePredicate, whereObject))
             .BuildQuery();
 
             var result = (SparqlResultSet)_graph.ExecuteQuery(query);
@@ -149,7 +149,7 @@ namespace IntoRdf.Tests
                 .Where(patterns.ToArray())
             .BuildQuery();
 
-            var subjectResult = (SparqlResultSet) _graph.ExecuteQuery(selectQuery);
+            var subjectResult = (SparqlResultSet)_graph.ExecuteQuery(selectQuery);
             return subjectResult.Select(r => new Uri(r[variable].ToString())).ToList();
         }
 
@@ -174,7 +174,7 @@ namespace IntoRdf.Tests
             var propQueryResult = (SparqlResultSet)_graph.ExecuteQuery(propQuery);
             return propQueryResult.ToDictionary(
                 result => result[predicateVar].ToString(),
-                result => (object) result[objectVar].ToString()
+                result => (object)result[objectVar].ToString()
             );
         }
 

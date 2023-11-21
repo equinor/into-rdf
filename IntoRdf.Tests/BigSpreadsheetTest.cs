@@ -55,7 +55,7 @@ public class BigSpreadsheetTest
 
     private TransformationDetails CreateTransformationDetails()
     {
-        var identitySegment = new TargetPathSegment ("Tag Number", "test");
+        var identitySegment = new TargetPathSegment("Tag Number", "test");
         return new TransformationDetails(DataUri,
          PredicateUri,
          identitySegment,

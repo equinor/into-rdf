@@ -30,7 +30,7 @@ namespace IntoRdf.TransformationServices
                 data.Add(line.Split(csvDetails.FieldDelimiter).ToList());
             }
             var rawData = CreateDataTable(header.ToList(), data);
-            var processedData =  _dataTableProcessor.ProcessDataTable(transformationDetails, rawData);
+            var processedData = _dataTableProcessor.ProcessDataTable(transformationDetails, rawData);
             return _rdfAssertionService.AssertProcessedData(processedData);
         }
 
