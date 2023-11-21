@@ -11,7 +11,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
 {
     List<string> invalidFormulaCellPositions = new List<string>();
     List<int> emptyHeaderCellPositions = new List<int>();
-    List<string>cellsWithDataNoHeader = new List<string>();
+    List<string> cellsWithDataNoHeader = new List<string>();
 
     public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails spreadsheetDetails)
     {
@@ -25,7 +25,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         CheckIfMissingColumnHeaders(headerRow);
         var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetDetails);
         CheckForEmptyFormulaCells(invalidFormulaCellPositions);
-        if (emptyHeaderCellPositions.Count>3  || cellsWithDataNoHeader.Count > 5)
+        if (emptyHeaderCellPositions.Count > 3 || cellsWithDataNoHeader.Count > 5)
         {
             var columnLetters = emptyHeaderCellPositions.Select(columnIndex => GetExcelColumnLetter(columnIndex));
             throw new Exception($"No column header at {string.Join(", ", columnLetters)}. but data is present in column.");
@@ -100,7 +100,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         var xmlIndex = startColumn - 1;
         for (; excelIndex <= excelEndColumn && xmlIndex < xmlCount; excelIndex++, xmlIndex++)
         {
-             
+
             var cell = descendants.ElementAt(xmlIndex) ?? throw new InvalidOperationException("Spreadsheet does not contain cell");
             var reference = cell.CellReference?.ToString()?.ToLower() ?? throw new InvalidOperationException("Spreadsheet cell does not contain cell reference");
             var columnLetters = Regex.Match(reference, @"[a-z]+").Value;
@@ -111,13 +111,13 @@ internal class ExcelDomReaderService : IExcelDomReaderService
                 yield return string.Empty;
             }
             var value = GetCellValue(cell, wbPart);
-            if(emptyHeaderCellPositions.Contains(excelIndex) && value!="")
+            if (emptyHeaderCellPositions.Contains(excelIndex) && value != "")
             {
                 cellsWithDataNoHeader.Add($"{reference}");
             }
 
             yield return value;
-          }
+        }
     }
 
     private static WorksheetPart GetWorksheetPart(SpreadsheetDocument doc, string sheetName)
@@ -161,10 +161,10 @@ internal class ExcelDomReaderService : IExcelDomReaderService
 
         }
         string value = cell.InnerText;
-        
-        if (cell.CellFormula is not null && cell.CellValue?.Text=="0")
+
+        if (cell.CellFormula is not null && cell.CellValue?.Text == "0")
         {
-            string cellReference = cell.CellReference?.InnerText?? "";
+            string cellReference = cell.CellReference?.InnerText ?? "";
             string columnName = Regex.Replace(cellReference, "[0-9]", "");
             int rowNumber = int.Parse(Regex.Replace(cellReference, "[^0-9]", ""));
             invalidFormulaCellPositions.Add($"{columnName}{rowNumber}");
@@ -273,7 +273,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         {
             if (string.IsNullOrEmpty(headerRow[i]))
             {
-                emptyHeaderCellPositions.Add(i+1);
+                emptyHeaderCellPositions.Add(i + 1);
             }
         }
     }

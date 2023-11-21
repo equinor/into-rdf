@@ -8,7 +8,7 @@ namespace IntoRdf.Utils;
 internal static class GraphSupportFunctions
 {
 
-    internal static string WriteGraphToString(Graph graph, RdfFormat writerType )
+    internal static string WriteGraphToString(Graph graph, RdfFormat writerType)
     {
         using MemoryStream outputStream = new MemoryStream();
         switch (writerType)
@@ -23,7 +23,7 @@ internal static class GraphSupportFunctions
                 graph.SaveToStream(new StreamWriter(outputStream, new UTF8Encoding(false)), new CompressingTurtleWriter());
                 break;
             default:
-                throw new InvalidOperationException($"Unknown RDF writer type {writerType}");   
+                throw new InvalidOperationException($"Unknown RDF writer type {writerType}");
         }
         return Encoding.UTF8.GetString(outputStream.ToArray());
     }

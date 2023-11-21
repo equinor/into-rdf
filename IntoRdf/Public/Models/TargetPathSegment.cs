@@ -23,7 +23,8 @@ public class TargetPathSegment : IEquatable<TargetPathSegment>
 
     public bool Equals(TargetPathSegment? other)
     {
-        if(other is not null && this.Target.Equals(other.Target, StringComparison.InvariantCultureIgnoreCase) && this.UriSegment.Equals(other.UriSegment, StringComparison.InvariantCultureIgnoreCase)) {
+        if (other is not null && this.Target.Equals(other.Target, StringComparison.InvariantCultureIgnoreCase) && this.UriSegment.Equals(other.UriSegment, StringComparison.InvariantCultureIgnoreCase))
+        {
             return true;
         }
         return false;

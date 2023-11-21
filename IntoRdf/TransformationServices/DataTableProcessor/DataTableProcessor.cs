@@ -118,7 +118,8 @@ internal class DataTableProcessor : IDataTableProcessor
 
     private static string Escape(string value, IDictionary<string, string> customEncoding)
     {
-        var customEscaped = customEncoding.Aggregate(value, (current, pair) => {
+        var customEscaped = customEncoding.Aggregate(value, (current, pair) =>
+        {
             return current.Replace(pair.Key, pair.Value);
         });
         return Uri.EscapeDataString(customEscaped);
