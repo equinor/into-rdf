@@ -13,7 +13,7 @@ internal class SpreadsheetService : ISpreadsheetService
     private readonly IRdfAssertionService _rdfAssertionService;
 
     public SpreadsheetService(
-        IExcelDomReaderService excelDomReaderService, 
+        IExcelDomReaderService excelDomReaderService,
         IDataTableProcessor excelTableBuilderService,
         IRdfAssertionService rdfAssertionService)
     {

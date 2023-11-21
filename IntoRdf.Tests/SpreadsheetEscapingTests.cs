@@ -53,7 +53,8 @@ public class SpreadsheetEscapingTests
         _valueTester.AssertTripleAsserted(name, "Value", literalValue);
         _idUriTester.AssertTripleAsserted(uriValue, "Name", name);
         _otherUriTester.AssertTripleAsserted(new Uri(DataUri, name), new Uri($"{PredicateUri}Value"), new Uri(DataUri, $"Value/{uriValue}"));
-        if (!written) {
+        if (!written)
+        {
             //Console.WriteLine(_otherUriTester.WriteGraphToString(RdfFormat.Turtle));
             written = true;
         }
@@ -68,6 +69,6 @@ public class SpreadsheetEscapingTests
     {
         var idSegment = new TargetPathSegment(uriColumn[0], "");
         var otherSegments = uriColumn.Skip(1).Select(segmentName => new TargetPathSegment(segmentName, segmentName)).ToList();
-        return new TransformationDetails(DataUri, PredicateUri,idSegment, otherSegments, RdfFormat.Turtle);
+        return new TransformationDetails(DataUri, PredicateUri, idSegment, otherSegments, RdfFormat.Turtle);
     }
 }

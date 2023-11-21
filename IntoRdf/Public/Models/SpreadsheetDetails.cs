@@ -10,9 +10,9 @@ public class SpreadsheetDetails
         StartColumn = startColumn;
     }
 
-    public string SheetName { get;  }
+    public string SheetName { get; }
     public int HeaderRow { get; }
-    public int DataStartRow { get;  }
+    public int DataStartRow { get; }
     public int StartColumn { get; }
     public int? DataEndRow { get; set; }
     public int? EndColumn { get; set; }

@@ -26,7 +26,8 @@ public class TransformerService : ITransformerService
         _tabularJsonTransformationService = provider.GetService<ITabularJsonTransformationService>() ?? throw new Exception("Unable to resolve ITabularJsonTransofrmationService");
     }
 
-    public string TransformTabularJson(Stream content, RdfFormat outputFormat, string subjectProperty, TransformationDetails transformationDetails) {
+    public string TransformTabularJson(Stream content, RdfFormat outputFormat, string subjectProperty, TransformationDetails transformationDetails)
+    {
         TransformationDetailsValidation.ValidateTransformationDetails(transformationDetails);
         return _tabularJsonTransformationService.TransformTabularJson(content, outputFormat, subjectProperty, transformationDetails);
     }

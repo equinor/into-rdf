@@ -17,12 +17,12 @@ namespace IntoRdf.Tests
                 .BuildServiceProvider();
             var amlDetails = new AmlTransformationDetails(
                     new Uri("https://IAmTest/scd/"),
-                new List<(string,Uri)>()
+                new List<(string, Uri)>()
                     { ("IAmString" ,new Uri("https://iAmAlsoTest.com"))
                     }
                 );
             Assert.Throws<System.Exception>(() => new TransformerService().TransformAml(amlDetails, faultyAML, RdfFormat.Turtle));
-            
+
         }
     }
 }

@@ -18,8 +18,9 @@ namespace IntoRdf.Validation
             }
         }
 
-        private static void CheckUri(Uri uri, string nameForDebug) {
-            if (! uri.AbsoluteUri.EndsWith("/") && ! uri.AbsoluteUri.EndsWith("#"))
+        private static void CheckUri(Uri uri, string nameForDebug)
+        {
+            if (!uri.AbsoluteUri.EndsWith("/") && !uri.AbsoluteUri.EndsWith("#"))
             {
                 throw new IntoRdfException($"{nameForDebug} {uri} is invalid, must end with '/' or '#'");
             }

@@ -29,7 +29,7 @@ internal class RdfAssertionService : IRdfAssertionService
                 {
                     continue;
                 }
-                
+
                 var rdfPredicate = CreateUriNode(graph, new Uri(header.ColumnName));
                 var rdfObject = CreateNode(graph, row[header]);
 
