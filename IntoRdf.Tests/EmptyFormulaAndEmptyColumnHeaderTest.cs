@@ -14,7 +14,7 @@ public class EmptyFormulaAndEmptyColumnHeaderTest
     [Fact]
     public void ValidateSheet__ShouldNotify__WhenSheetContainsEmptyFormulaAndEmptyHeader()
     {
-        var exception = Assert.Throws<Exception>(() => new RdfTestUtil("TestData/emptyFormulaAndEmptyColumnHeader.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails()));
+        var exception = Assert.Throws<Exception>(() => new RdfTestUtil("TestData/EmptyFormulaAndEmptyColumnHeader.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails()));
 
         // Assert that the exception message contains the expected string
         Assert.Contains("Errors found: The cell at position(s) C6, C7 contains a formula but has no value., The cell at position(s) b4, b5 contains data but column has no header.", exception.Message);
