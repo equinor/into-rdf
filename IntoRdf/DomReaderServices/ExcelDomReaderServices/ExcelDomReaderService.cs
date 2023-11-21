@@ -22,16 +22,21 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         var worksheetPart = GetWorksheetPart(doc, spreadsheetDetails.SheetName);
 
         var headerRow = GetHeaderRow(worksheetPart, workbookPart, spreadsheetDetails);
-        
-        var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetDetails);
-        CheckForEmptyFormulaCells(invalidFormulaCellPositions);
+        SetMissingColumnHeadersList(headerRow);
 
+
+        var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetDetails);
 
         var errorList = new List<string>
         {
             CheckForEmptyFormulaCells(invalidFormulaCellPositions),
-            CheckIfMissingColumnHeaders(headerRow),
+            CheckIfMissingColumnHeaders(),
         }.Where(error => error != string.Empty).ToList();
+        if (errorList.Any())
+        {
+            throw new Exception($"Errors found: {string.Join(", ", errorList)}");
+        }
+
 
         var data = CreateDataTable(spreadsheetDetails.DataStartRow, headerRow, dataRows, spreadsheetDetails.SheetName);
 
@@ -250,11 +255,10 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         if (invalidFormulaCellPositions.Any())
         {
             return $"The cell at position(s) {string.Join(", ", invalidFormulaCellPositions)} contains a formula but has no value.";
-            //throw new Exception($"The cell at position(s) {string.Join(", ", invalidFormulaCellPositions)} contains a formula but has no value.");
         }
-        return String.Empty;
+        return string.Empty;
     }
-    private string CheckIfMissingColumnHeaders(List<string> headerRow)
+    private void SetMissingColumnHeadersList(List<string> headerRow)
     {
         //Remove trailing empty cells until data is present
         for (int i = headerRow.Count - 1; i >= 0; i--)
@@ -274,11 +278,15 @@ internal class ExcelDomReaderService : IExcelDomReaderService
                 emptyHeaderCellPositions.Add(i + 1);
             }
         }
+    }
+
+    private string CheckIfMissingColumnHeaders()
+    {
         if (emptyHeaderCellPositions.Count > 3 || cellsWithDataNoHeader.Count > 5)
         {
             var columnLetters = emptyHeaderCellPositions.Select(columnIndex => GetExcelColumnLetter(columnIndex));
             return $"No column header at {string.Join(", ", columnLetters)} but data is present in column.";
-      
+
         }
         else if (cellsWithDataNoHeader.Any())
         {
@@ -288,8 +296,8 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         {
             return string.Empty;
         }
-
     }
+
     private string GetExcelColumnLetter(int columnNumber)
     {
         int dividend = columnNumber;
