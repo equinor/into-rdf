@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.0](https://github.com/equinor/into-rdf/compare/v0.3.7...v0.4.0) (2023-11-22)
+## [1.0.0](https://github.com/equinor/into-rdf/compare/v0.3.7...v0.4.0) (2023-11-22)
 
 
 ### Features
