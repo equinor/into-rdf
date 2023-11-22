@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/equinor/into-rdf/compare/v0.3.7...v0.4.0) (2023-11-22)
+
+
+### Features
+
+* Validation intoRDF ([#99](https://github.com/equinor/into-rdf/issues/99)) ([4c8c063](https://github.com/equinor/into-rdf/commit/4c8c0637a726c4183ac2942cf3c33b27f450b755))
+
 ## [0.3.7](https://github.com/equinor/into-rdf/compare/v0.3.6...v0.3.7) (2023-11-21)
 
 
