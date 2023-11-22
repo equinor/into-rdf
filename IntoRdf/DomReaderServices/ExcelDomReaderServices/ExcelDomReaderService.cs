@@ -9,9 +9,9 @@ namespace IntoRdf.DomReaderServices.ExcelDomReaderServices;
 
 internal class ExcelDomReaderService : IExcelDomReaderService
 {
-    List<string> invalidFormulaCellPositions = new List<string>();
-    List<int> emptyHeaderCellPositions = new List<int>();
-    List<string> cellsWithDataNoHeader = new List<string>();
+    List<string> invalidFormulaCellPositions = new();
+    List<int> emptyHeaderCellPositions = new();
+    List<string> cellsWithDataNoHeader = new();
 
     public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails spreadsheetDetails)
     {
@@ -284,7 +284,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
     {
         if (emptyHeaderCellPositions.Count > 3 || cellsWithDataNoHeader.Count > 5)
         {
-            var columnLetters = emptyHeaderCellPositions.Select(columnIndex => GetExcelColumnLetter(columnIndex));
+            var columnLetters = emptyHeaderCellPositions.Select(GetExcelColumnLetter);
             return $"No column header at {string.Join(", ", columnLetters)} but data is present in column.";
 
         }
