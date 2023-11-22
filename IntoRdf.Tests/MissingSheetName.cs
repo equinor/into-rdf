@@ -12,7 +12,7 @@ public class MissingSheetName
     private const string SheetName = "sheetName";
 
     [Fact]
-    public void ValidateSheet__ShouldNotify__WhenSheetNameIsNOtPresent()
+    public void ValidateSheet__ShouldNotify__WhenSheetNameIsNotPresent()
     {
         var exception = Assert.Throws<InvalidOperationException>(() => new RdfTestUtil("TestData/missingSheetName.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails()));
 
