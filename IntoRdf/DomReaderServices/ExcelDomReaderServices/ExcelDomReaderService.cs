@@ -9,6 +9,10 @@ namespace IntoRdf.DomReaderServices.ExcelDomReaderServices;
 
 internal class ExcelDomReaderService : IExcelDomReaderService
 {
+    List<string> invalidFormulaCellPositions = new();
+    List<int> emptyHeaderCellPositions = new();
+    List<string> cellsWithDataNoHeader = new();
+
     public DataTable GetSpreadsheetData(Stream excelFile, SpreadsheetDetails spreadsheetDetails)
     {
         if (spreadsheetDetails.SheetName == null) throw new InvalidOperationException("Failed to transform spreadsheet. Missing spreadsheet name in SpreadsheetContext");
@@ -18,8 +22,21 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         var worksheetPart = GetWorksheetPart(doc, spreadsheetDetails.SheetName);
 
         var headerRow = GetHeaderRow(worksheetPart, workbookPart, spreadsheetDetails);
+        SetMissingColumnHeadersList(headerRow);
+
 
         var dataRows = GetDataRows(worksheetPart, workbookPart, headerRow, spreadsheetDetails);
+
+        var errorList = new List<string>
+        {
+            CheckForEmptyFormulaCells(invalidFormulaCellPositions),
+            CheckIfMissingColumnHeaders(),
+        }.Where(error => error != string.Empty).ToList();
+        if (errorList.Any())
+        {
+            throw new Exception($"Errors found: {string.Join(", ", errorList)}");
+        }
+
 
         var data = CreateDataTable(spreadsheetDetails.DataStartRow, headerRow, dataRows, spreadsheetDetails.SheetName);
 
@@ -84,6 +101,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         var xmlIndex = startColumn - 1;
         for (; excelIndex <= excelEndColumn && xmlIndex < xmlCount; excelIndex++, xmlIndex++)
         {
+
             var cell = descendants.ElementAt(xmlIndex) ?? throw new InvalidOperationException("Spreadsheet does not contain cell");
             var reference = cell.CellReference?.ToString()?.ToLower() ?? throw new InvalidOperationException("Spreadsheet cell does not contain cell reference");
             var columnLetters = Regex.Match(reference, @"[a-z]+").Value;
@@ -94,6 +112,11 @@ internal class ExcelDomReaderService : IExcelDomReaderService
                 yield return string.Empty;
             }
             var value = GetCellValue(cell, wbPart);
+            if (emptyHeaderCellPositions.Contains(excelIndex) && value != "")
+            {
+                cellsWithDataNoHeader.Add($"{reference}");
+            }
+
             yield return value;
         }
     }
@@ -134,7 +157,20 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         {
             return "";
         }
+        else
+        {
+
+        }
         string value = cell.InnerText;
+
+        if (cell.CellFormula is not null && cell.CellValue?.Text == "0")
+        {
+            string cellReference = cell.CellReference?.InnerText ?? "";
+            string columnName = Regex.Replace(cellReference, "[0-9]", "");
+            int rowNumber = int.Parse(Regex.Replace(cellReference, "[^0-9]", ""));
+            invalidFormulaCellPositions.Add($"{columnName}{rowNumber}");
+        }
+
         if (cell.DataType != null)
         {
             switch (cell.DataType.Value)
@@ -213,4 +249,68 @@ internal class ExcelDomReaderService : IExcelDomReaderService
 
         return inputDataTable;
     }
+
+    private string CheckForEmptyFormulaCells(List<String> invalidFormulaCellPositions)
+    {
+        if (invalidFormulaCellPositions.Any())
+        {
+            return $"The cell at position(s) {string.Join(", ", invalidFormulaCellPositions)} contains a formula but has no value.";
+        }
+        return string.Empty;
+    }
+    private void SetMissingColumnHeadersList(List<string> headerRow)
+    {
+        //Remove trailing empty cells until data is present
+        for (int i = headerRow.Count - 1; i >= 0; i--)
+        {
+            if (!string.IsNullOrEmpty(headerRow[i]))
+            {
+                break;
+            }
+
+            headerRow.RemoveAt(i);
+        }
+
+        for (int i = 0; i < headerRow.Count; i++)
+        {
+            if (string.IsNullOrEmpty(headerRow[i]))
+            {
+                emptyHeaderCellPositions.Add(i + 1);
+            }
+        }
+    }
+
+    private string CheckIfMissingColumnHeaders()
+    {
+        if (emptyHeaderCellPositions.Count > 3 || cellsWithDataNoHeader.Count > 5)
+        {
+            var columnLetters = emptyHeaderCellPositions.Select(GetExcelColumnLetter);
+            return $"No column header at {string.Join(", ", columnLetters)} but data is present in column.";
+
+        }
+        else if (cellsWithDataNoHeader.Any())
+        {
+            return $"The cell at position(s) {string.Join(", ", cellsWithDataNoHeader)} contains data but column has no header.";
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
+
+    private string GetExcelColumnLetter(int columnNumber)
+    {
+        int dividend = columnNumber;
+        string columnLetter = string.Empty;
+
+        while (dividend > 0)
+        {
+            int modulo = (dividend - 1) % 26;
+            columnLetter = Convert.ToChar(65 + modulo).ToString() + columnLetter;
+            dividend = (dividend - modulo) / 26;
+        }
+
+        return columnLetter;
+    }
+
 }
