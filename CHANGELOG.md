@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/equinor/into-rdf/compare/v0.4.0...v0.4.1) (2023-11-23)
+
+
+### Other
+
+* trigger release please ([#102](https://github.com/equinor/into-rdf/issues/102)) ([978868b](https://github.com/equinor/into-rdf/commit/978868b5d866e9c44b06dd6070d9ba9113675fe0))
+
 ## [1.0.0](https://github.com/equinor/into-rdf/compare/v0.3.7...v0.4.0) (2023-11-22)
 
 
