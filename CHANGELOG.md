@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.2](https://github.com/equinor/into-rdf/compare/v0.4.1...v0.4.2) (2024-01-18)
+
+
+### Other
+
+* **deps:** bump Spectre.Console from 0.47.0 to 0.48.0 ([#104](https://github.com/equinor/into-rdf/issues/104)) ([d24587b](https://github.com/equinor/into-rdf/commit/d24587bab45f55ec960bd229c769196e09234a76))
+* **deps:** bump xunit.runner.console from 2.5.1 to 2.6.6 ([#114](https://github.com/equinor/into-rdf/issues/114)) ([07b0f52](https://github.com/equinor/into-rdf/commit/07b0f521b25c7221ac26d891c21187d58d6fff07))
+* **deps:** bump xunit.runner.visualstudio from 2.5.1 to 2.5.6 ([#109](https://github.com/equinor/into-rdf/issues/109)) ([6f70c52](https://github.com/equinor/into-rdf/commit/6f70c52cc626c40ac489e84440a84a4e483140d5))
+
 ## [1.0.0](https://github.com/equinor/into-rdf/compare/v0.4.0...v0.4.1) (2023-11-23)
 
 
