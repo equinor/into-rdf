@@ -175,7 +175,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
         {
             switch (cell.DataType.Value)
             {
-                case CellValues.SharedString:
+                case var cellType when cellType == CellValues.SharedString:
                     var stringTable = wbPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
                     if (stringTable != null)
                     {
@@ -183,7 +183,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
                     }
                     break;
 
-                case CellValues.Boolean:
+                case var cellType when cellType == CellValues.Boolean:
                     switch (value)
                     {
                         case "0":
@@ -194,7 +194,7 @@ internal class ExcelDomReaderService : IExcelDomReaderService
                             break;
                     }
                     break;
-                case CellValues.String:
+                case var cellType when cellType == CellValues.String:
                     if (cell.CellValue != null)
                     {
                         value = cell.CellValue.InnerText;
