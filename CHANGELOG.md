@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.3](https://github.com/equinor/into-rdf/compare/v0.4.2...v0.4.3) (2024-01-18)
+
+
+### Other
+
+* **deps:** bump xunit from 2.5.1 to 2.6.6 ([#113](https://github.com/equinor/into-rdf/issues/113)) ([7cbdf4f](https://github.com/equinor/into-rdf/commit/7cbdf4f3be4b8ae674dcd574617e53106174918e))
+
 ## [0.4.2](https://github.com/equinor/into-rdf/compare/v0.4.1...v0.4.2) (2024-01-18)
 
 
