@@ -6,6 +6,7 @@ using IntoRdf.Models;
 using IntoRdf.TransformationServices.XMLTransformationServices.Converters;
 using IntoRdf.Validation;
 using IntoRdf.TransformationServices;
+using VDS.RDF;
 
 namespace IntoRdf;
 
@@ -38,6 +39,12 @@ public class TransformerService : ITransformerService
         TransformationDetailsValidation.ValidateTransformationDetails(transformationDetails);
         var graph = _spreadsheetService.ConvertToRdf(spreadsheetDetails, transformationDetails, content);
         return GraphSupportFunctions.WriteGraphToString(graph, transformationDetails.OutputFormat);
+    }
+    
+    public IGraph TransformSpreadsheetToGraph(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content)
+    {
+        TransformationDetailsValidation.ValidateTransformationDetails(transformationDetails);
+        return _spreadsheetService.ConvertToRdf(spreadsheetDetails, transformationDetails, content);
     }
 
     public string TransformCsv(CsvDetails csvDetails, TransformationDetails transformationDetails, Stream content)
