@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.4](https://github.com/equinor/into-rdf/compare/v0.4.3...v0.4.4) (2024-03-15)
+
+
+### Other
+
+* added introdcuedby checker action ([#117](https://github.com/equinor/into-rdf/issues/117)) ([85f8d5e](https://github.com/equinor/into-rdf/commit/85f8d5e69b360aec32a340f27bf12836c7476a0c))
+* **deps:** bump coverlet.collector from 6.0.0 to 6.0.2 ([#122](https://github.com/equinor/into-rdf/issues/122)) ([e1a6395](https://github.com/equinor/into-rdf/commit/e1a63952f0f8f2649929f33d25414af0b8c1af3a))
+* **deps:** bump DocumentFormat.OpenXml from 2.20.0 to 3.0.1 ([#110](https://github.com/equinor/into-rdf/issues/110)) ([bc6e104](https://github.com/equinor/into-rdf/commit/bc6e1041984c1f7746e54d2f6e635dc76f5aed00))
+* **deps:** bump Microsoft.Extensions.DependencyInjection from 7.0.0 to 8.0.0 ([#105](https://github.com/equinor/into-rdf/issues/105)) ([b1bf620](https://github.com/equinor/into-rdf/commit/b1bf620d8aa924d8d75e14c3ea8e99563224639a))
+* **deps:** bump Microsoft.NET.Test.Sdk from 17.7.2 to 17.9.0 ([#119](https://github.com/equinor/into-rdf/issues/119)) ([04aa218](https://github.com/equinor/into-rdf/commit/04aa2180148b855cc6da62b71e00397985e918ef))
+* **deps:** bump Spectre.Console.Cli from 0.47.0 to 0.48.0 ([#106](https://github.com/equinor/into-rdf/issues/106)) ([e398d3e](https://github.com/equinor/into-rdf/commit/e398d3e77ccf70b4edb8e85dcf80de7f31689770))
+* **deps:** bump xunit from 2.6.6 to 2.7.0 ([#123](https://github.com/equinor/into-rdf/issues/123)) ([7ba4898](https://github.com/equinor/into-rdf/commit/7ba48988d2f2feca58534f6eb84e9b99b778ad52))
+* **deps:** bump xunit.runner.console from 2.6.6 to 2.7.0 ([#121](https://github.com/equinor/into-rdf/issues/121)) ([ab3ce4e](https://github.com/equinor/into-rdf/commit/ab3ce4e3492bdcae815217d1167aafebc48e7963))
+* **deps:** bump xunit.runner.visualstudio from 2.5.6 to 2.5.7 ([#120](https://github.com/equinor/into-rdf/issues/120)) ([3d2baf6](https://github.com/equinor/into-rdf/commit/3d2baf6c44e2a53090fba953f7f7a57f097f5231))
+
 ## [0.4.3](https://github.com/equinor/into-rdf/compare/v0.4.2...v0.4.3) (2024-01-18)
 
 
