@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.5](https://github.com/equinor/into-rdf/compare/v0.4.4...v0.4.5) (2024-03-18)
+
+
+### Other
+
+* **deps:** bump DocumentFormat.OpenXml from 3.0.1 to 3.0.2 ([#125](https://github.com/equinor/into-rdf/issues/125)) ([f5cf260](https://github.com/equinor/into-rdf/commit/f5cf260e32a2ec1f7a9a16b8488cbf467cb46010))
+
 ## [0.4.4](https://github.com/equinor/into-rdf/compare/v0.4.3...v0.4.4) (2024-03-15)
 
 
