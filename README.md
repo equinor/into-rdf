@@ -3,6 +3,9 @@ This repository contains code for IntoRdf nuget package. It is the code itself t
 
 IntoRdf is a NuGet package for transforming Excel (XLSX) files into RDF (Resource Description Framework) format. This package helps developers easily convert spreadsheet data into RDF triples using a simple and convenient API. To read more see [nuget readme](IntoRdf/docs/README.md)
 
+# Release
+To deploy a new release to nuget.org, create a new release on the main branch with the appropriate semver as the name, i.e. 1.0.0, **NOT** v1.0.0 . The name will be used as the nuget package version number, rather than the version in the .csproj-file.
+
 ## Support
 For questions, issues, or feature requests, please create an issue on the GitHub repository or submit a pull request if you have any improvements to contribute.
 
