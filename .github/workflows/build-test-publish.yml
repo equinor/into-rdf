@@ -1,0 +1,35 @@
+name: "Build, test, and publish Into RDF"
+on:
+  release:
+    types: [published]    
+  pull_request:
+    types:
+      - opened
+      
+jobs:
+  build:
+    name: "Build, test, and deploy Into RDF"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "7.x.x"
+
+      - name: Restore dependencies
+        run: dotnet restore -r linux-x64
+
+      - name: Build Solution
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Tests
+        run: dotnet test --no-restore --no-build --configuration Release
+
+      - name: Create nuget Artifact
+        run: dotnet pack IntoRdf --no-restore --no-build --configuration Release --output ${{ github.workspace }}/out -p:PackageVersion="${{ github.ref_name }}"
+
+      # - name: Publish
+      #   run: dotnet nuget push ${{ github.workspace }}/out/IntoRdf*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
