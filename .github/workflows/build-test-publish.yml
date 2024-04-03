@@ -26,7 +26,7 @@ jobs:
         run: dotnet test --no-restore --no-build --configuration Release
 
       - name: Create nuget Artifact
-        run: dotnet pack IntoRdf --no-restore --no-build --configuration Release --output ${{ github.workspace }}/out -p:PackageVersion="${{ github.ref_name }}"
+        run: dotnet pack IntoRdf --no-restore --no-build --configuration Release --output ${{ github.workspace }}/out -p:PackageVersion="${{ github.event.release.name }}"
 
-      # - name: Publish
-      #   run: dotnet nuget push ${{ github.workspace }}/out/IntoRdf*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+      - name: Publish
+        run: dotnet nuget push ${{ github.workspace }}/out/IntoRdf*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
