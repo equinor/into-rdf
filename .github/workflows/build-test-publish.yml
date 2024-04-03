@@ -2,10 +2,7 @@ name: "Build, test, and publish Into RDF"
 on:
   release:
     types: [published]    
-  pull_request:
-    types:
-      - opened
-      
+
 jobs:
   build:
     name: "Build, test, and deploy Into RDF"
