@@ -40,7 +40,7 @@ public class TransformerService : ITransformerService
         var graph = _spreadsheetService.ConvertToRdf(spreadsheetDetails, transformationDetails, content);
         return GraphSupportFunctions.WriteGraphToString(graph, transformationDetails.OutputFormat);
     }
-    
+
     public IGraph TransformSpreadsheetToGraph(SpreadsheetDetails spreadsheetDetails, TransformationDetails transformationDetails, Stream content)
     {
         TransformationDetailsValidation.ValidateTransformationDetails(transformationDetails);
