@@ -1,4 +1,5 @@
 using System.Data;
+using System.Xml;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 
@@ -6,7 +7,6 @@ namespace IntoRdf.TransformationServices;
 
 internal class RdfAssertionService : IRdfAssertionService
 {
-
     public Graph AssertProcessedData(DataTable dataTable)
     {
         return AssertProcessedData(dataTable, DataTableProcessor.SubjectColumnName);
@@ -15,6 +15,12 @@ internal class RdfAssertionService : IRdfAssertionService
     public Graph AssertProcessedData(DataTable dataTable, string subjectColumnName)
     {
         Graph graph = new Graph();
+
+        //Add version of IntoRdf to the graph
+        var versionSubject = CreateUriNode(graph, new Uri("https://example.com/into-rdf"));
+        var versionPredicate = CreateUriNode(graph, new Uri("https://example.com/hasVersion"));
+        var versionObject = CreateStringLiteralNode(graph, GetIntoRdfVersion());
+        graph.Assert(new Triple(versionSubject.First(), versionPredicate.First(), versionObject.First()));
 
         foreach (DataRow row in dataTable.Rows)
         {
@@ -70,15 +76,16 @@ internal class RdfAssertionService : IRdfAssertionService
         };
     }
 
-
     private static IList<INode> HandleError(object value)
     {
         throw new Exception($"Unknown datatype {value.GetType()}");
     }
+
     private static IList<INode> CreateBooleanLiteral(Graph graph, bool booleanLiteral)
     {
         return new List<INode>() { graph.CreateLiteralNode(booleanLiteral.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeBoolean)) };
     }
+
     private static IList<INode> CreateLiteralsTypedByArray(Graph graph, Array arrayLiteral)
     {
         List<INode> returnList = new List<INode>();
@@ -101,10 +108,12 @@ internal class RdfAssertionService : IRdfAssertionService
     {
         return new List<INode>() { graph.CreateLiteralNode(literal.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeInt)) };
     }
+
     private static IList<INode> CreateLongLiteral(Graph graph, Int64 literal)
     {
         return new List<INode>() { graph.CreateLiteralNode(literal.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeLong)) };
     }
+
     private static IList<INode> CreateDoubleLiteral(Graph graph, Double literal)
     {
         return new List<INode>() { graph.CreateLiteralNode(literal.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeDouble)) };
@@ -118,5 +127,20 @@ internal class RdfAssertionService : IRdfAssertionService
     private static IList<INode> CreateUriNode(Graph graph, Uri uri)
     {
         return new List<INode>() { graph.CreateUriNode(uri) };
+    }
+
+    private static string GetIntoRdfVersion()
+    {
+        var doc = new XmlDocument();
+        doc.Load("IntoRdf.csproj");
+
+        var versionNode = doc.SelectSingleNode("Version");
+        if (versionNode != null)
+        {
+            return versionNode.InnerText;
+        }
+
+        // Ha noe feilhåndtering her
+        return null;
     }
 }
