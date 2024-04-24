@@ -67,6 +67,9 @@
     <None Update="TestData\emptyColumnsAndRows.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestData\testAddIntoRdfVersion.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
 
   </ItemGroup>
 

@@ -12,7 +12,7 @@ public class AddIntoRdfVersionTest
     private static readonly Uri PredicateUri = new("https://example.com/");
     private const string SheetName = "sheetName";
 
-    private readonly RdfTestUtil _rdfTestUtils = new("TestData/basic.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails());
+    private readonly RdfTestUtil _rdfTestUtils = new("TestData/testAddIntoRdfVersion.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails());
 
     [Fact]
     public void AssertProcessedData_AddsVersionToGraph()
