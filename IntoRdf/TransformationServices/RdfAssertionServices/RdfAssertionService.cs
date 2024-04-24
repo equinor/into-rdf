@@ -1,5 +1,5 @@
 using System.Data;
-using System.Xml;
+using System.Reflection;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 
@@ -131,16 +131,12 @@ internal class RdfAssertionService : IRdfAssertionService
 
     private static string GetIntoRdfVersion()
     {
-        var doc = new XmlDocument();
-        doc.Load("IntoRdf.csproj");
-
-        var versionNode = doc.SelectSingleNode("Version");
-        if (versionNode != null)
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        if (version == null)
         {
-            return versionNode.InnerText;
+            throw new Exception("Could not get version of IntoRdf");
         }
 
-        // Ha noe feilhåndtering her
-        return null;
+        return version.ToString();
     }
 }
