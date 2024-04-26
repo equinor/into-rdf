@@ -15,12 +15,7 @@ internal class RdfAssertionService : IRdfAssertionService
     public Graph AssertProcessedData(DataTable dataTable, string subjectColumnName)
     {
         Graph graph = new Graph();
-
-        //Add version of IntoRdf to the graph
-        var versionSubject = CreateUriNode(graph, new Uri("https://example.com/into-rdf"));
-        var versionPredicate = CreateUriNode(graph, new Uri("https://example.com/hasVersion"));
-        var versionObject = CreateStringLiteralNode(graph, GetIntoRdfVersion());
-        graph.Assert(new Triple(versionSubject.First(), versionPredicate.First(), versionObject.First()));
+        IRefNode activity = graph.CreateBlankNode();
 
         foreach (DataRow row in dataTable.Rows)
         {
@@ -28,6 +23,11 @@ internal class RdfAssertionService : IRdfAssertionService
             if (subject == null) continue;
 
             var rdfSubject = CreateUriNode(graph, new Uri(subject));
+
+            var wasGeneratedByPredicate = new Triple(
+                rdfSubject.First(),
+                new UriNode(new Uri(Namespaces.Prov.WasGeneratedBy)),
+                activity);
 
             foreach (DataColumn header in dataTable.Columns)
             {
@@ -129,14 +129,6 @@ internal class RdfAssertionService : IRdfAssertionService
         return new List<INode>() { graph.CreateUriNode(uri) };
     }
 
-    private static string GetIntoRdfVersion()
-    {
-        var version = Assembly.GetExecutingAssembly().GetName().Version;
-        if (version == null)
-        {
-            throw new Exception("Could not get version of IntoRdf");
-        }
-
-        return version.ToString();
-    }
+    private string CreateIntoRdfVersionUri() =>
+        $"https://www.nuget.org/packages/IntoRdf/{GetType().Assembly.GetName().Version}";
 }
