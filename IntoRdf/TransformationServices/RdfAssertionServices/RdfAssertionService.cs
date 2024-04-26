@@ -17,6 +17,8 @@ internal class RdfAssertionService : IRdfAssertionService
         Graph graph = new Graph();
         IRefNode activity = graph.CreateBlankNode();
 
+        AddProvenance(graph, activity);
+
         foreach (DataRow row in dataTable.Rows)
         {
             var subject = GetObjectString(row[subjectColumnName]);
@@ -28,6 +30,8 @@ internal class RdfAssertionService : IRdfAssertionService
                 rdfSubject.First(),
                 new UriNode(new Uri(Namespaces.Prov.WasGeneratedBy)),
                 activity);
+
+            graph.Assert(wasGeneratedByPredicate);
 
             foreach (DataColumn header in dataTable.Columns)
             {
@@ -46,6 +50,19 @@ internal class RdfAssertionService : IRdfAssertionService
             }
         }
         return graph;
+    }
+
+    private void AddProvenance(Graph graph, IRefNode activity)
+    {
+        graph.Assert(new Triple(
+            activity,
+            new UriNode(new Uri(Namespaces.Prov.WasAssociatedWith)),
+            new UriNode(new Uri(CreateIntoRdfVersionUri()))));
+
+        graph.Assert(new Triple(
+            activity,
+            new UriNode(new Uri(Namespaces.Rdfs.Comment)),
+            new LiteralNode("Version of IntoRdf used to translate this data.")));
     }
 
     private static string? GetObjectString(object cell)

@@ -9,7 +9,7 @@ namespace IntoRdf.Tests;
 public class AddIntoRdfVersionTest
 {
     private static readonly Uri DataUri = new("https://example.com/");
-    private static readonly Uri PredicateUri = new("https://example.com/");
+    private static readonly Uri PredicateUri = new("http://www.w3.org/ns/prov#");
     private const string SheetName = "sheetName";
 
     private readonly RdfTestUtil _rdfTestUtils = new("TestData/testAddIntoRdfVersion.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails());
@@ -18,12 +18,14 @@ public class AddIntoRdfVersionTest
     public void AssertProcessedData_AddsVersionToGraph()
     {
         // Arrange
-        const string subjectSuffix = "into-rdf";
-        const string predicateSuffix = "hasVersion";
-        var objectValue = GetIntoRdfVersion();
+        var predicateUri = new Uri("http://www.w3.org/ns/prov#wasAssociatedWith");
+        var objectValue =  $"https://www.nuget.org/packages/IntoRdf/{GetIntoRdfVersion()}";
 
-        // Act & Assert
-        _rdfTestUtils.AssertTripleAsserted(subjectSuffix, predicateSuffix, objectValue);
+        //Act
+        var triples = _rdfTestUtils.GetTriples();
+
+        // Assert
+        Assert.Contains(triples, t => t.Predicate.ToString() == predicateUri.ToString() && t.Object.ToString() == objectValue);
     }
 
     private static SpreadsheetDetails CreateSpreadsheetDetails()

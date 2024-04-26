@@ -293,5 +293,10 @@ namespace IntoRdf.Tests
         {
             return new NodeMatchPattern(graph.CreateLiteralNode(literal.ToString(), new Uri(xsdPrefix + "int")));
         }
+
+        public List<Triple> GetTriples()
+        {
+            return _graph.Triples.ToList();
+        }
     }
 }
