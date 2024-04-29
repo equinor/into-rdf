@@ -104,9 +104,10 @@ namespace IntoRdf.Tests
                 Assert.Fail(debugMsg);
             }
 
+            var expectedPropCount = expectedProps.Count + 1; //Add prop for WasGeneratedBy property
             var actualProps = GetAllProperties(subjects.Single());
             var debugMsgToBigObject = $"Expected to find a single object satisfing only the props: [\n{DebugProps(expectedProps, 2)}\n], but found an object containing additional props. Found props: [\n{DebugProps(actualProps, 2)}\n]";
-            if (actualProps.Count > expectedProps.Count)
+            if (actualProps.Count > expectedPropCount)
             {
                 Assert.Fail(debugMsgToBigObject);
             }

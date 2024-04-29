@@ -44,7 +44,7 @@ public class SpreadsheetSelectingRowTests
 
         selectEmptyRowTester.AssertObjectExist(rowA);
         selectEmptyRowTester.AssertObjectExist(rowB);
-        selectEmptyRowTester.AssertTripleCount(9);
+        selectEmptyRowTester.AssertTripleCount(12);
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class SpreadsheetSelectingRowTests
         };
 
         selectEndRowTester.AssertObjectExist(rowA);
-        selectEndRowTester.AssertTripleCount(5);
+        selectEndRowTester.AssertTripleCount(7);
     }
 
     [Fact]
@@ -84,6 +84,6 @@ public class SpreadsheetSelectingRowTests
         };
 
         selectEmptyColumnTester.AssertObjectExist(rowA);
-        selectEmptyColumnTester.AssertTripleCount(5);
+        selectEmptyColumnTester.AssertTripleCount(7);
     }
 }
