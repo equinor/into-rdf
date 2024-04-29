@@ -7,11 +7,11 @@
   </Target>
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>IntoRdf</PackageId>
-    <Version>1.1.3</Version>
+    <Version>2.0.0</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageReadMeFile>README.md</PackageReadMeFile>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
