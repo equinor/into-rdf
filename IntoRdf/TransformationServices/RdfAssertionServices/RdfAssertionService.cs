@@ -1,4 +1,5 @@
 using System.Data;
+using System.Reflection;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 
@@ -6,7 +7,6 @@ namespace IntoRdf.TransformationServices;
 
 internal class RdfAssertionService : IRdfAssertionService
 {
-
     public Graph AssertProcessedData(DataTable dataTable)
     {
         return AssertProcessedData(dataTable, DataTableProcessor.SubjectColumnName);
@@ -15,6 +15,9 @@ internal class RdfAssertionService : IRdfAssertionService
     public Graph AssertProcessedData(DataTable dataTable, string subjectColumnName)
     {
         Graph graph = new Graph();
+        IRefNode activity = graph.CreateBlankNode();
+
+        AddProvenance(graph, activity);
 
         foreach (DataRow row in dataTable.Rows)
         {
@@ -22,6 +25,13 @@ internal class RdfAssertionService : IRdfAssertionService
             if (subject == null) continue;
 
             var rdfSubject = CreateUriNode(graph, new Uri(subject));
+
+            var wasGeneratedByPredicate = new Triple(
+                rdfSubject.First(),
+                new UriNode(new Uri(Namespaces.Prov.WasGeneratedBy)),
+                activity);
+
+            graph.Assert(wasGeneratedByPredicate);
 
             foreach (DataColumn header in dataTable.Columns)
             {
@@ -40,6 +50,25 @@ internal class RdfAssertionService : IRdfAssertionService
             }
         }
         return graph;
+    }
+
+    private void AddProvenance(Graph graph, IRefNode activity)
+    {
+        var versionUri = new UriNode(new Uri(CreateIntoRdfVersionUri()));
+        graph.Assert(new Triple(
+            activity,
+            new UriNode(new Uri(Namespaces.Prov.WasAssociatedWith)),
+            versionUri));
+
+        graph.Assert(new Triple(
+            versionUri,
+            new UriNode(new Uri(Namespaces.Rdfs.Comment)),
+            new LiteralNode("Version of IntoRdf used to translate this data.")));
+
+        graph.Assert(new Triple(
+            versionUri,
+            new UriNode(new Uri(Namespaces.Rdfs.Label)),
+            new LiteralNode(GetIntoRdfVersion())));
     }
 
     private static string? GetObjectString(object cell)
@@ -70,15 +99,16 @@ internal class RdfAssertionService : IRdfAssertionService
         };
     }
 
-
     private static IList<INode> HandleError(object value)
     {
         throw new Exception($"Unknown datatype {value.GetType()}");
     }
+
     private static IList<INode> CreateBooleanLiteral(Graph graph, bool booleanLiteral)
     {
         return new List<INode>() { graph.CreateLiteralNode(booleanLiteral.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeBoolean)) };
     }
+
     private static IList<INode> CreateLiteralsTypedByArray(Graph graph, Array arrayLiteral)
     {
         List<INode> returnList = new List<INode>();
@@ -101,10 +131,12 @@ internal class RdfAssertionService : IRdfAssertionService
     {
         return new List<INode>() { graph.CreateLiteralNode(literal.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeInt)) };
     }
+
     private static IList<INode> CreateLongLiteral(Graph graph, Int64 literal)
     {
         return new List<INode>() { graph.CreateLiteralNode(literal.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeLong)) };
     }
+
     private static IList<INode> CreateDoubleLiteral(Graph graph, Double literal)
     {
         return new List<INode>() { graph.CreateLiteralNode(literal.ToString(), new Uri(XmlSpecsHelper.XmlSchemaDataTypeDouble)) };
@@ -119,4 +151,9 @@ internal class RdfAssertionService : IRdfAssertionService
     {
         return new List<INode>() { graph.CreateUriNode(uri) };
     }
+
+    private string CreateIntoRdfVersionUri() =>
+        $"https://www.nuget.org/packages/IntoRdf/{GetIntoRdfVersion()}";
+    private string GetIntoRdfVersion() =>
+        GetType().Assembly.GetName().Version?.ToString() ?? throw new Exception("Could not get version of IntoRdf");
 }
