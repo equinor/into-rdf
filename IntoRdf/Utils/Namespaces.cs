@@ -11,6 +11,7 @@ public struct Namespaces
     {
         public const string BaseUrl = "http://www.w3.org/2000/01/rdf-schema#";
         public const string Comment = $"{BaseUrl}comment";
+        public const string Label = $"{BaseUrl}label";
     }
 }
 

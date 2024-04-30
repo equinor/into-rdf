@@ -54,15 +54,21 @@ internal class RdfAssertionService : IRdfAssertionService
 
     private void AddProvenance(Graph graph, IRefNode activity)
     {
+        var versionUri = new UriNode(new Uri(CreateIntoRdfVersionUri()));
         graph.Assert(new Triple(
             activity,
             new UriNode(new Uri(Namespaces.Prov.WasAssociatedWith)),
-            new UriNode(new Uri(CreateIntoRdfVersionUri()))));
+            versionUri));
 
         graph.Assert(new Triple(
-            activity,
+            versionUri,
             new UriNode(new Uri(Namespaces.Rdfs.Comment)),
             new LiteralNode("Version of IntoRdf used to translate this data.")));
+
+        graph.Assert(new Triple(
+            versionUri,
+            new UriNode(new Uri(Namespaces.Rdfs.Label)),
+            new LiteralNode(GetIntoRdfVersion())));
     }
 
     private static string? GetObjectString(object cell)
@@ -147,5 +153,7 @@ internal class RdfAssertionService : IRdfAssertionService
     }
 
     private string CreateIntoRdfVersionUri() =>
-        $"https://www.nuget.org/packages/IntoRdf/{GetType().Assembly.GetName().Version}";
+        $"https://www.nuget.org/packages/IntoRdf/{GetIntoRdfVersion()}";
+    private string GetIntoRdfVersion() =>
+        GetType().Assembly.GetName().Version?.ToString() ?? throw new Exception("Could not get version of IntoRdf");
 }
