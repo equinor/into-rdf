@@ -64,11 +64,6 @@ internal class RdfAssertionService : IRdfAssertionService
             versionUri,
             new UriNode(new Uri(Namespaces.Rdfs.Comment)),
             new LiteralNode("Version of IntoRdf used to translate this data.")));
-
-        graph.Assert(new Triple(
-            versionUri,
-            new UriNode(new Uri(Namespaces.Rdfs.Label)),
-            new LiteralNode(GetIntoRdfVersion())));
     }
 
     private static string? GetObjectString(object cell)
@@ -152,8 +147,12 @@ internal class RdfAssertionService : IRdfAssertionService
         return new List<INode>() { graph.CreateUriNode(uri) };
     }
 
-    private string CreateIntoRdfVersionUri() =>
-        $"https://www.nuget.org/packages/IntoRdf/{GetIntoRdfVersion()}";
-    private string GetIntoRdfVersion() =>
-        GetType().Assembly.GetName().Version?.ToString() ?? throw new Exception("Could not get version of IntoRdf");
+    private string CreateIntoRdfVersionUri()
+    {
+        var outputFolderPath = Assembly.GetExecutingAssembly()
+                                   .GetManifestResourceStream("IntoRdf.Properties.commit.url") ??
+                               throw new Exception("Could not get IntoRdf commit url.");
+        var shapeString = new StreamReader(outputFolderPath).ReadToEnd();
+        return shapeString;
+    }
 }

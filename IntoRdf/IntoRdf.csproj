@@ -31,11 +31,25 @@
     <None Update="Schemas\CAEX_ClassModel_V.3.0.xsd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Properties\commit.url">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Properties\README.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
       <None Include="docs\README.md" Pack="true" PackagePath="\" />
       <None Include="..\CHANGELOG.md" Pack="true" PackagePath="\" />
       <None Include="..\LICENSE.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\commit.url">
+      <IncludeInPackage>true</IncludeInPackage>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
