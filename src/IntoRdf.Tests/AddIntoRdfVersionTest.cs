@@ -19,7 +19,7 @@ public class AddIntoRdfVersionTest
     {
         // Arrange
         var predicateUri = new Uri("http://www.w3.org/ns/prov#wasAssociatedWith");
-        var objectValue = $"https://www.nuget.org/packages/IntoRdf/{GetIntoRdfVersion()}";
+        var objectValue = "https://github.com/equinor/into-rdf/commit/unknown";
 
         //Act
         var triples = _rdfTestUtils.GetTriples();
@@ -40,11 +40,5 @@ public class AddIntoRdfVersionTest
             null,
             new List<TargetPathSegment>()
             , RdfFormat.Turtle);
-    }
-
-    private static string GetIntoRdfVersion()
-    {
-        var assembly = Assembly.Load("IntoRdf");
-        return assembly.GetName().Version?.ToString();
     }
 }

@@ -17,8 +17,8 @@ jobs:
         with:
           dotnet-version: "8.x.x"
       - name: Restore dependencies
-        run: dotnet restore -r linux-x64 IntoRdf.sln
+        run: dotnet restore -r linux-x64 ./src/IntoRdf.sln
       - name: Build Solution
-        run: dotnet build /p:TreatWarningsAsErrors="true" --no-restore --configuration Release IntoRdf.sln
+        run: dotnet build /p:TreatWarningsAsErrors="true" --no-restore --configuration Release ./src/IntoRdf.sln
       - name: Tests
-        run: dotnet test --no-restore --no-build --configuration Release IntoRdf.sln
+        run: dotnet test --no-restore --no-build --configuration Release ./src/IntoRdf.sln
