@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using Xunit;
 using IntoRdf.Models;
-using Xunit;
 
-namespace IntoRdf.Tests;
+namespace IntoRdf.Nuget.Tests;
 
-public class AddIntoRdfVersionTest
+public class NugetTests
 {
     private static readonly Uri DataUri = new("https://example.com/");
     private static readonly Uri PredicateUri = new("http://www.w3.org/ns/prov#");
     private const string SheetName = "sheetName";
-
-    private readonly RdfTestUtil _rdfTestUtils = new("TestData/testAddIntoRdfVersion.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails());
+    private readonly Utils _utils = new("TestData.xlsx", CreateSpreadsheetDetails(), CreateTransformationDetails());
 
     [Fact]
     public void AssertProcessedData_AddsVersionToGraph()
@@ -22,7 +18,7 @@ public class AddIntoRdfVersionTest
         var objectValue = "https://github.com/equinor/into-rdf/commit/unknown";
 
         //Act
-        var triples = _rdfTestUtils.GetTriples();
+        var triples = _utils.GetTriples();
 
         // Assert
         Assert.Contains(triples, t => t.Predicate.ToString() == predicateUri.ToString() && t.Object.ToString() == objectValue);
@@ -35,10 +31,11 @@ public class AddIntoRdfVersionTest
 
     private static TransformationDetails CreateTransformationDetails()
     {
-        return new TransformationDetails(DataUri,
+        return new TransformationDetails(
+            DataUri,
             PredicateUri,
             null,
-            new List<TargetPathSegment>()
-            , RdfFormat.Turtle);
+            [],
+            RdfFormat.Turtle);
     }
 }
