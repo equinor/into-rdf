@@ -1,0 +1,25 @@
+@prefix commonlib: <https://rdf.equinor.com/commonlib/tie#> .
+@prefix splinter: <https://rdf.equinor.com/splinter#> .
+@prefix spreadsheet: <https://rdf.equinor.com/splinter/spreadsheet#> .
+
+<https://rdf.equinor.com/revision-train/C277-AS-W-LA-00001> a splinter:RevisionTrain ;
+    splinter:name "C277-AS-W-LA-00001" ;
+    splinter:tripleStore "wisting" ;
+    splinter:trainType "mel";
+    splinter:hasTieContext <https://rdf.equinor.com/revision-train/C277-AS-W-LA-00001_TieContext> ;
+    splinter:hasSpreadsheetContext <https://rdf.equinor.com/revision-train/C277-AS-W-LA-00001_SpreadsheetContext> .
+
+<https://rdf.equinor.com/revision-train/C277-AS-W-LA-00001_TieContext> a splinter:TieContext ;
+    commonlib:facilityName "WIST" ;
+    commonlib:objectName "C277-AS-W-LA-00001" ;
+    commonlib:contractNumber "4504044842" ;
+    commonlib:projectCode "L.O537C.001" ;
+    commonlib:contractorCode "AS" ;
+    commonlib:documentTitle "MASTER EQUIPMENT LIST - MEL" .
+
+<https://rdf.equinor.com/revision-train/C277-AS-W-LA-00001_SpreadsheetContext> a splinter:SpreadsheetContext ;
+    spreadsheet:sheetName "MEL" ;
+    spreadsheet:headerRow 6 ;
+    spreadsheet:dataStartRow 8 ;
+    spreadsheet:startColumn 1 ;
+    spreadsheet:identityColumn "Tag Number" .
