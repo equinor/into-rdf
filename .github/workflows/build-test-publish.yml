@@ -1,16 +1,19 @@
 name: "Build, test, and publish Into RDF"
 on:
   release:
-    types: [published]    
+    types: [published]
 
 jobs:
   build:
     name: "Build, test, and deploy Into RDF"
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./src/IntoRdf
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
@@ -22,16 +25,16 @@ jobs:
       - name: Setting git commit url
         run: |
           git_commit_url="${{ github.server_url}}/${{ github.repository }}/commit/${{ github.sha }}"
-          echo $git_commit_url > "./src/IntoRdf/Properties/commit.url"
+          echo $git_commit_url > "./Properties/commit.url"
 
       - name: Build Solution
-        run: dotnet build ./src/IntoRdf --no-restore --configuration Release
+        run: dotnet build --no-restore --configuration Release
 
       - name: Tests
-        run: dotnet test ./src/IntoRdf --no-restore --no-build --configuration Release
+        run: dotnet test --no-restore --no-build --configuration Release
 
       - name: Create nuget Artifact
-        run: dotnet pack ./src/IntoRdf --no-restore --no-build --configuration Release --output ${{ github.workspace }}/out -p:PackageVersion="${{ github.event.release.name }}"
+        run: dotnet pack --no-restore --no-build --configuration Release --output ${{ github.workspace }}/out -p:PackageVersion="${{ github.event.release.name }}"
 
       - name: Publish
         run: dotnet nuget push ${{ github.workspace }}/out/IntoRdf*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
