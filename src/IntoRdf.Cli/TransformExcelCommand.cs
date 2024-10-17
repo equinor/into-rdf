@@ -33,6 +33,15 @@ internal class TransformExcelSettings : CommandSettings
     [CommandOption("--input-format")]
     public ExcelFormat InputFormat { get; set; } = ExcelFormat.Xlsx;
 
+    [Description("Name of the column to be used for rdfs:label")]
+    [CommandOption("--label-column")]
+    public string? LabelColumn { get; set; } = null;
+
+    [Description("Name of the column to be used for skos:definition")]
+    [CommandOption("--definition-column")]
+    public string? DefinititionColumn { get; set; } = null;
+
+
     [Description("jsonld, turtle or trig")]
     [CommandOption("-f|--output-format")]
     public RdfFormat OutputFormat { get; set; } = RdfFormat.Turtle;
@@ -60,9 +69,13 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
             EndColumn = settings.EndColumn,
         };
         TargetPathSegment? idSegment = GetIdSegment(settings);
+        TargetPathSegment? labelSegment = GetLabelSegment(settings.LabelColumn);
+        TargetPathSegment? definitionSegment = GetDefinitionSegment(settings.DefinititionColumn);
 
-        var segments = settings.TargetPathSegments
+        var columnConfigs = settings.TargetPathSegments
                 .Select(raw => GetSegment(raw, "--target-path-segment"))
+                .Concat([labelSegment, definitionSegment])
+                .Where((s) => s != null)
                 .ToList();
 
         var CustomEncoding = settings.TargetPathSegments
@@ -79,7 +92,7 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
             new Uri(settings.BaseUri),
             new Uri(settings.BaseUri),
             idSegment,
-            segments.ToList(),
+            [.. columnConfigs],
             settings.OutputFormat,
             settings.CustomEncoding ? customEncoding : null
         );
@@ -130,6 +143,18 @@ internal class TransformExcelCommand : Command<TransformExcelSettings>
     {
         if (string.IsNullOrEmpty(settings.IdSegment)) { return null; }
         return GetSegment(settings.IdSegment, "--identifier-segment");
+    }
+
+    private static TargetPathSegment? GetLabelSegment(string? columnName)
+    {
+        if (string.IsNullOrEmpty(columnName)) { return null; }
+        return new TargetPathSegment(columnName, null, "http://www.w3.org/2000/01/rdfschema#label");
+    }
+
+    private static TargetPathSegment? GetDefinitionSegment(string? columnName)
+    {
+        if (string.IsNullOrEmpty(columnName)) { return null; }
+        return new TargetPathSegment(columnName, null, "http://www.w3.org/2004/02/skos/core#definition");
     }
 
     private static TargetPathSegment GetSegment(string segment, string paramNameForDebug)

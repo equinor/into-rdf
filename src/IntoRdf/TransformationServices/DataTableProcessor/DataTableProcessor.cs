@@ -28,8 +28,9 @@ internal class DataTableProcessor : IDataTableProcessor
                 var data = inputRow[processedColumnIndex - 1].ToString() ?? "";
                 var trimmedData = data.Trim();
 
-                if (matchingConfig == null)
+                if (matchingConfig?.UriSegment == null)
                 {
+                    // if uri segment is null we will create a literal
                     if (trimmedData == string.Empty)
                     {
                         processedRow[processedColumnIndex] = null;
@@ -42,7 +43,8 @@ internal class DataTableProcessor : IDataTableProcessor
                 }
                 else
                 {
-                    var dataUri = CreateUri(transformationDetails.BaseUri, matchingConfig.UriSegment, trimmedData, transformationDetails.CustomEncoding);
+                    // if uri segment is available we will create a name individual based on the uriSegment
+                    var dataUri = CreateUri(transformationDetails.BaseUri, matchingConfig, trimmedData, transformationDetails.CustomEncoding);
                     processedRow[processedColumnIndex] = dataUri;
                 }
             }
@@ -65,7 +67,7 @@ internal class DataTableProcessor : IDataTableProcessor
             {
                 throw new ArgumentNullException("Cannot find column with name " + details.IdentifierTargetPathSegment.Target);
             }
-            var idUri = CreateUri(details.BaseUri, details.IdentifierTargetPathSegment.UriSegment, data, details.CustomEncoding);
+            var idUri = CreateUri(details.BaseUri, details.IdentifierTargetPathSegment, data, details.CustomEncoding);
 
             if (idUri == null)
             {
@@ -94,25 +96,28 @@ internal class DataTableProcessor : IDataTableProcessor
             .Select(n =>
             {
                 var matchingConfig = transformationDetails.TargetPathSegments.Find(t => t.Target == n);
-                var dataType = matchingConfig == null ? typeof(string) : typeof(Uri);
-                var uri = CreateUri(transformationDetails.SourcePredicateBaseUri, null, n, transformationDetails.CustomEncoding);
+                var dataType = matchingConfig?.UriSegment == null ? typeof(string) : typeof(Uri);
 
-                return new DataColumn(uri?.AbsoluteUri, dataType);
+                var predicateUri = matchingConfig?.PredicateUri != null ?
+                    new Uri(matchingConfig.PredicateUri) :
+                    CreateUri(transformationDetails.SourcePredicateBaseUri, null, n, transformationDetails.CustomEncoding);
+
+                return new DataColumn(predicateUri?.AbsoluteUri, dataType);
             })
             .ToArray()
         );
         return processedData;
     }
 
-    private static Uri? CreateUri(Uri prefix, string? uriSegment, string data, IDictionary<string, string> customEncoding)
+    private static Uri? CreateUri(Uri baseUri, TargetPathSegment? config, string data, IDictionary<string, string> customEncoding)
     {
         if (string.IsNullOrEmpty(data))
         {
             return null;
         }
 
-        var slashedUriSegment = string.IsNullOrEmpty(uriSegment) ? "" : $"{uriSegment}/";
-        var fullPrefix = new Uri($"{prefix}{slashedUriSegment}");
+        var slashedUriSegment = string.IsNullOrEmpty(config?.UriSegment) ? "" : $"{config.UriSegment}/";
+        var fullPrefix = new Uri($"{baseUri}{slashedUriSegment}");
         return new Uri($"{fullPrefix}{Escape(data, customEncoding)}");
     }
 

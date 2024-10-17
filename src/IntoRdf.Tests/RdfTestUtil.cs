@@ -95,13 +95,17 @@ namespace IntoRdf.Tests
             Assert.True(ok, errorMsg);
         }
 
-        internal void AssertObjectExist(Dictionary<string, object> expectedProps)
+        internal void AssertObjectExist(Dictionary<string, object> expectedProps, bool acceptExtraProps = false)
         {
             var subjects = GetSubjects(expectedProps);
             var debugMsg = $"Expected to find a single object, but found {subjects.Count} objects satisfing the predicate-object pairs: [\n{DebugProps(expectedProps, 2)}\n]";
             if (subjects.Count != 1)
             {
                 Assert.Fail(debugMsg);
+            }
+
+            if (acceptExtraProps) {
+                return;
             }
 
             var expectedPropCount = expectedProps.Count + 1; //Add prop for WasGeneratedBy property
