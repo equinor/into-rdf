@@ -25,7 +25,7 @@ jobs:
       - name: Setting git commit url
         run: |
           git_commit_url="${{ github.server_url}}/${{ github.repository }}/commit/${{ github.sha }}"
-          echo $git_commit_url > "./Properties/commit.url"
+          echo $git_commit_url > "/Properties/commit.url"
 
       - name: Build Solution
         run: dotnet build --no-restore --configuration Release
