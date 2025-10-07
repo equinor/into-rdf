@@ -1,4 +1,7 @@
 name: 🔍 IntroducedBy Checker 🔍
+permissions:
+   pull-requests: write
+   contents: write
 on:
   schedule:
     - cron: '0 0 * * 1' # Every monday
@@ -8,9 +11,6 @@ jobs:
   compliance_test:
     runs-on: ubuntu-latest
     name: IntroducedBy Checker
-    permissions:
-       pull-requests: write
-       contents: write
     steps:
       - name: Checkout # Makes the source code available to be scanned
         id:   checkout
