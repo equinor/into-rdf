@@ -1,4 +1,6 @@
 name: "Build, test, and publish Into RDF"
+permissions:
+  contents: read
 on:
   release:
     types: [published]
