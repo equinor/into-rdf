@@ -45,7 +45,7 @@ internal class TransformExcelSettings : CommandSettings
     [CommandOption("-t |--target-path-segment")]
     public string[] TargetPathSegments { get; set; } = new string[0];
 
-    [Description("Do custom url encoding i.e. � -> SQUARED', � -> CUBED, and � -> DEGREES'")]
+    [Description("Do custom url encoding i.e. ² -> SQUARED', ³ -> CUBED, and ° -> DEGREES'")]
     [CommandOption("-e |--encode")]
     public bool CustomEncoding { get; set; } = false;
 }
