@@ -13,11 +13,11 @@ jobs:
     name: Validate Code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: "9.x.x"
+        uses: actions/setup-dotnet@v5
+        
       - name: Restore dependencies
         run: dotnet restore -r linux-x64 ./src/IntoRdf.sln
       - name: Build Solution

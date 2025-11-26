@@ -45,14 +45,14 @@ internal class TransformExcelSettings : CommandSettings
     [CommandOption("-t |--target-path-segment")]
     public string[] TargetPathSegments { get; set; } = new string[0];
 
-    [Description("Do custom url encoding i.e. ² -> SQUARED', ³ -> CUBED, and ° -> DEGREES'")]
+    [Description("Do custom url encoding i.e. Â² -> SQUARED', Â³ -> CUBED, and Â° -> DEGREES'")]
     [CommandOption("-e |--encode")]
     public bool CustomEncoding { get; set; } = false;
 }
 
 internal class TransformExcelCommand : Command<TransformExcelSettings>
 {
-    public override int Execute([NotNull] CommandContext context, [NotNull] TransformExcelSettings settings)
+    public override int Execute([NotNull] CommandContext context, [NotNull] TransformExcelSettings settings, CancellationToken cancellationToken)
     {
         var details = new SpreadsheetDetails(settings.SheetName, settings.PredicateRow, settings.DataStartRow, settings.StartColumn)
         {
